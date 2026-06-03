@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 01 — Orientação: como a engine pensa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F3EE;
+    --border: #E4E2D8;
+    --border-strong: #C8C5B8;
+    --text-primary: #1A1916;
+    --text-secondary: #5A5850;
+    --text-muted: #9A978E;
+    --accent: #2D5A27;
+    --accent-light: #EBF3E8;
+    --accent-mid: #4A8A42;
+    --amber: #8A5A00;
+    --amber-light: #FFF3D6;
+    --blue: #1A3F6B;
+    --blue-light: #E8F0FA;
+    --red: #7A2020;
+    --red-light: #FAEAEA;
+    --purple: #4A2878;
+    --purple-light: #F0EAFA;
+    --code-bg: #F0EFEA;
+    --code-border: #D8D6CE;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+  }
+
+  html { font-size: 16px; background: var(--bg); color: var(--text-primary); }
+  body { font-family: var(--font-body); font-weight: 400; line-height: 1.7; min-height: 100vh; }
+
+  /* Layout */
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  /* Sidebar */
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-logo .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo .title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sidebar-logo .tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 1.5rem;
+    margin-bottom: 6px;
+  }
+  .sidebar-nav { list-style: none; margin-bottom: 1.5rem; }
+  .sidebar-nav li a {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 1.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-nav li a:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .sidebar-nav li.active a {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-nav li a .nav-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+  .sidebar-nav li.active a .nav-num { color: var(--accent-mid); }
+
+  /* Main content */
+  main { padding: 3rem 4rem; max-width: 840px; }
+
+  /* Lesson header */
+  .lesson-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lesson-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .lesson-title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .lesson-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 580px;
+  }
+  .lesson-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .meta-pill svg { opacity: 0.5; }
+
+  /* Lesson nav */
+  .lesson-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .lesson-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: var(--font-body);
+  }
+  .lesson-tab:hover { color: var(--text-primary); }
+  .lesson-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  /* Content sections */
+  .lesson-content { display: none; }
+  .lesson-content.active { display: block; }
+
+  /* Prose */
+  h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 2rem 0 0.75rem;
+    line-height: 1.3;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 1.5rem 0 0.5rem;
+    letter-spacing: 0.01em;
+  }
+  p { margin-bottom: 1rem; color: var(--text-secondary); font-size: 15px; }
+  p strong { color: var(--text-primary); font-weight: 500; }
+
+  /* Callouts */
+  .callout {
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-left: 3px solid;
+    font-size: 14px;
+  }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout.info { background: var(--blue-light); border-color: var(--blue); }
+  .callout.info .callout-label { color: var(--blue); }
+  .callout.info p { color: #2A4F7A; }
+  .callout.tip { background: var(--accent-light); border-color: var(--accent); }
+  .callout.tip .callout-label { color: var(--accent); }
+  .callout.tip p { color: #2D5A27; }
+  .callout.warning { background: var(--amber-light); border-color: var(--amber); }
+  .callout.warning .callout-label { color: var(--amber); }
+  .callout.warning p { color: #6A4500; }
+  .callout.analogy { background: var(--purple-light); border-color: var(--purple); }
+  .callout.analogy .callout-label { color: var(--purple); }
+  .callout.analogy p { color: #3A1E60; }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    margin: 1.25rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--code-border);
+    background: #E8E7E0;
+  }
+  .code-filename {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .code-lang {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .code-block pre {
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+  /* Syntax highlight classes */
+  .kw { color: #7A3080; font-weight: 500; }
+  .cm { color: #7A9A70; font-style: italic; }
+  .st { color: #A03030; }
+  .nm { color: #1A5A8A; }
+  .fn { color: #2A6A50; }
+  .at { color: #8A5A00; }
+  .tp { color: #4A2878; }
+
+  /* Diagram */
+  .diagram-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .diagram-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .tree {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 2;
+    color: var(--text-secondary);
+  }
+  .tree .node-name { color: var(--text-primary); font-weight: 500; }
+  .tree .node-type { color: var(--accent-mid); font-size: 12px; }
+  .tree .node-script { color: #8A5A00; font-size: 12px; }
+
+  /* Comparison table */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .compare-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .compare-card .cc-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .compare-card ul { list-style: none; }
+  .compare-card ul li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .compare-card ul li:last-child { border-bottom: none; }
+  .compare-card ul li::before { content: "—"; color: var(--text-muted); flex-shrink: 0; }
+
+  /* Steps */
+  .steps { margin: 1.5rem 0; }
+  .step {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .step-body p { font-size: 14px; margin-bottom: 0; }
+
+  /* Checklist */
+  .checklist { list-style: none; margin: 1rem 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: "○";
+    color: var(--border-strong);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Summary card */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0 0;
+  }
+  .summary-card h3 { margin-top: 0; margin-bottom: 1rem; font-size: 14px; }
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .concept-pill {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .concept-pill strong { display: block; font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 2px; }
+
+  /* Milestone banner */
+  .milestone-banner {
+    background: linear-gradient(135deg, var(--accent-light), #F0FAF0);
+    border: 1px solid #C0DDB8;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .milestone-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .milestone-icon svg { color: white; }
+  .milestone-text strong { font-size: 14px; color: var(--accent); display: block; margin-bottom: 4px; }
+  .milestone-text p { font-size: 13px; color: #3A6A35; margin: 0; }
+
+  /* Lesson nav footer */
+  .lesson-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-btn:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--surface-alt); }
+  .nav-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #245020; border-color: #245020; }
+  .nav-btn:disabled, .nav-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+  /* Progress */
+  .progress-bar {
+    background: var(--border);
+    height: 2px;
+    border-radius: 2px;
+    margin: 1rem 1.5rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .progress-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 0 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--text-primary);
+  }
+
+  /* Challenge styles */
+  .challenge-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1.25rem 1.5rem;
+    background: var(--amber-light);
+    border: 1px solid #E8C870;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 0;
+  }
+  .challenge-icon {
+    width: 36px; height: 36px;
+    background: var(--amber);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .challenge-meta { flex: 1; }
+  .challenge-meta strong { font-size: 15px; font-weight: 500; color: #5A3800; display: block; }
+  .challenge-meta span { font-size: 12px; color: #8A6020; }
+  .difficulty-badge {
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+  .diff-medium { background: #FFE8A0; color: #7A4A00; border: 1px solid #E8C870; }
+  .challenge-body {
+    border: 1px solid #E8C870;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--surface);
+  }
+  .objective-list { list-style: none; margin: 1rem 0; }
+  .objective-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--text-secondary);
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .objective-list li:last-child { border-bottom: none; }
+  .obj-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--amber-light); color: var(--amber);
+    font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .hint-accordion {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    overflow: hidden;
+  }
+  .hint-toggle {
+    width: 100%; text-align: left;
+    padding: 12px 16px;
+    background: var(--surface-alt);
+    border: none; cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 13px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .hint-toggle:hover { background: var(--border); color: var(--text-primary); }
+  .hint-toggle svg { flex-shrink: 0; transition: transform 0.2s; }
+  .hint-toggle.open svg { transform: rotate(180deg); }
+  .hint-body { display: none; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .hint-body.open { display: block; }
+  .hint-body p { font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .hint-body p:last-child { margin-bottom: 0; }
+  .restriction-box {
+    background: var(--red-light);
+    border: 1px solid #E8B0B0;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .restriction-box .callout-label { color: var(--red); margin-bottom: 6px; }
+  .restriction-box p { font-size: 13px; color: #5A1818; margin: 0; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    main { padding: 2rem 1.5rem; }
+    .compare-grid, .concepts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-logo">
+      <div class="eyebrow">Tutorial Godot 4</div>
+      <div class="title">Módulo 01<br>Como a engine pensa</div>
+      <span class="tag">C# · Plataforma 2D</span>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 33%"></div></div>
+    <div class="progress-label" id="progress-label">Aula 1 de 3</div>
+
+    <div class="sidebar-section-label">Aulas</div>
+    <ul class="sidebar-nav">
+      <li class="active" id="nav-1" onclick="goLesson(1)">
+        <a href="#">
+          <span class="nav-num">1.1</span>
+          A lógica de nodes e cenas
+        </a>
+      </li>
+      <li id="nav-2" onclick="goLesson(2)">
+        <a href="#">
+          <span class="nav-num">1.2</span>
+          Navegando no editor
+        </a>
+      </li>
+      <li id="nav-3" onclick="goLesson(3)">
+        <a href="#">
+          <span class="nav-num">1.3</span>
+          Signals: o padrão Observer nativo
+        </a>
+      </li>
+    </ul>
+
+    <div style="padding: 1.5rem; border-top: 1px solid var(--border); margin-top: auto;">
+      <div class="sidebar-section-label" style="margin-bottom: 10px;">Milestone do módulo</div>
+      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+        Cena mínima funcionando no editor com node, script e signal conectados.
+      </p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ======================== AULA 1.1 ======================== -->
+    <div class="lesson-content active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 01 · Aula 1.1</div>
+        <h1 class="lesson-title">A lógica de nodes e cenas</h1>
+        <p class="lesson-subtitle">Entender a estrutura fundamental do Godot antes de escrever uma linha de código. O maior choque de quem chega do zero numa engine.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Conceitual
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+      </div>
+
+      <div id="conteudo-1">
+        <h2>O que é um node?</h2>
+        <p>Se você já trabalhou com POO, sua intuição inicial vai ser: <strong>"node é uma classe, cena é um objeto"</strong>. Isso está parcialmente certo — mas na prática o Godot inverte o que você está acostumado a fazer.</p>
+        <p>Em linguagens tradicionais, você escreve uma classe <code>Player</code> que herda de <code>Character</code>, instancia ela no <code>main()</code> e chama métodos. No Godot, você <em>não escreve um <code>main()</code></em>. Você monta uma <strong>árvore de nodes</strong> — e a engine executa essa árvore pra você.</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">Analogia</div>
+          <p>Pense num node como um bloco LEGO especializado. Cada tipo de node já tem um comportamento embutido: um <strong>Sprite2D</strong> sabe como desenhar uma textura, um <strong>CollisionShape2D</strong> sabe como ocupar espaço físico, um <strong>AudioStreamPlayer</strong> sabe como tocar áudio. Você combina blocos, não reimplementa tudo do zero.</p>
+        </div>
+
+        <h2>A árvore de cenas</h2>
+        <p>Nodes se organizam em hierarquia pai → filho. Essa hierarquia é a <strong>SceneTree</strong> — a estrutura central que a engine lê a cada frame. Quando um node pai se move, todos os filhos acompanham. Quando o pai é removido, os filhos vão junto.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Exemplo: cena de um inimigo patrulheiro</div>
+          <div class="tree">
+<span class="node-name">Enemy</span> <span class="node-type">[CharacterBody2D]</span> <span class="node-script">← Enemy.cs</span>
+├── <span class="node-name">Sprite2D</span> <span class="node-type">[Sprite2D]</span>
+├── <span class="node-name">CollisionShape2D</span> <span class="node-type">[CollisionShape2D]</span>
+├── <span class="node-name">DetectionArea</span> <span class="node-type">[Area2D]</span>
+│   └── <span class="node-name">CollisionShape2D</span> <span class="node-type">[CollisionShape2D]</span>
+└── <span class="node-name">PatrolRayCast</span> <span class="node-type">[RayCast2D]</span>
+          </div>
+        </div>
+
+        <p>Cada node dessa árvore é responsável por <em>uma coisa só</em>. Você não escreve código de detecção dentro do script de movimento — você adiciona um node <code>Area2D</code> que já sabe fazer isso, e <em>reage ao que ele emite</em>.</p>
+
+        <h2>Classe vs. instância vs. cena</h2>
+        <p>No Godot, uma <strong>cena</strong> é um arquivo <code>.tscn</code> que descreve uma árvore de nodes com suas propriedades configuradas. É como um <em>prefab</em>: uma cena de <code>Coin</code> pode ser instanciada dezenas de vezes no mapa. Cada instância é independente, mas todas partem do mesmo template.</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--blue);">OOP tradicional</div>
+            <ul>
+              <li>Você define <code>class Player</code></li>
+              <li>Herança para reutilizar comportamento</li>
+              <li>Você instancia no <code>main()</code></li>
+              <li>Comunicação por chamada direta de método</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">Godot (nodes)</div>
+            <ul>
+              <li>Você cria uma cena com nodes</li>
+              <li>Composição de nodes para reutilizar</li>
+              <li>Engine instancia via SceneTree</li>
+              <li>Comunicação preferencialmente por signals</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Para quem vem de Unity</div>
+          <p>A diferença principal: no Unity, um GameObject é quase vazio e você adiciona Components. No Godot, cada node já <em>é</em> um tipo específico com comportamento. A hierarquia de herança fica mais simples, e a composição fica mais explícita na SceneTree.</p>
+        </div>
+
+        <h2>Scripts são anexados a nodes</h2>
+        <p>Um script C# no Godot não é uma classe independente que você instancia manualmente. Ele é <strong>anexado a um node</strong> e estende o comportamento desse node. Quando o engine processa aquele node, ele executa seu script automaticamente.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="cm">// Este script estende CharacterBody2D —</span>
+<span class="cm">// ele só pode ser anexado a um node desse tipo.</span>
+<span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
+{
+    <span class="cm">// [Export] expõe a variável no Inspector do editor</span>
+    [<span class="at">Export</span>] <span class="kw">public float</span> Speed = <span class="nm">200f</span>;
+
+    <span class="cm">// Chamado uma vez quando o node entra na SceneTree</span>
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        GD.<span class="fn">Print</span>(<span class="st">"Player pronto!"</span>);
+    }
+
+    <span class="cm">// Chamado a cada frame de física (~60x por segundo)</span>
+    <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+    {
+        <span class="cm">// Lógica de movimento aqui</span>
+    }
+}</pre>
+        </div>
+
+        <p>Repare que você <strong>não instancia <code>Player</code> manualmente</strong>. Você anexa esse script ao node <code>Player</code> na cena, e a engine cuida do ciclo de vida.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Ponto-chave</div>
+          <p>O método <code>_Ready()</code> é o seu "construtor seguro" — quando ele é chamado, todos os filhos do node já existem e podem ser acessados. Já o construtor padrão do C# (<code>Player()</code>) é chamado antes disso e <em>não deve ser usado</em> para lógica de jogo.</p>
+        </div>
+      </div>
+
+      <div id="pratica-1" style="display:none">
+        <h2>Explorando a SceneTree na prática</h2>
+        <p>Antes de criar seu projeto completo, faça este exercício para internalizar a estrutura de nodes.</p>
+
+        <div class="callout warning">
+          <div class="callout-label">Pré-requisito</div>
+          <p>Godot 4 instalado com suporte a .NET habilitado. Crie um projeto 2D vazio chamado <code>PlataformaDemo</code> antes de começar.</p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Crie uma cena nova</strong>
+              <p>No menu superior: <strong>Cena → Nova Cena</strong>. Escolha <strong>Node2D</strong> como node raiz. Salve como <code>res://scenes/TestScene.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Adicione nodes filhos</strong>
+              <p>Com o Node2D selecionado na SceneTree, clique no ícone "+" para adicionar filhos. Adicione um <strong>Label</strong> e um <strong>Sprite2D</strong>. Observe como eles aparecem indentados na árvore.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Anexe um script ao Node2D raiz</strong>
+              <p>Selecione o Node2D raiz → clique no ícone de script → <strong>Criar</strong>. Godot gera um arquivo <code>.cs</code> automaticamente e abre o editor.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Acesse um nó filho por código</strong>
+              <p>No <code>_Ready()</code>, use <code>GetNode&lt;Label&gt;("Label")</code> para pegar a referência ao Label filho e altere o texto.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Rode e observe</strong>
+              <p>Pressione <strong>F5</strong> para rodar o projeto. Veja o output no painel inferior. Mova nodes na SceneTree e observe como as posições mudam no viewport.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">TestScene.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">TestScene</span> : <span class="tp">Node2D</span>
+{
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        <span class="cm">// Acessa o Label pelo nome que aparece na SceneTree</span>
+        <span class="kw">var</span> label = <span class="fn">GetNode</span>&lt;<span class="tp">Label</span>&gt;(<span class="st">"Label"</span>);
+        label.Text = <span class="st">"Meu primeiro node!"</span>;
+
+        GD.<span class="fn">Print</span>(<span class="st">"Filhos desta cena: "</span> + <span class="fn">GetChildCount</span>());
+    }
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Experimento extra</div>
+          <p>Renomeie o node <code>Label</code> na SceneTree para <code>TituloLabel</code>. O código vai quebrar — você precisará atualizar a string em <code>GetNode</code>. Essa fragilidade existe e há formas melhores de referenciar nodes (como <code>[Export]</code> ou <code>%NodeUnico</code>), que veremos na aula 2.1.</p>
+        </div>
+      </div>
+
+      <div id="desafio-1" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Inventário de cena</strong>
+            <span>Aula 1.1 — Nodes e cenas</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Intermediário</span>
+        </div>
+        <div class="challenge-body">
+          <p style="font-size:14px; color:var(--text-secondary); margin-bottom:1rem;">
+            Sem usar prática guiada ou exemplos desta aula como referência, construa uma cena completa de <strong>coletável de moeda</strong> do zero, tomando suas próprias decisões de design de nodes.
+          </p>
+
+          <h3>Objetivos</h3>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Criar uma cena chamada <code>Coin.tscn</code> com a hierarquia de nodes que você achar apropriada para um coletável 2D</li>
+            <li><div class="obj-num">2</div>Anexar um script <code>Coin.cs</code> ao node raiz com pelo menos duas variáveis <code>[Export]</code> que façam sentido para uma moeda (pense: valor, velocidade de animação, etc.)</li>
+            <li><div class="obj-num">3</div>No <code>_Ready()</code>, imprimir no console o nome do node raiz e a quantidade de filhos que ele tem</li>
+            <li><div class="obj-num">4</div>Criar uma segunda cena <code>Level.tscn</code> e instanciar a moeda nela pelo menos 3 vezes, cada instância com valores <code>[Export]</code> diferentes no Inspector</li>
+            <li><div class="obj-num">5</div>Rodar com F5 e confirmar que os prints aparecem uma vez por instância, com os valores corretos</li>
+          </ul>
+
+          <div class="restriction-box">
+            <div class="callout-label">Restrição do desafio</div>
+            <p>Não copie a estrutura da árvore do diagrama visto na aula. Justifique no comentário do script por que escolheu cada node filho. Se sua cena tiver apenas o node raiz, tudo bem — explique por quê.</p>
+          </div>
+
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Dica — só abra se realmente travar
+            </button>
+            <div class="hint-body">
+              <p>Um coletável 2D geralmente precisa de: algo que <em>detecte</em> quando o player passa por cima (um node de área, não de física sólida) e algo visual (um Sprite2D ou um ColorRect para prototipar sem arte).</p>
+              <p>A pergunta certa é: "minha moeda precisa ter colisão física sólida, ou só precisa saber se algo entrou na área dela?" Isso determina o tipo do node raiz.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Node</strong>bloco especializado reutilizável</div>
+            <div class="concept-pill"><strong>SceneTree</strong>hierarquia pai → filho</div>
+            <div class="concept-pill"><strong>Cena (.tscn)</strong>template instanciável</div>
+            <div class="concept-pill"><strong>Script</strong>comportamento anexado a um node</div>
+            <div class="concept-pill"><strong>_Ready()</strong>inicialização segura</div>
+            <div class="concept-pill"><strong>[Export]</strong>variável visível no Inspector</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que não existe um <code>main()</code> explícito num projeto Godot?</li>
+          <li>Qual a diferença entre um node e uma cena?</li>
+          <li>Quando <code>_Ready()</code> é chamado em relação aos filhos do node?</li>
+          <li>O que acontece com os nodes filhos quando o pai é removido da SceneTree?</li>
+          <li>Por que preferir composição de nodes em vez de herança profunda?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn disabled">← Aula anterior</button>
+        <button class="nav-btn primary" onclick="goLesson(2)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 1.2 ======================== -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 01 · Aula 1.2</div>
+        <h1 class="lesson-title">Navegando no editor</h1>
+        <p class="lesson-subtitle">Conhecer os painéis do Godot e criar o primeiro projeto do zero — da cena vazia até a primeira execução.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~40 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Prático no editor
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
+      </div>
+
+      <div id="conteudo-2">
+        <h2>Os quatro painéis principais</h2>
+        <p>O editor do Godot pode assustar de início, mas tem uma lógica clara. Você vai trabalhar principalmente com quatro áreas:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Layout do editor Godot 4</div>
+          <div style="display: grid; grid-template-columns: 180px 1fr 200px; grid-template-rows: auto auto; gap: 8px; font-family: var(--font-mono); font-size: 12px;">
+            <div style="background: #E8F0FA; border: 1px solid #B5D4F4; border-radius: 6px; padding: 10px; grid-row: 1/3;">
+              <div style="font-size: 11px; font-weight: 500; color: var(--blue); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em;">SceneTree</div>
+              <div style="color: var(--text-secondary); line-height: 2;">
+                ▾ Node2D<br>
+                &nbsp;&nbsp;▾ Player<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Sprite2D<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Collision<br>
+                &nbsp;&nbsp;TileMap
+              </div>
+            </div>
+            <div style="background: #F4F3EE; border: 1px solid var(--border); border-radius: 6px; padding: 10px; min-height: 120px; display: flex; align-items: center; justify-content: center;">
+              <div style="text-align: center; color: var(--text-muted);">
+                <div style="font-size: 28px; margin-bottom: 4px;">⬛</div>
+                <div style="font-size: 12px;">Viewport 2D</div>
+                <div style="font-size: 11px;">(onde você vê o jogo)</div>
+              </div>
+            </div>
+            <div style="background: #FFF3D6; border: 1px solid #FAC775; border-radius: 6px; padding: 10px; grid-row: 1/3;">
+              <div style="font-size: 11px; font-weight: 500; color: var(--amber); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em;">Inspector</div>
+              <div style="color: var(--text-secondary); line-height: 2; font-size: 11px;">
+                Position: (0, 0)<br>
+                Rotation: 0°<br>
+                Scale: (1, 1)<br>
+                <span style="color: var(--amber);">Speed: 200</span><br>
+                <span style="color: var(--amber);">JumpForce: 400</span>
+              </div>
+            </div>
+            <div style="background: #EBF3E8; border: 1px solid #C0DDB8; border-radius: 6px; padding: 10px;">
+              <div style="font-size: 11px; font-weight: 500; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em;">FileSystem</div>
+              <div style="color: var(--text-secondary); font-size: 11px; line-height: 1.8;">
+                res://<br>
+                ├ scenes/<br>
+                ├ scripts/<br>
+                └ assets/
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3>SceneTree — a árvore de nodes</h3>
+        <p>Painel superior-esquerdo. É onde você monta a hierarquia de nodes da cena aberta. Clicar num node o seleciona no viewport e abre suas propriedades no Inspector.</p>
+
+        <h3>Inspector — propriedades do node selecionado</h3>
+        <p>Painel direito. Mostra todas as propriedades do node — incluindo as que você decorou com <code>[Export]</code> no script. Editar aqui é equivalente a editar no código, mas persiste na cena salva.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Dica importante</div>
+          <p>Variáveis com <code>[Export]</code> podem ter valores diferentes <em>por instância</em>. Você define o default no código, mas pode sobrescrever no Inspector pra cada inimigo ou plataforma individualmente — sem tocar no script.</p>
+        </div>
+
+        <h3>FileSystem — seus arquivos de projeto</h3>
+        <p>Painel inferior-esquerdo. Mostra a estrutura de pastas dentro de <code>res://</code> — o caminho raiz do seu projeto. Cenas são <code>.tscn</code>, scripts C# são <code>.cs</code>, assets ficam em subpastas que você organiza.</p>
+
+        <h3>Viewport — onde o jogo aparece</h3>
+        <p>A área central. No modo 2D você movimenta, escala e rotaciona nodes visualmente. O Godot usa <strong>Y crescente para baixo</strong> — o (0,0) fica no canto superior-esquerdo por padrão.</p>
+
+        <h2>Criando o projeto do tutorial</h2>
+        <p>Vamos criar a estrutura de pastas que vamos usar durante todo o tutorial. Organização desde o começo evita refatoração dolorosa depois.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Estrutura de pastas do projeto</span>
+            <span class="code-lang">FileSystem</span>
+          </div>
+          <pre>res://
+├── scenes/
+│   ├── world/          <span class="cm">← cenas de fase</span>
+│   ├── entities/       <span class="cm">← player, inimigos</span>
+│   └── ui/             <span class="cm">← HUD, menus</span>
+├── scripts/            <span class="cm">← scripts sem cena (.cs utilitários)</span>
+├── assets/
+│   ├── sprites/
+│   ├── tilemaps/
+│   └── audio/
+└── autoload/           <span class="cm">← GameManager e similares</span></pre>
+        </div>
+
+        <h2>Rodando o projeto pela primeira vez</h2>
+        <p>Pressione <strong>F5</strong> (ou o botão ▶ no topo). O Godot vai pedir para você definir a <strong>cena principal</strong> — a cena que abre quando o jogo começa. Por enquanto, defina a cena que você criou na aula anterior.</p>
+
+        <div class="callout info">
+          <div class="callout-label">Atalhos essenciais</div>
+          <p>
+            <code>F5</code> — Rodar o projeto · 
+            <code>F6</code> — Rodar apenas a cena atual · 
+            <code>Ctrl+S</code> — Salvar cena · 
+            <code>Ctrl+Shift+S</code> — Salvar como · 
+            <code>Ctrl+Z</code> — Desfazer (funciona no viewport também)
+          </p>
+        </div>
+      </div>
+
+      <div id="pratica-2" style="display:none">
+        <h2>Criando o projeto do tutorial do zero</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Novo projeto com .NET</strong>
+              <p>No launcher do Godot: <strong>Novo Projeto → Renderer: Compatibility → Linguagem: C# (.NET)</strong>. Nomeie <code>PlataformaTutorial</code> e escolha uma pasta.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Crie a estrutura de pastas</strong>
+              <p>No FileSystem, clique-direito → <strong>Nova Pasta</strong> para criar <code>scenes/</code>, <code>assets/</code>, <code>autoload/</code>. Dentro de <code>scenes/</code>, crie <code>world/</code> e <code>entities/</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Crie a cena do mundo</strong>
+              <p>Nova cena → node raiz <strong>Node2D</strong> → salve em <code>res://scenes/world/Level01.tscn</code>. Este será o ponto de entrada do jogo.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Configure a cena principal</strong>
+              <p><strong>Projeto → Configurações do Projeto → Aplicação → Run → Cena Principal</strong>. Selecione <code>Level01.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Configure a resolução</strong>
+              <p>Em <strong>Configurações → Display → Window</strong>: defina <code>Width: 1280</code>, <code>Height: 720</code>, <strong>Stretch Mode: canvas_items</strong>, <strong>Aspect: keep</strong>. Isso mantém a tela consistente em qualquer resolução.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Rode com F5</strong>
+              <p>Você verá uma janela vazia cinza — perfeito. O projeto está rodando. Feche e continue.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="desafio-2" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Configuração às cegas</strong>
+            <span>Aula 1.2 — Navegando no editor</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Intermediário</span>
+        </div>
+        <div class="challenge-body">
+          <p style="font-size:14px; color:var(--text-secondary); margin-bottom:1rem;">
+            A prática guiada te levou passo a passo. Agora recrie o projeto do zero em menos de 15 minutos, sem consultar os passos — só com o que memorizou. Depois, aplique três configurações adicionais que não foram ensinadas.
+          </p>
+
+          <h3>Parte 1 — Recriação cronometrada</h3>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Criar novo projeto Godot 4 com suporte .NET, estrutura de pastas completa (<code>scenes/world</code>, <code>scenes/entities</code>, <code>assets/</code>, <code>autoload/</code>) e cena principal configurada</li>
+            <li><div class="obj-num">2</div>Configurar resolução 1280×720 com Stretch Mode correto e rodar com F5 — tudo isso sem olhar a aula</li>
+          </ul>
+
+          <h3 style="margin-top:1.25rem;">Parte 2 — Descoberta no editor</h3>
+          <p style="font-size:14px; color:var(--text-secondary);">Explore as Configurações do Projeto e encontre como fazer cada item abaixo. Você não viu isso na aula — use a interface para descobrir:</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">A</div>Mudar o título da janela do jogo para o nome que você quiser (não "Godot Engine")</li>
+            <li><div class="obj-num">B</div>Desativar o redimensionamento da janela pelo usuário</li>
+            <li><div class="obj-num">C</div>Fazer o jogo rodar em tela cheia por padrão ao abrir</li>
+          </ul>
+
+          <div class="restriction-box">
+            <div class="callout-label">Sem busca externa</div>
+            <p>Resolva a Parte 2 só usando o editor — menus, tooltips, busca interna das Configurações do Projeto. O objetivo é aprender a navegar na ferramenta, não memorizar caminhos.</p>
+          </div>
+
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Dica — só abra se realmente travar
+            </button>
+            <div class="hint-body">
+              <p>A busca interna das Configurações do Projeto (o campo de texto no topo do painel) é sua melhor aliada. Tente palavras como "title", "fullscreen", "resize".</p>
+              <p>Para o título da janela, procure a seção <strong>Application → Config</strong>. Para tela cheia, a seção <strong>Display → Window → Size</strong> tem o que você precisa.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>SceneTree</strong>painel de hierarquia</div>
+            <div class="concept-pill"><strong>Inspector</strong>propriedades do node</div>
+            <div class="concept-pill"><strong>FileSystem</strong>res:// e organização</div>
+            <div class="concept-pill"><strong>Viewport</strong>eixo Y invertido</div>
+            <div class="concept-pill"><strong>F5 / F6</strong>rodar projeto/cena</div>
+            <div class="concept-pill"><strong>Stretch Mode</strong>resolução consistente</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Qual é a diferença entre F5 e F6 no editor?</li>
+          <li>Por que separar cenas em pastas <code>world/</code>, <code>entities/</code> e <code>ui/</code>?</li>
+          <li>O que acontece com uma variável <code>[Export]</code> editada no Inspector se você mudar o valor default no código?</li>
+          <li>O que é <code>res://</code> e por que usar esse caminho em vez de caminhos absolutos?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
+        <button class="nav-btn primary" onclick="goLesson(3)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 1.3 ======================== -->
+    <div class="lesson-content" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 01 · Aula 1.3</div>
+        <h1 class="lesson-title">Signals: o padrão Observer nativo</h1>
+        <p class="lesson-subtitle">O mecanismo de comunicação entre nodes do Godot — e por que ele existe em vez de chamadas diretas de método.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~35 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Código + editor
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
+      </div>
+
+      <div id="conteudo-3">
+        <h2>Por que não chamar métodos diretamente?</h2>
+        <p>Imagine que seu <code>Player</code> precisa avisar a <code>HUD</code> quando perde uma vida. A abordagem mais óbvia seria:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — abordagem problemática</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="cm">// Player precisa "conhecer" a HUD — acoplamento forte</span>
+<span class="kw">var</span> hud = <span class="fn">GetNode</span>&lt;<span class="tp">HUD</span>&gt;(<span class="st">"/root/Level/UI/HUD"</span>);
+hud.<span class="fn">UpdateLives</span>(lives);</pre>
+        </div>
+
+        <p>Isso <em>funciona</em>, mas cria um problema: o <code>Player</code> agora <strong>depende da estrutura exata da cena</strong>. Se você mover a HUD de lugar, renomear o nó ou criar um nível sem HUD (numa cena de teste, por exemplo), o código quebra.</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">Analogia com padrão Observer</div>
+          <p>Signals são exatamente o padrão Observer que você já conhece — só que embutido na engine. O emitente <strong>não conhece</strong> os ouvintes. Quem quer saber de um evento se registra para ouvir; quem emite só dispara o sinal sem se preocupar com quem está escutando.</p>
+        </div>
+
+        <h2>Signals embutidos vs. signals customizados</h2>
+        <p>Todo node já vem com signals prontos. Um <code>Button</code> emite <code>pressed</code>. Um <code>Area2D</code> emite <code>body_entered</code>. Você também pode declarar seus próprios signals em C#:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
+{
+    <span class="cm">// Declara um signal que passa o número de vidas restantes</span>
+    [<span class="at">Signal</span>] <span class="kw">public delegate void</span> <span class="fn">LifeLostEventHandler</span>(<span class="kw">int</span> livesRemaining);
+
+    <span class="kw">private int</span> _lives = <span class="nm">3</span>;
+
+    <span class="kw">public void</span> <span class="fn">TakeDamage</span>()
+    {
+        _lives--;
+
+        <span class="cm">// Emite o signal — quem estiver ouvindo recebe</span>
+        <span class="fn">EmitSignal</span>(<span class="tp">SignalName</span>.LifeLost, _lives);
+
+        <span class="kw">if</span> (_lives &lt;= <span class="nm">0</span>)
+            <span class="fn">Die</span>();
+    }
+}</pre>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Convenção do Godot 4 em C#</div>
+          <p>O atributo <code>[Signal]</code> sobre um <code>delegate void</code> com sufixo <code>EventHandler</code> é a forma canônica no Godot 4 com C#. O Godot gera automaticamente o nome <code>LifeLost</code> (sem o sufixo) para usar em <code>EmitSignal</code> e <code>Connect</code>.</p>
+        </div>
+
+        <h2>Conectando signals: editor vs. código</h2>
+        <p>Há duas formas de conectar um signal a um método receptor. Cada uma tem seu lugar:</p>
+
+        <h3>Via editor (drag-and-drop)</h3>
+        <p>Selecione o node emissor na SceneTree → aba <strong>Node</strong> (ao lado de Inspector) → <strong>Signals</strong> → dê duplo-clique no signal → selecione o node receptor → nomeie o método → <strong>Conectar</strong>. O Godot cria o método no script automaticamente.</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">Use o editor quando</div>
+            <ul>
+              <li>A conexão é estática (nunca muda em runtime)</li>
+              <li>Os dois nodes existem na mesma cena</li>
+              <li>É uma conexão simples, de um para um</li>
+              <li>Prototipando rápido</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--blue);">Use código quando</div>
+            <ul>
+              <li>O receptor é instanciado dinamicamente</li>
+              <li>A conexão depende de lógica de runtime</li>
+              <li>Você quer <code>Callable</code> com parâmetros extras</li>
+              <li>O emissor é de outra cena</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Via código</h3>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Level01.cs — conectando por código</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public partial class</span> <span class="tp">Level01</span> : <span class="tp">Node2D</span>
+{
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        <span class="kw">var</span> player = <span class="fn">GetNode</span>&lt;<span class="tp">Player</span>&gt;(<span class="st">"Player"</span>);
+        <span class="kw">var</span> hud    = <span class="fn">GetNode</span>&lt;<span class="tp">HUD</span>&gt;(<span class="st">"UI/HUD"</span>);
+
+        <span class="cm">// Conecta: quando Player emitir LifeLost,</span>
+        <span class="cm">// chama hud.OnLifeLost(livesRemaining)</span>
+        player.LifeLost += hud.<span class="fn">OnLifeLost</span>;
+    }
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">HUD.cs — método receptor</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public partial class</span> <span class="tp">HUD</span> : <span class="tp">CanvasLayer</span>
+{
+    <span class="cm">// A assinatura deve bater com o delegate do signal</span>
+    <span class="kw">public void</span> <span class="fn">OnLifeLost</span>(<span class="kw">int</span> livesRemaining)
+    {
+        <span class="fn">GetNode</span>&lt;<span class="tp">Label</span>&gt;(<span class="st">"LivesLabel"</span>).Text = <span class="st">$"Vidas: {livesRemaining}"</span>;
+    }
+}</pre>
+        </div>
+
+        <p>Repare que o <code>Player</code> <strong>não importa, não referencia e não conhece</strong> a classe <code>HUD</code>. Ele só emite. Quem conecta é o <code>Level01</code> — o node pai que tem visibilidade de ambos.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Padrão recomendado</div>
+          <p>Nodes filhos não devem referenciar o pai — isso cria dependência circular. O pai (ou um gerenciador) conhece os filhos e faz a ponte via signals. Signals de filho para cima (filho → pai) são naturais; chamadas de filho para filho atravessando o pai são sinal de que o design precisa de signals.</p>
+        </div>
+
+        <div class="milestone-banner">
+          <div class="milestone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="milestone-text">
+            <strong>Milestone do Módulo 01</strong>
+            <p>Você agora entende a tríade fundamental do Godot: nodes compõem cenas, scripts estendem nodes, signals conectam nodes sem acoplamento. No próximo módulo você aplica tudo isso criando o personagem jogável.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="pratica-3" style="display:none">
+        <h2>Signals na prática: botão que conta cliques</h2>
+        <p>Exercício simples mas que cobre o ciclo completo: node emissor → signal → node receptor → atualização de UI.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Monte a cena</strong>
+              <p>Crie uma nova cena com <code>Node2D</code> como raiz. Adicione filhos: <code>Button</code> e <code>Label</code>. Posicione-os no viewport com a ferramenta de mover.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Conecte o signal pelo editor</strong>
+              <p>Selecione o <code>Button</code> → aba <strong>Node</strong> → signal <code>pressed</code> → duplo clique → selecione o Node2D raiz como receptor → método sugerido: <code>_on_button_pressed</code> → Conectar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Implemente o método gerado</strong>
+              <p>O editor cria o método no script do Node2D. Adicione uma variável de contagem e atualize o texto do Label a cada clique.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Crie e emita um signal customizado</strong>
+              <p>Declare um signal <code>[Signal] public delegate void CountReachedEventHandler(int count);</code> no Node2D. Emita-o quando a contagem atingir 5. Conecte por código a um método que muda a cor do Label.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">SignalDemo.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">SignalDemo</span> : <span class="tp">Node2D</span>
+{
+    [<span class="at">Signal</span>] <span class="kw">public delegate void</span> <span class="fn">CountReachedEventHandler</span>(<span class="kw">int</span> count);
+
+    <span class="kw">private int</span> _count = <span class="nm">0</span>;
+    <span class="kw">private</span> <span class="tp">Label</span> _label;
+
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        _label = <span class="fn">GetNode</span>&lt;<span class="tp">Label</span>&gt;(<span class="st">"Label"</span>);
+        <span class="cm">// Conecta o signal customizado por código (lambda)</span>
+        CountReached += count =>
+            _label.Modulate = count >= <span class="nm">5</span> ? <span class="tp">Colors</span>.Green : <span class="tp">Colors</span>.White;
+    }
+
+    <span class="cm">// Gerado pelo editor ao conectar Button.pressed</span>
+    <span class="kw">private void</span> <span class="fn">_on_button_pressed</span>()
+    {
+        _count++;
+        _label.Text = <span class="st">$"Cliques: {_count}"</span>;
+        <span class="kw">if</span> (_count == <span class="nm">5</span>)
+            <span class="fn">EmitSignal</span>(<span class="tp">SignalName</span>.CountReached, _count);
+    }
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Observe</div>
+          <p>Quando a conexão do editor e a conexão por código coexistem, o signal pode ter <em>vários ouvintes</em>. Um signal pode ser conectado a quantos métodos quiser — todos são chamados na ordem de conexão. Isso é uma das forças do padrão Observer.</p>
+        </div>
+      </div>
+
+      <div id="desafio-3" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Placar desacoplado</strong>
+            <span>Aula 1.3 — Signals</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Intermediário</span>
+        </div>
+        <div class="challenge-body">
+          <p style="font-size:14px; color:var(--text-secondary); margin-bottom:1rem;">
+            Implemente um mini-sistema de placar usando signals, onde <strong>nenhuma das cenas conhece a outra diretamente</strong>. Você decide a estrutura — o requisito é o desacoplamento.
+          </p>
+
+          <h3>Contexto</h3>
+          <p style="font-size:14px; color:var(--text-secondary);">Você tem três cenas independentes: um <code>Enemy</code> que pode morrer, um <code>Scoreboard</code> que exibe pontos, e um <code>Level</code> que as instancia. A regra: o script de <code>Enemy</code> não pode ter nenhuma referência à classe <code>Scoreboard</code>, e vice-versa.</p>
+
+          <h3>Objetivos</h3>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Cena <code>Enemy.tscn</code> com um script que declara um signal <code>Died</code> e o emite quando uma tecla (ex: <kbd>K</kbd>) é pressionada — simula o inimigo sendo morto</li>
+            <li><div class="obj-num">2</div>Cena <code>Scoreboard.tscn</code> com um <code>Label</code> que exibe a pontuação e um método público que recebe quantos pontos adicionar</li>
+            <li><div class="obj-num">3</div>Cena <code>Level.tscn</code> que instancia ambos e conecta o signal <code>Died</code> do Enemy ao método do Scoreboard — sem que Enemy ou Scoreboard saibam um do outro</li>
+            <li><div class="obj-num">4</div>Instanciar 3 inimigos diferentes no Level, cada um com um valor de pontos diferente via <code>[Export]</code>. Matar cada um deve adicionar a pontuação correta ao placar</li>
+          </ul>
+
+          <div class="restriction-box">
+            <div class="callout-label">Critério de aprovação</div>
+            <p>Abra o script de <code>Enemy.cs</code> e verifique: há alguma menção à palavra "Scoreboard"? Se sim, o desafio não foi concluído. O mesmo vale para <code>Scoreboard.cs</code> — não pode ter referência a "Enemy". A ponte existe só no <code>Level.cs</code>.</p>
+          </div>
+
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Dica — só abra se realmente travar
+            </button>
+            <div class="hint-body">
+              <p>O signal <code>Died</code> precisa passar o valor de pontos: <code>[Signal] public delegate void DiedEventHandler(int points);</code>. O inimigo não sabe quem vai receber — ele só emite o valor.</p>
+              <p>No <code>Level.cs</code>, após pegar as referências com <code>GetNode</code>, a conexão fica: <code>enemy.Died += scoreboard.AddPoints;</code>. O método <code>AddPoints</code> no Scoreboard recebe um <code>int</code> e atualiza o Label.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>[Signal]</strong>declarar signal customizado</div>
+            <div class="concept-pill"><strong>EmitSignal</strong>disparar o evento</div>
+            <div class="concept-pill"><strong>+=</strong>conectar por código</div>
+            <div class="concept-pill"><strong>Aba Node</strong>conectar pelo editor</div>
+            <div class="concept-pill"><strong>Observer</strong>padrão por trás dos signals</div>
+            <div class="concept-pill"><strong>Desacoplamento</strong>emissor não conhece receptor</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que um node filho não deveria chamar métodos diretamente no pai?</li>
+          <li>Qual a diferença entre um signal embutido (como <code>pressed</code>) e um customizado?</li>
+          <li>Em qual situação você prefere conectar signals via editor em vez de código?</li>
+          <li>O que acontece se você emitir um signal que ninguém está ouvindo?</li>
+          <li>Como signals ajudam a reutilizar a cena de <code>Player</code> em diferentes níveis?</li>
+        </ul>
+
+        <div class="milestone-banner" style="margin-top: 2rem;">
+          <div class="milestone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="milestone-text">
+            <strong>Módulo 01 completo!</strong>
+            <p>Você entende nodes, cenas, scripts e signals. O Módulo 02 começa o personagem jogável com CharacterBody2D, Input e física de plataforma.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
+        <button class="nav-btn" style="opacity:0.4; pointer-events:none;">Módulo 02 →</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let currentLesson = 1;
+
+  function goLesson(n) {
+    document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('lesson-' + n).classList.add('active');
+    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
+    document.getElementById('nav-' + n).classList.add('active');
+    currentLesson = n;
+    document.getElementById('progress-fill').style.width = (n / 3 * 100) + '%';
+    document.getElementById('progress-label').textContent = 'Aula ' + n + ' de 3';
+    window.scrollTo(0, 0);
+
+    // Reset tabs in new lesson
+    const tabs = document.querySelectorAll('#lesson-' + n + ' .lesson-tab');
+    if (tabs.length) {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[0].classList.add('active');
+      const firstId = tabs[0].getAttribute('onclick').match(/'([^']+)'/)[1];
+      document.querySelectorAll('#lesson-' + n + ' [id^="conteudo-"], #lesson-' + n + ' [id^="pratica-"], #lesson-' + n + ' [id^="desafio-"], #lesson-' + n + ' [id^="resumo-"]').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById(firstId).style.display = 'block';
+    }
+  }
+
+  function switchTab(btn, targetId) {
+    const lesson = btn.closest('.lesson-content');
+    lesson.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const lessonNum = lesson.id.split('-')[1];
+    ['conteudo', 'pratica', 'desafio', 'resumo'].forEach(prefix => {
+      const el = document.getElementById(prefix + '-' + lessonNum);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById(targetId).style.display = 'block';
+  }
+
+  function toggleHint(btn) {
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
