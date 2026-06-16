@@ -1366,6 +1366,21 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
 
         <p>Mas essa abordagem ainda acopla <code>Player</code> ao tipo <code>HUD</code>. Se você quiser usar o <code>Player</code> numa cena de teste sem HUD, vai precisar tratar a referência nula ou remover o campo. Para comunicação de filho para pai — ou entre nodes não relacionados — existe uma solução melhor.</p>
 
+        <h3>Alternativa: nomes únicos com <code>%</code></h3>
+        <p>O Godot 4 permite marcar um node como <strong>acesso de nó único</strong> no editor (clique com o botão direito no node → <em>Access as Unique Name</em>). Depois disso, qualquer script na mesma cena pode referenciá-lo com o prefixo <code>%</code>, sem precisar conhecer a hierarquia:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — nome único</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="cm">// Funciona de qualquer profundidade na cena,</span>
+<span class="cm">// sem importar onde HUD está na hierarquia</span>
+<span class="fn">GetNode</span>&lt;<span class="tp">HUD</span>&gt;(<span class="st">"%HUD"</span>).<span class="fn">UpdateLives</span>(_lives);</pre>
+        </div>
+
+        <p>Use <code>[Export]</code> quando diferentes instâncias da cena podem apontar para nodes diferentes (configurável por Inspector). Use <code>%NomeÚnico</code> quando o node é sempre o mesmo dentro da cena e você quer evitar arrastar referências manualmente.</p>
+
         <div class="callout tip">
           <div class="callout-label">A regra de ouro da arquitetura Godot</div>
           <p><strong>Chame para baixo, sinalize para cima.</strong> Um pai pode acessar seus filhos diretamente — com <code>GetNode()</code> ou <code>[Export]</code>. Um filho <em>nunca</em> deve acessar o pai ou irmãos diretamente: ele emite um signal e quem quiser reagir se conecta. Isso mantém cada cena funcional independentemente de onde for instanciada.</p>
@@ -1507,6 +1522,45 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
         <div class="callout tip">
           <div class="callout-label">Padrão recomendado</div>
           <p>Nodes filhos não devem referenciar o pai — isso cria dependência circular. O pai (ou um gerenciador) conhece os filhos e faz a ponte via signals. Signals de filho para cima (filho → pai) são naturais; chamadas de filho para filho atravessando o pai são sinal de que o design precisa de signals.</p>
+        </div>
+
+        <h2>Grupos: comunicação um para muitos</h2>
+        <p>Signals conectam um emissor a receptores específicos. Mas e quando você precisa chamar um método em <em>todos</em> os inimigos ao mesmo tempo, sem manter uma lista de referências? Para isso existe o sistema de grupos — uma tag aplicada a nodes que permite acioná-los em conjunto:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Enemy.cs — entrar no grupo</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public override void</span> <span class="fn">_Ready</span>()
+{
+    <span class="fn">AddToGroup</span>(<span class="st">"enemies"</span>);
+}
+
+<span class="kw">public void</span> <span class="fn">Explode</span>()
+{
+    <span class="cm">// lógica de explosão</span>
+    <span class="fn">QueueFree</span>();
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">SmartBomb.cs — chamar todos do grupo</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public void</span> <span class="fn">Detonate</span>()
+{
+    <span class="cm">// Chama Explode() em todos os nodes com a tag "enemies"</span>
+    <span class="fn">GetTree</span>().<span class="fn">CallGroup</span>(<span class="st">"enemies"</span>, <span class="st">"Explode"</span>);
+}</pre>
+        </div>
+
+        <p>Você também pode adicionar nodes a grupos pelo editor: selecione o node → aba <strong>Node</strong> → <strong>Groups</strong>. Grupos definidos pelo editor ficam salvos no <code>.tscn</code> e persistem entre sessões.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Grupos vs. signals</div>
+          <p>Signals avisam quem se registrou para ouvir — ótimo para relações de um para um ou poucos receptores conhecidos. Grupos chamam todos os nodes de uma categoria sem referências individuais — ótimo para sistemas de broadcast como dano em área, pausa geral, ou troca de fase. Em projetos reais você vai usar os dois.</p>
         </div>
 
         <div class="milestone-banner">
