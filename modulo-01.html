@@ -755,6 +755,76 @@
           <div class="callout-label">Ponto-chave</div>
           <p>O método <code>_Ready()</code> é o seu "construtor seguro" — quando ele é chamado, todos os filhos do node já existem e podem ser acessados. Já o construtor padrão do C# (<code>Player()</code>) é chamado antes disso e <em>não deve ser usado</em> para lógica de jogo.</p>
         </div>
+
+        <h2>O loop principal: o que acontece a cada frame</h2>
+        <p>Até aqui você viu a <em>estrutura</em> — nodes, cenas, scripts. Mas o que faz isso rodar é a engine repetindo um ciclo várias vezes por segundo, o <strong>game loop</strong>. Entender a ordem desse ciclo evita boa parte dos bugs de inicialização e de timing que você vai encontrar mais adiante.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Do F5 ao primeiro frame</div>
+          <div class="steps" style="margin: 0;">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <strong>Godot carrega a cena principal</strong>
+                <p>Lê o <code>project.godot</code>, encontra a cena marcada como principal e instancia toda a árvore de nodes descrita nela.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <strong><code>_EnterTree()</code> — de cima para baixo</strong>
+                <p>Conforme cada node é adicionado à SceneTree, ele recebe esse callback. O pai entra primeiro, depois os filhos, na ordem em que aparecem na árvore.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <strong><code>_Ready()</code> — de baixo para cima</strong>
+                <p>Na ordem inversa do passo anterior: um node só recebe <code>_Ready()</code> depois que <em>todos</em> os seus filhos já receberam o deles. É por isso que <code>GetNode()</code> dentro de <code>_Ready()</code> é seguro.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <strong>Loop principal — repete a cada frame</strong>
+                <p>A partir daqui a engine entra em loop: processa input, roda física, roda a lógica de jogo e desenha a tela. Esse ciclo só para quando o jogo é fechado.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p>Dentro de cada volta do loop, dois callbacks competem por atenção — e a diferença entre eles é uma das maiores fontes de bugs em quem está começando:</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--blue);"><code>_PhysicsProcess(delta)</code></div>
+            <ul>
+              <li>Taxa fixa: 60 vezes por segundo por padrão</li>
+              <li><code>delta</code> é sempre o mesmo valor (≈0.0166s)</li>
+              <li>Pode rodar 0, 1 ou várias vezes por frame renderizado</li>
+              <li>Use para: movimento, colisão, física</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);"><code>_Process(delta)</code></div>
+            <ul>
+              <li>Roda exatamente uma vez por frame renderizado</li>
+              <li><code>delta</code> varia com a taxa de quadros atual</li>
+              <li>Não é sincronizado com a física</li>
+              <li>Use para: animação, UI, lógica que não depende de física</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Onde os signals entram nisso</div>
+          <p>Signals não são uma fila separada: <code>EmitSignal()</code> chama os métodos conectados <strong>imediatamente, na mesma execução</strong>, antes de continuar o resto da função que emitiu. Se o <code>Player</code> emite um signal dentro de <code>_PhysicsProcess()</code>, quem está ouvindo já roda ainda dentro daquele mesmo frame de física.</p>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">E quando um node é removido?</div>
+          <p>Chamar <code>Free()</code> no meio de um <code>_PhysicsProcess()</code> pode quebrar a iteração da engine sobre a árvore. Por isso o padrão é <code>QueueFree()</code>: marca o node para ser removido com segurança no fim do frame atual, em vez de destruí-lo instantaneamente.</p>
+        </div>
       </div>
 
       <div id="pratica-1" style="display:none">
@@ -770,8 +840,8 @@
           <div class="step">
             <div class="step-num">1</div>
             <div class="step-body">
-              <strong>Crie uma cena nova</strong>
-              <p>No menu superior: <strong>Cena → Nova Cena</strong>. Escolha <strong>Node2D</strong> como node raiz. Salve como <code>res://scenes/TestScene.tscn</code>.</p>
+              <strong>Defina o node raiz da cena</strong>
+              <p>Um projeto recém-criado abre direto com a viewport vazia mostrando os botões <strong>2D Scene</strong>, <strong>3D Scene</strong>, <strong>User Interface</strong> e <strong>Other Node</strong> — não existe nenhuma cena ainda, então não precisa ir a um menu. Clique em <strong>2D Scene</strong> para criar um <strong>Node2D</strong> como raiz (isso é o mesmo que <strong>Cena → Nova Cena</strong>, só que o Godot já deixa esse atalho na tela quando não há nenhuma cena aberta). Salve como <code>res://scenes/TestScene.tscn</code>.</p>
             </div>
           </div>
           <div class="step">
@@ -1048,7 +1118,7 @@
             <div class="step-num">3</div>
             <div class="step-body">
               <strong>Crie a cena do mundo</strong>
-              <p>Nova cena → node raiz <strong>Node2D</strong> → salve em <code>res://scenes/world/Level01.tscn</code>. Este será o ponto de entrada do jogo.</p>
+              <p>Como o projeto acabou de ser criado, a viewport ainda está esperando você escolher um node raiz — clique em <strong>2D Scene</strong> para criar um <strong>Node2D</strong> (se essa tela não aparecer mais, use <strong>Cena → Nova Cena</strong>). Salve em <code>res://scenes/world/Level01.tscn</code>. Este será o ponto de entrada do jogo.</p>
             </div>
           </div>
           <div class="step">
