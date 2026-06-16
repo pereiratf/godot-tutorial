@@ -857,6 +857,11 @@
           </div>
         </div>
 
+        <div class="callout tip">
+          <div class="callout-label">Por que multiplicar por <code>delta</code>?</div>
+          <p>Sem <code>delta</code>, o código <code>Position += new Vector2(Speed, 0)</code> move o personagem <strong>Speed pixels por frame</strong>. Em uma máquina rodando a 120 FPS ele anda o dobro do que em outra rodando a 60 FPS — o jogo fica mais rápido em hardware melhor. Multiplicando por <code>delta</code> você define a velocidade em <strong>pixels por segundo</strong>: a engine escala automaticamente para quantos frames aconteceram naquele intervalo. Em <code>_PhysicsProcess</code> o delta é quase constante (taxa fixa), mas em <code>_Process</code> é essencial para comportamento consistente entre máquinas.</p>
+        </div>
+
         <div class="callout warning">
           <div class="callout-label">Onde os signals entram nisso</div>
           <p>Signals não são uma fila separada: <code>EmitSignal()</code> chama os métodos conectados <strong>imediatamente, na mesma execução</strong>, antes de continuar o resto da função que emitiu. Se o <code>Player</code> emite um signal dentro de <code>_PhysicsProcess()</code>, quem está ouvindo já roda ainda dentro daquele mesmo frame de física.</p>
@@ -1337,6 +1342,34 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
         </div>
 
         <p>Isso <em>funciona</em>, mas cria um problema: o <code>Player</code> agora <strong>depende da estrutura exata da cena</strong>. Se você mover a HUD de lugar, renomear o nó ou criar um nível sem HUD (numa cena de teste, por exemplo), o código quebra.</p>
+
+        <h3>Quando referência direta é aceitável: <code>[Export]</code></h3>
+        <p>Se o <code>Player</code> é pai da <code>HUD</code> e precisa controlá-la, a solução é expor a referência pelo Inspector. O Godot resolve o vínculo na hora de salvar a cena — nenhuma string para quebrar, nenhuma dependência de caminho:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — com Export</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
+{
+    <span class="cm">// No Inspector, arraste o node HUD para este campo</span>
+    [<span class="at">Export</span>] <span class="kw">public</span> <span class="tp">HUD</span> Hud;
+
+    <span class="kw">public void</span> <span class="fn">TakeDamage</span>()
+    {
+        _lives--;
+        Hud.<span class="fn">UpdateLives</span>(_lives); <span class="cm">// sem string de caminho</span>
+    }
+}</pre>
+        </div>
+
+        <p>Mas essa abordagem ainda acopla <code>Player</code> ao tipo <code>HUD</code>. Se você quiser usar o <code>Player</code> numa cena de teste sem HUD, vai precisar tratar a referência nula ou remover o campo. Para comunicação de filho para pai — ou entre nodes não relacionados — existe uma solução melhor.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">A regra de ouro da arquitetura Godot</div>
+          <p><strong>Chame para baixo, sinalize para cima.</strong> Um pai pode acessar seus filhos diretamente — com <code>GetNode()</code> ou <code>[Export]</code>. Um filho <em>nunca</em> deve acessar o pai ou irmãos diretamente: ele emite um signal e quem quiser reagir se conecta. Isso mantém cada cena funcional independentemente de onde for instanciada.</p>
+        </div>
 
         <div class="callout analogy">
           <div class="callout-label">Analogia com padrão Observer</div>
