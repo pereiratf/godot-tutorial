@@ -312,6 +312,47 @@
   .tree .node-type { color: var(--accent-mid); font-size: 12px; }
   .tree .node-script { color: #8A5A00; font-size: 12px; }
 
+  /* UI highlight mockups — destaca um elemento dentro de um diagrama de editor */
+  .ui-highlight {
+    outline: 2px solid var(--accent-mid);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--accent-light);
+    background: var(--accent-light);
+  }
+  .ui-pointer {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .ui-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 0.75rem 0 0;
+    width: fit-content;
+  }
+  .ui-toolbar-btn {
+    display: flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    color: var(--text-muted);
+  }
+
   /* Comparison table */
   .compare-grid {
     display: grid;
@@ -366,7 +407,7 @@
     flex-shrink: 0;
     margin-top: 2px;
   }
-  .step-body strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .step-body > strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
   .step-body p { font-size: 14px; margin-bottom: 0; }
 
   /* Checklist */
@@ -849,6 +890,15 @@
             <div class="step-body">
               <strong>Adicione nodes filhos</strong>
               <p>Com o Node2D selecionado na SceneTree, clique no ícone "+" para adicionar filhos. Adicione um <strong>Label</strong> e um <strong>Sprite2D</strong>. Observe como eles aparecem indentados na árvore.</p>
+              <div class="ui-toolbar">
+                <span class="ui-toolbar-btn ui-highlight">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </span>
+                <span class="ui-toolbar-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </span>
+                <span class="ui-pointer">↑ topo do painel Scene</span>
+              </div>
             </div>
           </div>
           <div class="step">
@@ -856,6 +906,15 @@
             <div class="step-body">
               <strong>Anexe um script ao Node2D raiz</strong>
               <p>Selecione o Node2D raiz → clique no ícone de script → <strong>Criar</strong>. Godot gera um arquivo <code>.cs</code> automaticamente e abre o editor.</p>
+              <div class="ui-toolbar">
+                <span class="ui-toolbar-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </span>
+                <span class="ui-toolbar-btn ui-highlight">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </span>
+                <span class="ui-pointer">↑ mesmo painel, ícone de script</span>
+              </div>
             </div>
           </div>
           <div class="step">
@@ -1060,6 +1119,22 @@
 
         <h3>Viewport — onde o jogo aparece</h3>
         <p>A área central. No modo 2D você movimenta, escala e rotaciona nodes visualmente. O Godot usa <strong>Y crescente para baixo</strong> — o (0,0) fica no canto superior-esquerdo por padrão.</p>
+
+        <h2>Abas de modo: 2D, 3D, Script, AssetLib</h2>
+        <p>Bem acima do Viewport existem quatro abas que trocam completamente o que aparece na área central. É fácil confundir isso com os painéis fixos vistos acima — eles são independentes e sempre estão lá, não importa em qual aba você esteja.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Abas de modo do editor</div>
+          <div style="display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 13px;">
+            <div class="ui-highlight" style="padding: 8px 16px; color: var(--accent); font-weight: 500; border-bottom: 2px solid var(--accent-mid); margin-bottom: -1px; border-radius: 4px 4px 0 0;">2D</div>
+            <div style="padding: 8px 16px; color: var(--text-muted);">3D</div>
+            <div style="padding: 8px 16px; color: var(--text-muted);">Script</div>
+            <div style="padding: 8px 16px; color: var(--text-muted);">AssetLib</div>
+            <span class="ui-pointer" style="margin-left: 10px;">↑ aba ativa por padrão</span>
+          </div>
+        </div>
+
+        <p>A aba <strong>2D</strong> é onde você monta cenas visualmente — é a que vamos usar quase sempre neste tutorial. A aba <strong>Script</strong> abre o editor de código; é pra lá que o Godot te leva automaticamente quando você cria ou dá duplo-clique num script C#. <strong>3D</strong> e <strong>AssetLib</strong> não aparecem muito num projeto 2D.</p>
 
         <h2>Criando o projeto do tutorial</h2>
         <p>Vamos criar a estrutura de pastas que vamos usar durante todo o tutorial. Organização desde o começo evita refatoração dolorosa depois.</p>
@@ -1308,6 +1383,34 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
 
         <h3>Via editor (drag-and-drop)</h3>
         <p>Selecione o node emissor na SceneTree → aba <strong>Node</strong> (ao lado de Inspector) → <strong>Signals</strong> → dê duplo-clique no signal → selecione o node receptor → nomeie o método → <strong>Conectar</strong>. O Godot cria o método no script automaticamente.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Conectando um signal pelo editor</div>
+          <div style="display: grid; grid-template-columns: 150px 1fr; gap: 16px; font-family: var(--font-mono); font-size: 12px;">
+            <div style="background: #F4F3EE; border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+              <div style="font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Scene</div>
+              <div style="line-height: 2; color: var(--text-secondary);">
+                ▾ Level<br>
+                &nbsp;&nbsp;<span class="ui-highlight" style="display:inline-block; padding: 1px 6px; border-radius: 4px;">Player</span><br>
+                &nbsp;&nbsp;UI
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; gap: 14px; border-bottom: 1px solid var(--border); margin-bottom: 10px;">
+                <span style="padding: 6px 0; color: var(--text-muted);">Inspector</span>
+                <span class="ui-highlight" style="padding: 6px 10px; color: var(--accent); font-weight: 500; border-bottom: 2px solid var(--accent-mid); margin-bottom: -1px; border-radius: 4px 4px 0 0;">Node</span>
+                <span style="padding: 6px 0; color: var(--text-muted);">History</span>
+              </div>
+              <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 0;">
+                <div style="padding: 0 12px 6px; color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Signals</div>
+                <div class="ui-highlight" style="display: flex; align-items: center; justify-content: space-between; margin: 0 6px; padding: 6px 8px; border-radius: 4px; color: var(--text-primary);">
+                  <span>body_entered(body: Node2D)</span>
+                  <span class="ui-pointer">duplo-clique aqui</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="compare-grid">
           <div class="compare-card">
