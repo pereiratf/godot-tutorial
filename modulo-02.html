@@ -218,7 +218,7 @@
 
   .diagram-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
   .diagram-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
-  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2; color: var(--text-secondary); }
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2; color: var(--text-secondary); white-space: pre; }
   .tree .node-name { color: var(--text-primary); font-weight: 500; }
   .tree .node-type { color: var(--accent-mid); font-size: 12px; }
   .tree .node-script { color: #8A5A00; font-size: 12px; }
@@ -478,6 +478,10 @@
             <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-is-on-ceiling" target="_blank" rel="noopener" class="doc-link"><code>IsOnCeiling()</code></a></div>
             <div class="loop-desc">O body colidiu com uma superfície acima. Cancelar velocidade Y evita "grudar" no teto.</div>
           </div>
+          <div class="loop-step">
+            <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-get-wall-normal" target="_blank" rel="noopener" class="doc-link"><code>GetWallNormal()</code></a></div>
+            <div class="loop-desc">Retorna um <code>Vector2</code> apontando <em>para fora da parede</em> em direção ao player. <code>Normal.X &gt; 0</code> = parede à esquerda; <code>Normal.X &lt; 0</code> = parede à direita.</div>
+          </div>
         </div>
 
         <h2>Gravidade manual — por que é assim?</h2>
@@ -641,6 +645,50 @@
             <div class="hint-body">
               <p>A verificação acontece <em>depois</em> do <code>MoveAndSlide()</code>, não antes. A sequência correta é: mover → checar colisão → reagir.</p>
               <p><code>if (IsOnCeiling()) Velocity = new Vector2(Velocity.X, 0);</code></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="challenge-header" style="margin-top: 1.5rem;">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Wall jump com GetWallNormal()</strong>
+            <span>Aula 2.1 · Física</span>
+          </div>
+          <span class="difficulty-badge diff-hard">Difícil</span>
+        </div>
+        <div class="challenge-body">
+          <p>O wall jump é uma mecânica clássica de plataforma: o personagem pode pular enquanto está em contato com uma parede, sendo lançado na direção oposta. A chave é saber de que lado está a parede — e para isso usamos <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-get-wall-normal" target="_blank" rel="noopener" class="doc-link"><code>GetWallNormal()</code></a>.</p>
+
+          <div class="callout info">
+            <div class="callout-label">Como funciona a normal da parede</div>
+            <p>Uma <em>normal</em> é um vetor perpendicular a uma superfície, apontando para fora dela. <code>GetWallNormal()</code> retorna esse vetor apontando <strong>em direção ao player</strong>. Parede à direita → normal aponta para a esquerda (<code>Normal.X = -1</code>). Parede à esquerda → normal aponta para a direita (<code>Normal.X = +1</code>). Isso é conveniente para o wall jump: a normal já indica a direção exata em que o player deve ser lançado para se afastar da parede.</p>
+          </div>
+
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>No script, declare <code>[Export] public float WallJumpForce = 350f</code></li>
+            <li><div class="obj-num">2</div>Adicione a condição de wall jump: <code>IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; IsActionJustPressed("jump")</code></li>
+            <li><div class="obj-num">3</div>Dentro dessa condição, leia <code>GetWallNormal()</code> e use o eixo X como direção horizontal do pulo</li>
+            <li><div class="obj-num">4</div>Aplique <code>velocity.Y = -JumpForce</code> e <code>velocity.X = GetWallNormal().X * WallJumpForce</code></li>
+            <li><div class="obj-num">5</div>Adicione duas paredes verticais (<code>StaticBody2D</code>) na cena e confirme que o player ricocheteia corretamente em ambos os lados</li>
+          </ul>
+
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>A normal já aponta na direção certa para o lançamento — não precisa inverter. Se o player está encostado na parede direita (<code>Normal.X = -1</code>), multiplicar por <code>WallJumpForce</code> dá velocidade negativa (para a esquerda), que é exatamente o que queremos.</p>
+              <p>A condição completa dentro de <code>_PhysicsProcess</code>, antes do <code>MoveAndSlide()</code>:</p>
+              <pre style="font-family: var(--font-mono); font-size: 12px; background: var(--code-bg); border-radius: 6px; padding: 10px; overflow-x: auto; margin-top: 8px;">if (IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; Input.IsActionJustPressed("jump"))
+{
+    var n = GetWallNormal();
+    velocity.Y = -JumpForce;
+    velocity.X = n.X * WallJumpForce;
+}</pre>
             </div>
           </div>
         </div>
