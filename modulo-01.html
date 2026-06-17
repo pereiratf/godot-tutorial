@@ -312,6 +312,30 @@
   .tree .node-type { color: var(--accent-mid); font-size: 12px; }
   .tree .node-script { color: #8A5A00; font-size: 12px; }
 
+  /* Doc links — API names that link to official docs */
+  a.doc-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-mid);
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s, color 0.15s;
+  }
+  a.doc-link:hover {
+    text-decoration-style: solid;
+    text-decoration-color: var(--accent);
+    color: var(--accent);
+  }
+  a.doc-link::after {
+    content: " ↗";
+    font-size: 0.65em;
+    color: var(--accent-mid);
+    vertical-align: super;
+    line-height: 0;
+    transition: color 0.15s;
+  }
+  a.doc-link:hover::after { color: var(--accent); }
+
   /* UI highlight mockups — destaca um elemento dentro de um diagrama de editor */
   .ui-highlight {
     outline: 2px solid var(--accent-mid);
@@ -721,12 +745,12 @@
         <div class="diagram-box">
           <div class="diagram-title">Exemplo: cena de um inimigo patrulheiro</div>
           <div class="tree">
-<span class="node-name">Enemy</span> <span class="node-type">[CharacterBody2D]</span> <span class="node-script">← Enemy.cs</span>
-├── <span class="node-name">Sprite2D</span> <span class="node-type">[Sprite2D]</span>
-├── <span class="node-name">CollisionShape2D</span> <span class="node-type">[CollisionShape2D]</span>
-├── <span class="node-name">DetectionArea</span> <span class="node-type">[Area2D]</span>
+<span class="node-name">Enemy</span> <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html" target="_blank" rel="noopener" class="doc-link"><span class="node-type">[CharacterBody2D]</span></a> <span class="node-script">← Enemy.cs</span>
+├── <span class="node-name">Sprite2D</span> <a href="https://docs.godotengine.org/en/stable/classes/class_sprite2d.html" target="_blank" rel="noopener" class="doc-link"><span class="node-type">[Sprite2D]</span></a>
+├── <span class="node-name">CollisionShape2D</span> <a href="https://docs.godotengine.org/en/stable/classes/class_collisionshape2d.html" target="_blank" rel="noopener" class="doc-link"><span class="node-type">[CollisionShape2D]</span></a>
+├── <span class="node-name">DetectionArea</span> <a href="https://docs.godotengine.org/en/stable/classes/class_area2d.html" target="_blank" rel="noopener" class="doc-link"><span class="node-type">[Area2D]</span></a>
 │   └── <span class="node-name">CollisionShape2D</span> <span class="node-type">[CollisionShape2D]</span>
-└── <span class="node-name">PatrolRayCast</span> <span class="node-type">[RayCast2D]</span>
+└── <span class="node-name">PatrolRayCast</span> <a href="https://docs.godotengine.org/en/stable/classes/class_raycast2d.html" target="_blank" rel="noopener" class="doc-link"><span class="node-type">[RayCast2D]</span></a>
           </div>
         </div>
 
@@ -840,7 +864,7 @@
 
         <div class="compare-grid">
           <div class="compare-card">
-            <div class="cc-label" style="color: var(--blue);"><code>_PhysicsProcess(delta)</code></div>
+            <div class="cc-label" style="color: var(--blue);"><a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-private-method-physics-process" target="_blank" rel="noopener" class="doc-link"><code>_PhysicsProcess(delta)</code></a></div>
             <ul>
               <li>Taxa fixa: 60 vezes por segundo por padrão</li>
               <li><code>delta</code> é sempre o mesmo valor (≈0.0166s)</li>
@@ -849,7 +873,7 @@
             </ul>
           </div>
           <div class="compare-card">
-            <div class="cc-label" style="color: var(--accent);"><code>_Process(delta)</code></div>
+            <div class="cc-label" style="color: var(--accent);"><a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-private-method-process" target="_blank" rel="noopener" class="doc-link"><code>_Process(delta)</code></a></div>
             <ul>
               <li>Roda exatamente uma vez por frame renderizado</li>
               <li><code>delta</code> varia com a taxa de quadros atual</li>
@@ -871,7 +895,7 @@
 
         <div class="callout info">
           <div class="callout-label">E quando um node é removido?</div>
-          <p>Chamar <code>Free()</code> no meio de um <code>_PhysicsProcess()</code> pode quebrar a iteração da engine sobre a árvore. Por isso o padrão é <code>QueueFree()</code>: marca o node para ser removido com segurança no fim do frame atual, em vez de destruí-lo instantaneamente.</p>
+          <p>Chamar <code>Free()</code> no meio de um <code>_PhysicsProcess()</code> pode quebrar a iteração da engine sobre a árvore. Por isso o padrão é <a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-queue-free" target="_blank" rel="noopener" class="doc-link"><code>QueueFree()</code></a>: marca o node para ser removido com segurança no fim do frame atual, em vez de destruí-lo instantaneamente.</p>
         </div>
       </div>
 
@@ -1410,7 +1434,7 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
 
         <div class="callout info">
           <div class="callout-label">Convenção do Godot 4 em C#</div>
-          <p>O atributo <code>[Signal]</code> sobre um <code>delegate void</code> com sufixo <code>EventHandler</code> é a forma canônica no Godot 4 com C#. O Godot gera automaticamente o nome <code>LifeLost</code> (sem o sufixo) para usar em <code>EmitSignal</code> e <code>Connect</code>.</p>
+          <p>O atributo <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_signals.html" target="_blank" rel="noopener" class="doc-link"><code>[Signal]</code></a> sobre um <code>delegate void</code> com sufixo <code>EventHandler</code> é a forma canônica no Godot 4 com C#. O Godot gera automaticamente o nome <code>LifeLost</code> (sem o sufixo) para usar em <a href="https://docs.godotengine.org/en/stable/classes/class_object.html#class-object-method-emit-signal" target="_blank" rel="noopener" class="doc-link"><code>EmitSignal</code></a> e <code>Connect</code>.</p>
         </div>
 
         <h2>Conectando signals: editor vs. código</h2>
@@ -1543,7 +1567,7 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
 }</pre>
         </div>
 
-        <p>Você também pode adicionar nodes a grupos pelo editor: selecione o node → aba <strong>Node</strong> → <strong>Groups</strong>. Grupos definidos pelo editor ficam salvos no <code>.tscn</code> e persistem entre sessões.</p>
+        <p>Você também pode adicionar nodes a grupos pelo editor: selecione o node → aba <strong>Node</strong> → <strong>Groups</strong>. Grupos definidos pelo editor ficam salvos no <code>.tscn</code> e persistem entre sessões. Veja <a href="https://docs.godotengine.org/en/stable/classes/class_scenetree.html#class-scenetree-method-call-group" target="_blank" rel="noopener" class="doc-link"><code>CallGroup()</code></a> e <a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-add-to-group" target="_blank" rel="noopener" class="doc-link"><code>AddToGroup()</code></a> na documentação para variantes e opções disponíveis.</p>
 
         <div class="callout tip">
           <div class="callout-label">Grupos vs. signals</div>
