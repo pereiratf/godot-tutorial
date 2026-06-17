@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 02 — Personagem jogável</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F3EE;
+    --border: #E4E2D8;
+    --border-strong: #C8C5B8;
+    --text-primary: #1A1916;
+    --text-secondary: #5A5850;
+    --text-muted: #9A978E;
+    --accent: #2D5A27;
+    --accent-light: #EBF3E8;
+    --accent-mid: #4A8A42;
+    --amber: #8A5A00;
+    --amber-light: #FFF3D6;
+    --blue: #1A3F6B;
+    --blue-light: #E8F0FA;
+    --red: #7A2020;
+    --red-light: #FAEAEA;
+    --purple: #4A2878;
+    --purple-light: #F0EAFA;
+    --code-bg: #F0EFEA;
+    --code-border: #D8D6CE;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+  }
+
+  html { font-size: 16px; background: var(--bg); color: var(--text-primary); }
+  body { font-family: var(--font-body); font-weight: 400; line-height: 1.7; min-height: 100vh; }
+
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-logo .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo .title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sidebar-logo .tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 1.5rem;
+    margin-bottom: 6px;
+  }
+  .sidebar-nav { list-style: none; margin-bottom: 1.5rem; }
+  .sidebar-nav li a {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 1.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-nav li a:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .sidebar-nav li.active a {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-nav li a .nav-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+  .sidebar-nav li.active a .nav-num { color: var(--accent-mid); }
+
+  main { padding: 3rem 4rem; max-width: 840px; }
+
+  .lesson-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lesson-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .lesson-title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .lesson-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 580px;
+  }
+  .lesson-meta { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .meta-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .meta-pill svg { opacity: 0.5; }
+
+  .lesson-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .lesson-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: var(--font-body);
+  }
+  .lesson-tab:hover { color: var(--text-primary); }
+  .lesson-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .lesson-content { display: none; }
+  .lesson-content.active { display: block; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 2rem 0 0.75rem;
+    line-height: 1.3;
+  }
+  h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin: 1.5rem 0 0.5rem; letter-spacing: 0.01em; }
+  p { margin-bottom: 1rem; color: var(--text-secondary); font-size: 15px; }
+  p strong { color: var(--text-primary); font-weight: 500; }
+
+  .callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; border-left: 3px solid; font-size: 14px; }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+  .callout-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.info { background: var(--blue-light); border-color: var(--blue); }
+  .callout.info .callout-label { color: var(--blue); }
+  .callout.info p { color: #2A4F7A; }
+  .callout.tip { background: var(--accent-light); border-color: var(--accent); }
+  .callout.tip .callout-label { color: var(--accent); }
+  .callout.tip p { color: #2D5A27; }
+  .callout.warning { background: var(--amber-light); border-color: var(--amber); }
+  .callout.warning .callout-label { color: var(--amber); }
+  .callout.warning p { color: #6A4500; }
+  .callout.analogy { background: var(--purple-light); border-color: var(--purple); }
+  .callout.analogy .callout-label { color: var(--purple); }
+  .callout.analogy p { color: #3A1E60; }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; margin: 1.25rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--code-border); background: #E8E7E0; }
+  .code-filename { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .code-lang { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .code-block pre { padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+  .kw { color: #7A3080; font-weight: 500; }
+  .cm { color: #7A9A70; font-style: italic; }
+  .st { color: #A03030; }
+  .nm { color: #1A5A8A; }
+  .fn { color: #2A6A50; }
+  .at { color: #8A5A00; }
+  .tp { color: #4A2878; }
+
+  .diagram-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .diagram-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2; color: var(--text-secondary); }
+  .tree .node-name { color: var(--text-primary); font-weight: 500; }
+  .tree .node-type { color: var(--accent-mid); font-size: 12px; }
+  .tree .node-script { color: #8A5A00; font-size: 12px; }
+
+  a.doc-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-mid);
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s, color 0.15s;
+  }
+  a.doc-link:hover { text-decoration-style: solid; text-decoration-color: var(--accent); color: var(--accent); }
+  a.doc-link::after { content: " ↗"; font-size: 0.65em; color: var(--accent-mid); vertical-align: super; line-height: 0; transition: color 0.15s; }
+  a.doc-link:hover::after { color: var(--accent); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+  .compare-card .cc-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .compare-card ul { list-style: none; }
+  .compare-card ul li { font-size: 13px; color: var(--text-secondary); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
+  .compare-card ul li:last-child { border-bottom: none; }
+  .compare-card ul li::before { content: "—"; color: var(--text-muted); flex-shrink: 0; }
+
+  .steps { margin: 1.5rem 0; }
+  .step { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body > strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .step-body p { font-size: 14px; margin-bottom: 0; }
+
+  .checklist { list-style: none; margin: 1rem 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "○"; color: var(--border-strong); flex-shrink: 0; margin-top: 1px; }
+
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 2rem 0 0; }
+  .summary-card h3 { margin-top: 0; margin-bottom: 1rem; font-size: 14px; }
+  .concepts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .concept-pill { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .concept-pill strong { display: block; font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 2px; }
+
+  .milestone-banner { background: linear-gradient(135deg, var(--accent-light), #F0FAF0); border: 1px solid #C0DDB8; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 2rem 0; display: flex; align-items: flex-start; gap: 14px; }
+  .milestone-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .milestone-icon svg { color: white; }
+  .milestone-text strong { font-size: 14px; color: var(--accent); display: block; margin-bottom: 4px; }
+  .milestone-text p { font-size: 13px; color: #3A6A35; margin: 0; }
+
+  .lesson-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: 13px; color: var(--text-secondary); font-family: var(--font-body); transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--surface-alt); }
+  .nav-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #245020; border-color: #245020; }
+  .nav-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+  .progress-bar { background: var(--border); height: 2px; border-radius: 2px; margin: 1rem 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+  .progress-label { font-size: 11px; color: var(--text-muted); padding: 0 1.5rem; margin-bottom: 1.5rem; }
+
+  code { font-family: var(--font-mono); font-size: 13px; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 6px; color: var(--text-primary); }
+
+  .challenge-header { display: flex; align-items: center; gap: 12px; padding: 1.25rem 1.5rem; background: var(--amber-light); border: 1px solid #E8C870; border-radius: 10px 10px 0 0; }
+  .challenge-icon { width: 36px; height: 36px; background: var(--amber); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .challenge-meta { flex: 1; }
+  .challenge-meta strong { font-size: 15px; font-weight: 500; color: #5A3800; display: block; }
+  .challenge-meta span { font-size: 12px; color: #8A6020; }
+  .difficulty-badge { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.05em; }
+  .diff-medium { background: #FFE8A0; color: #7A4A00; border: 1px solid #E8C870; }
+  .diff-hard { background: #FAEAEA; color: #7A2020; border: 1px solid #E8B0B0; }
+  .challenge-body { border: 1px solid #E8C870; border-top: none; border-radius: 0 0 10px 10px; padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
+  .objective-list { list-style: none; margin: 1rem 0; }
+  .objective-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .objective-list li:last-child { border-bottom: none; }
+  .obj-num { width: 22px; height: 22px; border-radius: 50%; background: var(--amber-light); color: var(--amber); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .hint-accordion { border: 1px solid var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; }
+  .hint-toggle { width: 100%; text-align: left; padding: 12px 16px; background: var(--surface-alt); border: none; cursor: pointer; font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .hint-toggle:hover { background: var(--border); color: var(--text-primary); }
+  .hint-toggle svg { flex-shrink: 0; transition: transform 0.2s; }
+  .hint-toggle.open svg { transform: rotate(180deg); }
+  .hint-body { display: none; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .hint-body.open { display: block; }
+  .hint-body p { font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .hint-body p:last-child { margin-bottom: 0; }
+
+  /* Physics loop diagram */
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .loop-step:last-child { border-bottom: none; }
+  .loop-arrow { color: var(--accent-mid); font-weight: 500; flex-shrink: 0; width: 20px; margin-top: 1px; }
+  .loop-label { font-family: var(--font-mono); color: var(--text-primary); font-weight: 500; min-width: 160px; }
+  .loop-desc { color: var(--text-secondary); }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    main { padding: 2rem 1.5rem; }
+    .compare-grid, .concepts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-logo">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="eyebrow">Tutorial Godot 4</div>
+        <div class="title">Módulo 02<br>Personagem jogável</div>
+      </a>
+      <span class="tag">C# · Plataforma 2D</span>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 33%"></div></div>
+    <div class="progress-label" id="progress-label">Aula 1 de 3</div>
+
+    <div class="sidebar-section-label">Aulas</div>
+    <ul class="sidebar-nav">
+      <li class="active" id="nav-1" onclick="goLesson(1)">
+        <a href="#">
+          <span class="nav-num">2.1</span>
+          CharacterBody2D e física
+        </a>
+      </li>
+      <li id="nav-2" onclick="goLesson(2)">
+        <a href="#">
+          <span class="nav-num">2.2</span>
+          Input: ações, não teclas
+        </a>
+      </li>
+      <li id="nav-3" onclick="goLesson(3)">
+        <a href="#">
+          <span class="nav-num">2.3</span>
+          O personagem completo
+        </a>
+      </li>
+    </ul>
+
+    <div style="padding: 1.5rem; border-top: 1px solid var(--border); margin-top: auto;">
+      <div class="sidebar-section-label" style="margin-bottom: 10px;">Milestone do módulo</div>
+      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+        Personagem com movimento horizontal, pulo e gravidade funcionando em uma cena com colisões.
+      </p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ======================== AULA 2.1 ======================== -->
+    <div class="lesson-content active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 02 · Aula 2.1</div>
+        <h1 class="lesson-title">CharacterBody2D e o sistema de física</h1>
+        <p class="lesson-subtitle">Entender qual tipo de corpo físico usar e como o Godot gerencia movimento e colisão para personagens jogáveis.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~25 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Conceitual + código
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+      </div>
+
+      <div id="conteudo-1">
+        <h2>Qual tipo de corpo físico usar?</h2>
+        <p>O Godot tem três tipos de corpo 2D para coisas que colidem. A escolha errada não quebra o jogo imediatamente — mas vai te criar bugs difíceis de diagnosticar mais tarde.</p>
+
+        <div class="compare-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html" target="_blank" rel="noopener" class="doc-link">CharacterBody2D</a>
+            </div>
+            <ul>
+              <li>Você move via <code>Velocity</code> + <code>MoveAndSlide()</code></li>
+              <li>Colide mas não é empurrado pela física</li>
+              <li>Gravidade é manual — você escreve no código</li>
+              <li><strong>Use para:</strong> personagem jogável, inimigos</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--blue);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_rigidbody2d.html" target="_blank" rel="noopener" class="doc-link">RigidBody2D</a>
+            </div>
+            <ul>
+              <li>Física simulada automaticamente</li>
+              <li>Você aplica forças, não posição direta</li>
+              <li>Gravidade, inércia, bounce são automáticos</li>
+              <li><strong>Use para:</strong> caixas, projéteis, objetos físicos</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--text-muted);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_staticbody2d.html" target="_blank" rel="noopener" class="doc-link">StaticBody2D</a>
+            </div>
+            <ul>
+              <li>Não se move — só colide</li>
+              <li>Mais eficiente que os outros dois</li>
+              <li>Pode ter fricção e material físico</li>
+              <li><strong>Use para:</strong> chão, paredes, plataformas</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Por que não usar RigidBody2D para o player?</div>
+          <p>Com <code>RigidBody2D</code> você perde controle direto da posição. A física acumula forças — um pulo acaba sendo o resultado de impulsos, fricção e gravidade interagindo. Conseguir um "game feel" preciso (pulo responsivo, cancelamento de pulo, dash) fica muito mais difícil. <code>CharacterBody2D</code> te dá controle total a custo de implementar a gravidade você mesmo — o que é simples e vale a pena.</p>
+        </div>
+
+        <h2>MoveAndSlide() — o motor do movimento</h2>
+        <p>O <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-move-and-slide" target="_blank" rel="noopener" class="doc-link"><code>MoveAndSlide()</code></a> é o método que faz o <code>CharacterBody2D</code> se mover respeitando colisões. Ele não recebe parâmetros — lê a propriedade <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-property-velocity" target="_blank" rel="noopener" class="doc-link"><code>Velocity</code></a> do próprio body, tenta mover essa distância, e se encontrar um colisor no caminho, desliza ao longo da superfície em vez de parar abruptamente.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — uso mínimo</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+{
+    <span class="kw">var</span> velocity = Velocity; <span class="cm">// lê a propriedade atual</span>
+
+    <span class="cm">// ... modifica velocity ...</span>
+
+    Velocity = velocity;   <span class="cm">// grava de volta</span>
+    <span class="fn">MoveAndSlide</span>();        <span class="cm">// move o body e resolve colisões</span>
+}</pre>
+        </div>
+
+        <p>Após chamar <code>MoveAndSlide()</code>, você pode consultar o estado da colisão com três métodos:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Métodos de estado pós-movimento</div>
+          <div class="loop-step">
+            <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-is-on-floor" target="_blank" rel="noopener" class="doc-link"><code>IsOnFloor()</code></a></div>
+            <div class="loop-desc">O body está em contato com uma superfície abaixo. Use para detectar se pode pular.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-is-on-wall" target="_blank" rel="noopener" class="doc-link"><code>IsOnWall()</code></a></div>
+            <div class="loop-desc">O body bateu numa parede lateral. Útil para wall jump e escalada.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-is-on-ceiling" target="_blank" rel="noopener" class="doc-link"><code>IsOnCeiling()</code></a></div>
+            <div class="loop-desc">O body colidiu com uma superfície acima. Cancelar velocidade Y evita "grudar" no teto.</div>
+          </div>
+        </div>
+
+        <h2>Gravidade manual — por que é assim?</h2>
+        <p>O <code>CharacterBody2D</code> não tem gravidade automática. Isso é uma escolha de design do Godot: ele não quer assumir nada sobre o seu jogo. Você adiciona gravidade incrementando <code>Velocity.Y</code> a cada frame de física:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — com gravidade</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
+{
+    [<span class="at">Export</span>] <span class="kw">public float</span> Gravity = <span class="nm">980f</span>; <span class="cm">// pixels/segundo²</span>
+
+    <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+    {
+        <span class="kw">var</span> velocity = Velocity;
+
+        <span class="cm">// Aplica gravidade somente quando no ar</span>
+        <span class="kw">if</span> (!<span class="fn">IsOnFloor</span>())
+            velocity.Y += Gravity * (<span class="kw">float</span>)delta;
+
+        Velocity = velocity;
+        <span class="fn">MoveAndSlide</span>();
+    }
+}</pre>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Y cresce para baixo</div>
+          <p>No Godot 2D, o eixo Y positivo aponta para baixo (como na tela). Gravidade aumenta <code>Velocity.Y</code> — empurra o personagem para baixo. Um pulo precisa de <code>Velocity.Y = -JumpForce</code> (valor negativo, direção para cima).</p>
+        </div>
+
+        <h2>O loop de física do personagem</h2>
+        <p>Em cada frame de física, o código do personagem segue sempre a mesma sequência:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Sequência em _PhysicsProcess a cada frame</div>
+          <div class="loop-step">
+            <div class="loop-arrow">1</div>
+            <div class="loop-label">Lê input</div>
+            <div class="loop-desc"><code>Input.GetAxis()</code>, <code>Input.IsActionJustPressed()</code></div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">2</div>
+            <div class="loop-label">Aplica gravidade</div>
+            <div class="loop-desc"><code>velocity.Y += Gravity * delta</code> se não estiver no chão</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">3</div>
+            <div class="loop-label">Calcula velocidade</div>
+            <div class="loop-desc">Define <code>velocity.X</code> pelo input; aplica pulo se condições OK</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">4</div>
+            <div class="loop-label">MoveAndSlide()</div>
+            <div class="loop-desc">Move o body, resolve colisões, atualiza <code>IsOnFloor()</code></div>
+          </div>
+        </div>
+
+        <p>Essa sequência importa: <code>IsOnFloor()</code> só retorna o valor correto <em>depois</em> que <code>MoveAndSlide()</code> rodou. Detectar pulo antes de mover pode dar resultados incorretos em bordas de plataforma.</p>
+      </div>
+
+      <div id="pratica-1" style="display:none">
+        <h2>Personagem que cai</h2>
+        <p>Antes de adicionar controles, vamos montar a estrutura correta e ver o personagem respondendo à gravidade.</p>
+
+        <div class="callout warning">
+          <div class="callout-label">Pré-requisito</div>
+          <p>Projeto Godot 4 com .NET habilitado já criado. Use o projeto <code>PlataformaDemo</code> do Módulo 01 ou crie um novo.</p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Crie a cena do personagem</strong>
+              <p>Cena → Nova Cena. Escolha <strong>CharacterBody2D</strong> como raiz. Renomeie o node para <code>Player</code>. Salve como <code>res://scenes/Player.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Adicione CollisionShape2D e visual</strong>
+              <p>Adicione <code>CollisionShape2D</code> como filho. No Inspector, crie uma <strong>CapsuleShape2D</strong> (32×64px). Adicione também um <code>ColorRect</code> como filho para visualização — defina Width 32, Height 64, posição (-16, -64). Sem Sprite2D por enquanto; ColorRect é suficiente para testar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Crie o chão</strong>
+              <p>Na cena principal (crie <code>res://scenes/World.tscn</code> com Node2D como raiz), adicione um <strong>StaticBody2D</strong> com <code>CollisionShape2D</code> filho usando <strong>WorldBoundaryShape2D</strong>. Isso cria um chão infinito na posição Y=0. Posicione o Player em Y=-200 para ele começar no ar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Escreva o script de gravidade</strong>
+              <p>Selecione o node <code>Player</code> → ícone de script → Criar. Cole o código abaixo e pressione F5.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
+{
+    [<span class="at">Export</span>] <span class="kw">public float</span> Gravity = <span class="nm">980f</span>;
+
+    <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+    {
+        <span class="kw">var</span> velocity = Velocity;
+
+        <span class="kw">if</span> (!<span class="fn">IsOnFloor</span>())
+            velocity.Y += Gravity * (<span class="kw">float</span>)delta;
+
+        Velocity = velocity;
+        <span class="fn">MoveAndSlide</span>();
+    }
+}</pre>
+        </div>
+
+        <p>O personagem deve cair e parar exatamente no chão. Experimente mudar o valor de <code>Gravity</code> no Inspector (sem recompilar) e pressione F5 novamente para ver a diferença no feel.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">O que observar</div>
+          <p>Com <code>Gravity = 980</code> o personagem cai em velocidade realista (~1 segundo para 490px). Valores maiores como <code>2000</code> dão um feel mais "arcade" — mais peso, queda rápida. Muitos jogos de plataforma usam gravidade 2–3× a real propositalmente.</p>
+        </div>
+      </div>
+
+      <div id="desafio-1" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Cancelar pulo no teto</strong>
+            <span>Aula 2.1 · Física</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Quando o personagem bate a cabeça no teto durante um pulo, ele tende a "grudar" por alguns frames porque a velocidade Y continua negativa (para cima) enquanto o teto bloqueia o movimento.</p>
+          <p>Implemente a correção: se <code>IsOnCeiling()</code> for verdadeiro após o <code>MoveAndSlide()</code>, zere <code>Velocity.Y</code>. Isso faz o personagem começar a cair imediatamente.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione um <code>StaticBody2D</code> com teto na cena (retângulo acima do player)</li>
+            <li><div class="obj-num">2</div>No script, após <code>MoveAndSlide()</code>, cheque <code>IsOnCeiling()</code></li>
+            <li><div class="obj-num">3</div>Se verdadeiro, atribua <code>Velocity = new Vector2(Velocity.X, 0)</code></li>
+            <li><div class="obj-num">4</div>Teste: sem a correção o player "flutua" no teto brevemente; com ela cai de imediato</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>A verificação acontece <em>depois</em> do <code>MoveAndSlide()</code>, não antes. A sequência correta é: mover → checar colisão → reagir.</p>
+              <p><code>if (IsOnCeiling()) Velocity = new Vector2(Velocity.X, 0);</code></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-1" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>CharacterBody2D</strong>corpo controlado por código</div>
+            <div class="concept-pill"><strong>MoveAndSlide()</strong>move + resolve colisões</div>
+            <div class="concept-pill"><strong>Velocity</strong>direção e velocidade do body</div>
+            <div class="concept-pill"><strong>IsOnFloor()</strong>estado pós-movimento</div>
+            <div class="concept-pill"><strong>Gravidade manual</strong>Y += G × delta</div>
+            <div class="concept-pill"><strong>StaticBody2D</strong>colisores estáticos</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que usar <code>CharacterBody2D</code> em vez de <code>RigidBody2D</code> para o player?</li>
+          <li>O que acontece se você chamar <code>IsOnFloor()</code> antes de <code>MoveAndSlide()</code>?</li>
+          <li>Por que multiplicar a gravidade por <code>delta</code>?</li>
+          <li>Em que direção Y você precisa aplicar força para um pulo?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn disabled">← Módulo 01</button>
+        <button class="nav-btn" onclick="goLesson(2)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 2.2 ======================== -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 02 · Aula 2.2</div>
+        <h1 class="lesson-title">Input: ações, não teclas</h1>
+        <p class="lesson-subtitle">Como o sistema de InputMap do Godot desacopla controles do código — e por que isso importa desde o começo.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~20 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Editor + código
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
+      </div>
+
+      <div id="conteudo-2">
+        <h2>Por que mapear ações, não teclas?</h2>
+        <p>A abordagem mais óbvia seria checar teclas diretamente no código:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — abordagem frágil</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="cm">// Frágil: amarrado ao teclado, não remapeável, não funciona com gamepad</span>
+<span class="kw">if</span> (<span class="tp">Input</span>.<span class="fn">IsKeyPressed</span>(<span class="tp">Key</span>.Space))
+    velocity.Y = -JumpForce;</pre>
+        </div>
+
+        <p>O problema: esse código conhece a implementação física do controle (a tecla Space). Se o jogador quiser remapear para gamepad, ou se você quiser suporte a controle sem mexer no código, não tem como. O <a href="https://docs.godotengine.org/en/stable/classes/class_inputmap.html" target="_blank" rel="noopener" class="doc-link"><strong>InputMap</strong></a> resolve isso: você define <em>ações</em> com nomes semânticos, mapeia dispositivos para elas no editor, e o código só conhece o nome da ação.</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--red);">Tecla direta — problemas</div>
+            <ul>
+              <li>Não remapeável pelo jogador</li>
+              <li>Cada plataforma/dispositivo exige código diferente</li>
+              <li>Teclado e gamepad precisam de condicionais separadas</li>
+              <li>Nomes de teclas mudam entre layouts (QWERTY / AZERTY)</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">InputMap — vantagens</div>
+            <ul>
+              <li>Teclado, gamepad e touch mapeados para a mesma ação</li>
+              <li>Jogador pode remapear sem alterar código</li>
+              <li>Código lê <code>"jump"</code> — não importa o dispositivo</li>
+              <li>Você adiciona suporte a gamepad sem tocar no script</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>Configurando o InputMap</h2>
+        <p>Acesse <strong>Projeto → Configurações do Projeto → Mapa de Entrada</strong>. O Godot já tem ações padrão como <code>ui_left</code>, <code>ui_right</code>, <code>ui_accept</code> — úteis para menus. Para o jogo, crie ações próprias com nomes claros:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Ações a criar para o player</div>
+          <div class="loop-step">
+            <div class="loop-label" style="color: var(--text-primary); font-weight: 500; min-width: 130px;">move_left</div>
+            <div class="loop-desc">Tecla A ou seta esquerda — movimento horizontal esquerdo</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label" style="color: var(--text-primary); font-weight: 500; min-width: 130px;">move_right</div>
+            <div class="loop-desc">Tecla D ou seta direita — movimento horizontal direito</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label" style="color: var(--text-primary); font-weight: 500; min-width: 130px;">jump</div>
+            <div class="loop-desc">Tecla Space ou W ou seta cima — pulo</div>
+          </div>
+        </div>
+
+        <p>Para cada ação: clique em <strong>Adicionar Ação</strong>, digite o nome, pressione Enter. Depois clique no <strong>+</strong> ao lado da ação para adicionar eventos (teclas, botões de gamepad).</p>
+
+        <h2>Os três métodos de Input</h2>
+        <p>O <a href="https://docs.godotengine.org/en/stable/classes/class_input.html" target="_blank" rel="noopener" class="doc-link"><code>Input</code></a> singleton tem três métodos principais, e a escolha errada cria bugs sutis:</p>
+
+        <div class="compare-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_input.html#class-input-method-get-axis" target="_blank" rel="noopener" class="doc-link"><code>GetAxis()</code></a>
+            </div>
+            <ul>
+              <li>Retorna <code>-1.0</code> a <code>1.0</code></li>
+              <li>Combina dois ações opostas</li>
+              <li>Suporta valores intermediários (gamepad analógico)</li>
+              <li><strong>Use para:</strong> movimento contínuo</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--blue);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_input.html#class-input-method-is-action-just-pressed" target="_blank" rel="noopener" class="doc-link"><code>IsActionJustPressed()</code></a>
+            </div>
+            <ul>
+              <li><code>true</code> somente no frame em que foi pressionado</li>
+              <li>Volta para <code>false</code> no frame seguinte</li>
+              <li>Não acumula enquanto mantido</li>
+              <li><strong>Use para:</strong> pulo, ataque, interação</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--purple);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_input.html#class-input-method-is-action-pressed" target="_blank" rel="noopener" class="doc-link"><code>IsActionPressed()</code></a>
+            </div>
+            <ul>
+              <li><code>true</code> em todos os frames que a ação está ativa</li>
+              <li>Continua <code>true</code> enquanto mantido</li>
+              <li>Não detecta o momento exato do press</li>
+              <li><strong>Use para:</strong> carga de poder, disparo automático</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Erro clássico: pulo com IsActionPressed</div>
+          <p>Se você usar <code>IsActionPressed("jump")</code> para pular, o personagem pula repetidamente enquanto a tecla é mantida — uma vez por frame de física (60x/segundo). <code>IsActionJustPressed</code> garante que o pulo acontece apenas uma vez por pressão, mesmo que o jogador segure a tecla.</p>
+        </div>
+      </div>
+
+      <div id="pratica-2" style="display:none">
+        <h2>Configurar o InputMap e ler movimento</h2>
+        <p>Antes de implementar o personagem completo, vamos criar as ações e confirmar que o input está sendo lido corretamente.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Crie as ações no InputMap</strong>
+              <p>Projeto → Configurações do Projeto → Mapa de Entrada. Adicione as ações <code>move_left</code>, <code>move_right</code> e <code>jump</code>. Para cada uma, adicione pelo menos uma tecla: A/D/Space ou as setas.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Leia o eixo horizontal e imprima</strong>
+              <p>Temporariamente, substitua o conteúdo do <code>_PhysicsProcess</code> pelo código abaixo. Execute o jogo e pressione as teclas para ver os valores no Output.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — diagnóstico de input</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+{
+    <span class="kw">float</span> direction = <span class="tp">Input</span>.<span class="fn">GetAxis</span>(<span class="st">"move_left"</span>, <span class="st">"move_right"</span>);
+    GD.<span class="fn">Print</span>(<span class="st">$"Direção: {direction}"</span>);
+
+    <span class="kw">if</span> (<span class="tp">Input</span>.<span class="fn">IsActionJustPressed</span>(<span class="st">"jump"</span>))
+        GD.<span class="fn">Print</span>(<span class="st">"Pulo! (JustPressed)"</span>);
+
+    <span class="kw">if</span> (<span class="tp">Input</span>.<span class="fn">IsActionPressed</span>(<span class="st">"jump"</span>))
+        GD.<span class="fn">Print</span>(<span class="st">"Jump mantido (Pressed)"</span>);
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">O que observar no Output</div>
+          <p>Segure a tecla de pulo por 2 segundos. Você vai ver <code>"Pulo! (JustPressed)"</code> aparecer apenas uma vez (no primeiro frame), enquanto <code>"Jump mantido (Pressed)"</code> aparece em todos os frames enquanto a tecla está pressionada. Essa é a diferença crucial para implementar pulo corretamente.</p>
+        </div>
+      </div>
+
+      <div id="desafio-2" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Dash horizontal</strong>
+            <span>Aula 2.2 · Input</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Implemente um dash: quando o jogador pressiona <code>shift</code> (crie a ação <code>dash</code> no InputMap), o personagem recebe um impulso horizontal na direção em que está se movendo, com velocidade 3× maior por 0.15 segundos.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione a ação <code>dash</code> no InputMap (Shift esquerdo)</li>
+            <li><div class="obj-num">2</div>No script, declare <code>private float _dashTimer = 0f</code></li>
+            <li><div class="obj-num">3</div>Quando <code>IsActionJustPressed("dash")</code>, atribua <code>_dashTimer = 0.15f</code></li>
+            <li><div class="obj-num">4</div>Em cada frame, decremente o timer e aplique velocidade triplicada enquanto ele for maior que zero</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Use <code>_dashTimer -= (float)delta</code> em cada frame. A velocidade horizontal fica: <code>velocity.X = direction * Speed * (_dashTimer > 0 ? 3f : 1f)</code>.</p>
+              <p>Guarde a direção no momento do dash para que ele continue na mesma direção mesmo se o jogador soltar a tecla.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-2" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>InputMap</strong>ações desacopladas de teclas</div>
+            <div class="concept-pill"><strong>GetAxis()</strong>movimento contínuo −1 a 1</div>
+            <div class="concept-pill"><strong>JustPressed</strong>detecta o momento do press</div>
+            <div class="concept-pill"><strong>IsActionPressed</strong>verdadeiro enquanto mantido</div>
+            <div class="concept-pill"><strong>Remapeamento</strong>sem alterar código</div>
+            <div class="concept-pill"><strong>Gamepad</strong>mesmo código, outro dispositivo</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que <code>GetAxis("move_left", "move_right")</code> e não <code>IsKeyPressed(Key.D)</code>?</li>
+          <li>Qual método usar para detectar o início de um ataque de espada?</li>
+          <li>O que acontece se usar <code>IsActionPressed</code> para pulo em vez de <code>IsActionJustPressed</code>?</li>
+          <li>Como você adicionaria suporte a gamepad sem mudar nenhuma linha do script?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
+        <button class="nav-btn" onclick="goLesson(3)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 2.3 ======================== -->
+    <div class="lesson-content" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 02 · Aula 2.3</div>
+        <h1 class="lesson-title">O personagem completo</h1>
+        <p class="lesson-subtitle">Juntar gravidade, input e pulo num script coeso — e ajustar o feel até ficar responsivo.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~35 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Código + editor
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
+      </div>
+
+      <div id="conteudo-3">
+        <h2>O script completo</h2>
+        <p>Com <code>CharacterBody2D</code>, gravidade manual e <code>InputMap</code> configurados, o script do personagem jogável é direto:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
+{
+    [<span class="at">Export</span>] <span class="kw">public float</span> Speed      = <span class="nm">200f</span>; <span class="cm">// pixels/segundo</span>
+    [<span class="at">Export</span>] <span class="kw">public float</span> JumpForce  = <span class="nm">500f</span>; <span class="cm">// pixels/segundo (para cima)</span>
+    [<span class="at">Export</span>] <span class="kw">public float</span> Gravity    = <span class="nm">1200f</span>;<span class="cm">// pixels/segundo²</span>
+
+    <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+    {
+        <span class="kw">var</span> velocity = Velocity;
+
+        <span class="cm">// 1. Gravidade</span>
+        <span class="kw">if</span> (!<span class="fn">IsOnFloor</span>())
+            velocity.Y += Gravity * (<span class="kw">float</span>)delta;
+
+        <span class="cm">// 2. Movimento horizontal</span>
+        <span class="kw">float</span> direction = <span class="tp">Input</span>.<span class="fn">GetAxis</span>(<span class="st">"move_left"</span>, <span class="st">"move_right"</span>);
+        velocity.X = direction * Speed;
+
+        <span class="cm">// 3. Pulo</span>
+        <span class="kw">if</span> (<span class="tp">Input</span>.<span class="fn">IsActionJustPressed</span>(<span class="st">"jump"</span>) &amp;&amp; <span class="fn">IsOnFloor</span>())
+            velocity.Y = -JumpForce;
+
+        <span class="cm">// 4. Cancelar pulo no teto</span>
+        <span class="kw">if</span> (<span class="fn">IsOnCeiling</span>())
+            velocity.Y = <span class="nm">0</span>;
+
+        Velocity = velocity;
+        <span class="fn">MoveAndSlide</span>();
+    }
+}</pre>
+        </div>
+
+        <h2>Flip horizontal do sprite</h2>
+        <p>Com o movimento funcionando, o sprite precisa virar quando o personagem muda de direção. Se você estiver usando <a href="https://docs.godotengine.org/en/stable/classes/class_sprite2d.html" target="_blank" rel="noopener" class="doc-link"><code>Sprite2D</code></a>, a propriedade <code>FlipH</code> espelha horizontalmente sem precisar de animações separadas:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — flip horizontal</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="cm">// Declare no topo da classe:</span>
+<span class="kw">private</span> <span class="tp">Sprite2D</span> _sprite;
+
+<span class="kw">public override void</span> <span class="fn">_Ready</span>()
+{
+    _sprite = <span class="fn">GetNode</span>&lt;<span class="tp">Sprite2D</span>&gt;(<span class="st">"Sprite2D"</span>);
+}
+
+<span class="cm">// Dentro de _PhysicsProcess, após calcular direction:</span>
+<span class="kw">if</span> (direction != <span class="nm">0</span>)
+    _sprite.FlipH = direction &lt; <span class="nm">0</span>; <span class="cm">// true = virado para esquerda</span></pre>
+        </div>
+
+        <p>Se estiver usando <a href="https://docs.godotengine.org/en/stable/classes/class_animatedsprite2d.html" target="_blank" rel="noopener" class="doc-link"><code>AnimatedSprite2D</code></a>, o mesmo <code>FlipH</code> existe. Você pode combinar com chamadas como <code>_sprite.Play("walk")</code> e <code>_sprite.Play("idle")</code> baseadas em <code>direction != 0</code>.</p>
+
+        <h2>Ajustando o feel</h2>
+        <p>Os valores de <code>Speed</code>, <code>JumpForce</code> e <code>Gravity</code> são <code>[Export]</code> propositalmente — você pode ajustá-los no Inspector <em>enquanto o jogo roda</em> no editor (F5 com a cena aberta) para encontrar o feel certo sem recompilar. Valores de referência para plataforma arcade:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Valores de partida para plataforma 2D</div>
+          <div class="loop-step">
+            <div class="loop-label" style="min-width: 120px;"><code>Speed</code></div>
+            <div class="loop-desc">180–250 px/s · Rápido demais = difícil de controlar; devagar demais = pesado</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label" style="min-width: 120px;"><code>JumpForce</code></div>
+            <div class="loop-desc">400–600 px/s · Quanto maior, mais alto o pulo relativo à gravidade</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label" style="min-width: 120px;"><code>Gravity</code></div>
+            <div class="loop-desc">900–1400 px/s² · Gravidade alta = pulo mais "arcade" (sobe rápido, cai rápido)</div>
+          </div>
+        </div>
+
+        <div class="callout analogy">
+          <div class="callout-label">O ratio que define o feel</div>
+          <p>O que o jogador sente não é o valor absoluto de <code>JumpForce</code>, mas a relação <code>JumpForce / Gravity</code>. Dobrar os dois mantém o mesmo arco de pulo mas com tudo acontecendo mais rápido — jogo mais responsivo. Diminuir a razão dá pulos mais altos e flutuantes; aumentar dá pulos curtos e precisos.</p>
+        </div>
+      </div>
+
+      <div id="pratica-3" style="display:none">
+        <h2>Implementar e ajustar o personagem</h2>
+        <p>Substitua o script da Aula 2.1 pelo script completo e itere nos valores até o movimento parecer bom.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Substitua o script</strong>
+              <p>Abra <code>Player.cs</code> e substitua pelo script completo desta aula. Certifique-se de que o InputMap tem as ações <code>move_left</code>, <code>move_right</code> e <code>jump</code> da Aula 2.2.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Adicione plataformas para teste</strong>
+              <p>Na cena World, adicione 2–3 <code>StaticBody2D</code> com <code>CollisionShape2D</code> em alturas diferentes para ter superfícies onde pular. Um <code>ColorRect</code> filho em cada um serve de visual.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Substitua o ColorRect por Sprite2D</strong>
+              <p>Remova o <code>ColorRect</code> do Player. Adicione um <code>Sprite2D</code> com qualquer textura (ou use o ícone padrão do Godot em <code>res://icon.svg</code>). Adicione o código de flip horizontal.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Ajuste os valores no Inspector enquanto o jogo roda</strong>
+              <p>Pressione F5. Com o jogo rodando, selecione o node <code>Player</code> na SceneTree do editor. Os campos <code>Speed</code>, <code>JumpForce</code> e <code>Gravity</code> aparecem no Inspector e podem ser editados em tempo real.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Ponto de verificação</div>
+          <p>O personagem deve: (1) cair com gravidade ao ser solto no ar, (2) mover horizontalmente com A/D, (3) pular com Space apenas quando no chão, (4) não pular ao segurar Space, (5) parar de subir se bater no teto, (6) virar o sprite ao mudar de direção.</p>
+        </div>
+      </div>
+
+      <div id="desafio-3" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Coyote Time</strong>
+            <span>Aula 2.3 · Game feel</span>
+          </div>
+          <span class="difficulty-badge diff-hard">Difícil</span>
+        </div>
+        <div class="challenge-body">
+          <p><em>Coyote time</em> é uma técnica clássica de plataforma: o jogador pode pular por alguns frames <em>após</em> sair de uma plataforma, não apenas enquanto ainda está nela. Isso torna o controle mais perdoador sem afetar o comportamento percebido.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Declare <code>private float _coyoteTimer = 0f</code> e <code>private const float CoyoteTime = 0.12f</code></li>
+            <li><div class="obj-num">2</div>Quando <code>IsOnFloor()</code> for verdadeiro, redefina o timer: <code>_coyoteTimer = CoyoteTime</code></li>
+            <li><div class="obj-num">3</div>Quando <code>IsOnFloor()</code> for falso, decremente: <code>_coyoteTimer -= (float)delta</code></li>
+            <li><div class="obj-num">4</div>A condição de pulo passa de <code>IsOnFloor()</code> para <code>_coyoteTimer > 0f</code></li>
+            <li><div class="obj-num">5</div>Após pular, zere o timer para evitar segundo pulo no ar</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>O timer deve ser decrementado <em>independente</em> de <code>IsOnFloor()</code>. Quando no chão, você recarrega para <code>CoyoteTime</code>; quando no ar, ele conta regressivamente. O <code>Mathf.Max(0, _coyoteTimer - delta)</code> evita valores negativos.</p>
+              <p>Lembre de zerar o timer imediatamente após o pulo com <code>_coyoteTimer = 0</code> — senão o jogador poderia pular duas vezes (uma com coyote, outra porque o timer ainda está positivo).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-3" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Script completo</strong>gravidade + input + pulo</div>
+            <div class="concept-pill"><strong>FlipH</strong>espelhar sprite por direção</div>
+            <div class="concept-pill"><strong>[Export]</strong>ajustar feel sem recompilar</div>
+            <div class="concept-pill"><strong>IsOnCeiling</strong>cancelar pulo no teto</div>
+            <div class="concept-pill"><strong>Feel ratio</strong>JumpForce / Gravity</div>
+            <div class="concept-pill"><strong>Coyote Time</strong>tolerância de pulo pós-borda</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que a condição de pulo usa <code>&amp;&amp; IsOnFloor()</code> em vez de um boolean separado?</li>
+          <li>Como você tornaria o pulo mais alto sem aumentar <code>JumpForce</code>?</li>
+          <li>O que acontece se <code>IsOnCeiling()</code> não zerar <code>velocity.Y</code>?</li>
+          <li>Como o coyote time melhora a experiência do jogador sem mudar o que ele "vê"?</li>
+        </ul>
+
+        <div class="milestone-banner" style="margin-top: 2rem;">
+          <div class="milestone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="milestone-text">
+            <strong>Módulo 02 completo!</strong>
+            <p>Você tem um personagem com física de plataforma funcional. O Módulo 03 cria o mundo: TileMapLayer, câmera 2D e colisões de mapa.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
+        <a href="modulo-01.html" class="nav-btn disabled">Módulo 03 →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let currentLesson = 1;
+
+  function goLesson(n) {
+    document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('lesson-' + n).classList.add('active');
+    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
+    document.getElementById('nav-' + n).classList.add('active');
+    currentLesson = n;
+    document.getElementById('progress-fill').style.width = (n / 3 * 100) + '%';
+    document.getElementById('progress-label').textContent = 'Aula ' + n + ' de 3';
+    window.scrollTo(0, 0);
+
+    const tabs = document.querySelectorAll('#lesson-' + n + ' .lesson-tab');
+    if (tabs.length) {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[0].classList.add('active');
+      const firstId = tabs[0].getAttribute('onclick').match(/'([^']+)'/)[1];
+      document.querySelectorAll('#lesson-' + n + ' [id^="conteudo-"], #lesson-' + n + ' [id^="pratica-"], #lesson-' + n + ' [id^="desafio-"], #lesson-' + n + ' [id^="resumo-"]').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById(firstId).style.display = 'block';
+    }
+  }
+
+  function switchTab(btn, targetId) {
+    const lesson = btn.closest('.lesson-content');
+    lesson.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const lessonNum = lesson.id.split('-')[1];
+    ['conteudo', 'pratica', 'desafio', 'resumo'].forEach(prefix => {
+      const el = document.getElementById(prefix + '-' + lessonNum);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById(targetId).style.display = 'block';
+  }
+
+  function toggleHint(btn) {
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
