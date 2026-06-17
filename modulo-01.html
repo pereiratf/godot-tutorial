@@ -1366,21 +1366,6 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
 
         <p>Mas essa abordagem ainda acopla <code>Player</code> ao tipo <code>HUD</code>. Se você quiser usar o <code>Player</code> numa cena de teste sem HUD, vai precisar tratar a referência nula ou remover o campo. Para comunicação de filho para pai — ou entre nodes não relacionados — existe uma solução melhor.</p>
 
-        <h3>Alternativa: nomes únicos com <code>%</code></h3>
-        <p>O Godot 4 permite marcar um node como <strong>acesso de nó único</strong> no editor (clique com o botão direito no node → <em>Access as Unique Name</em>). Depois disso, qualquer script na mesma cena pode referenciá-lo com o prefixo <code>%</code>, sem precisar conhecer a hierarquia:</p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">Player.cs — nome único</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="cm">// Funciona de qualquer profundidade na cena,</span>
-<span class="cm">// sem importar onde HUD está na hierarquia</span>
-<span class="fn">GetNode</span>&lt;<span class="tp">HUD</span>&gt;(<span class="st">"%HUD"</span>).<span class="fn">UpdateLives</span>(_lives);</pre>
-        </div>
-
-        <p>Use <code>[Export]</code> quando diferentes instâncias da cena podem apontar para nodes diferentes (configurável por Inspector). Use <code>%NomeÚnico</code> quando o node é sempre o mesmo dentro da cena e você quer evitar arrastar referências manualmente.</p>
-
         <div class="callout tip">
           <div class="callout-label">A regra de ouro da arquitetura Godot</div>
           <p><strong>Chame para baixo, sinalize para cima.</strong> Um pai pode acessar seus filhos diretamente — com <code>GetNode()</code> ou <code>[Export]</code>. Um filho <em>nunca</em> deve acessar o pai ou irmãos diretamente: ele emite um signal e quem quiser reagir se conecta. Isso mantém cada cena funcional independentemente de onde for instanciada.</p>
