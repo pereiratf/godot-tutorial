@@ -662,40 +662,27 @@
 
       <div id="pratica-1" style="display:none">
         <h2>Personagem que cai</h2>
-        <p>Antes de adicionar controles, vamos montar a estrutura correta e ver o personagem respondendo à gravidade.</p>
+        <p>Antes de adicionar controles, vamos ver o personagem respondendo à gravidade. A cena já está pronta no projeto base — o foco aqui é escrever o primeiro script de física.</p>
 
-        <div class="callout warning">
-          <div class="callout-label">Pré-requisito</div>
-          <p>Projeto Godot 4 com .NET habilitado já criado. Use o projeto <code>PlataformaDemo</code> do Módulo 01 ou crie um novo.</p>
+        <div class="callout info">
+          <div class="callout-label">Projeto base deste módulo</div>
+          <p>Baixe e abra o projeto base antes de continuar. Ele contém a cena <code>Player.tscn</code> (CharacterBody2D + AnimatedSprite2D + CollisionShape2D, sem script) e a cena <code>World.tscn</code> com chão e uma plataforma para testes. Animações e TileMapLayer serão abordados num módulo futuro.</p>
+          <a href="#" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: var(--accent); color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">⬇ Baixar projeto base</a>
         </div>
 
         <div class="steps">
           <div class="step">
             <div class="step-num">1</div>
             <div class="step-body">
-              <strong>Crie a cena do personagem</strong>
-              <p>Cena → Nova Cena. Escolha <strong>CharacterBody2D</strong> como raiz. Renomeie o node para <code>Player</code>. Salve como <code>res://scenes/Player.tscn</code>.</p>
+              <strong>Abra o projeto no Godot</strong>
+              <p>Extraia o zip, abra o Godot e importe a pasta. Confirme que as cenas <code>scenes/Player.tscn</code> e <code>scenes/World.tscn</code> aparecem no FileSystem. Abra <code>World.tscn</code> e pressione F5 — o personagem deve aparecer parado no ar, sem cair (sem script ainda).</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
-              <strong>Adicione CollisionShape2D e Sprite2D</strong>
-              <p>Adicione <code>CollisionShape2D</code> como filho. No Inspector, crie uma <strong>CapsuleShape2D</strong> (32×64px). Adicione também um <code>Sprite2D</code> como filho — no Inspector, arraste o spritesheet do personagem Sunny Land (importado em <code>res://assets/character/</code>) para o campo <strong>Texture</strong>. Ajuste <strong>Hframes</strong> e <strong>Vframes</strong> conforme o layout do spritesheet e defina <strong>Frame</strong> 0 para exibir o idle.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-body">
-              <strong>Crie o chão</strong>
-              <p>Na cena principal (crie <code>res://scenes/World.tscn</code> com Node2D como raiz), adicione um <strong>StaticBody2D</strong> com <code>CollisionShape2D</code> filho usando <strong>WorldBoundaryShape2D</strong>. Isso cria um chão infinito na posição Y=0. Posicione o Player em Y=-200 para ele começar no ar.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-body">
-              <strong>Escreva o script de gravidade</strong>
-              <p>Selecione o node <code>Player</code> → ícone de script → Criar. Cole o código abaixo e pressione F5.</p>
+              <strong>Crie o script de gravidade</strong>
+              <p>Abra <code>Player.tscn</code>. Selecione o node raiz <code>Player</code> → ícone de script → Criar. Godot gera <code>Player.cs</code> automaticamente. Cole o código abaixo.</p>
             </div>
           </div>
         </div>
@@ -1141,7 +1128,7 @@
         </div>
 
         <h2>Flip horizontal do sprite</h2>
-        <p>Com o movimento funcionando, o sprite precisa virar quando o personagem muda de direção. Se você estiver usando <a href="https://docs.godotengine.org/en/stable/classes/class_sprite2d.html" target="_blank" rel="noopener" class="doc-link"><code>Sprite2D</code></a>, a propriedade <code>FlipH</code> espelha horizontalmente sem precisar de animações separadas:</p>
+        <p>Com o movimento funcionando, o sprite precisa virar quando o personagem muda de direção. O projeto base usa <a href="https://docs.godotengine.org/en/stable/classes/class_animatedsprite2d.html" target="_blank" rel="noopener" class="doc-link"><code>AnimatedSprite2D</code></a>, que tem a mesma propriedade <code>FlipH</code> do <code>Sprite2D</code> — espelha horizontalmente sem precisar de frames separados para cada direção:</p>
 
         <div class="code-block">
           <div class="code-header">
@@ -1149,11 +1136,11 @@
             <span class="code-lang">C#</span>
           </div>
           <pre><span class="cm">// Declare no topo da classe:</span>
-<span class="kw">private</span> <span class="tp">Sprite2D</span> _sprite;
+<span class="kw">private</span> <span class="tp">AnimatedSprite2D</span> _sprite;
 
 <span class="kw">public override void</span> <span class="fn">_Ready</span>()
 {
-    _sprite = <span class="fn">GetNode</span>&lt;<span class="tp">Sprite2D</span>&gt;(<span class="st">"Sprite2D"</span>);
+    _sprite = <span class="fn">GetNode</span>&lt;<span class="tp">AnimatedSprite2D</span>&gt;(<span class="st">"AnimatedSprite2D"</span>);
 }
 
 <span class="cm">// Dentro de _PhysicsProcess, após calcular direction:</span>
@@ -1161,7 +1148,10 @@
     _sprite.FlipH = direction &lt; <span class="nm">0</span>; <span class="cm">// true = virado para esquerda</span></pre>
         </div>
 
-        <p>Se estiver usando <a href="https://docs.godotengine.org/en/stable/classes/class_animatedsprite2d.html" target="_blank" rel="noopener" class="doc-link"><code>AnimatedSprite2D</code></a>, o mesmo <code>FlipH</code> existe. Você pode combinar com chamadas como <code>_sprite.Play("walk")</code> e <code>_sprite.Play("idle")</code> baseadas em <code>direction != 0</code>.</p>
+        <div class="callout info">
+          <div class="callout-label">Animações ficam para o próximo módulo</div>
+          <p>O <code>AnimatedSprite2D</code> pode trocar entre animações com <code>_sprite.Play("run")</code>, <code>_sprite.Play("jump")</code> etc. Por enquanto o flip já dá resultado visual satisfatório. A configuração completa das animações com o Sunny Land será feita no módulo "Dar vida ao jogo".</p>
+        </div>
 
         <h2>Ajustando o feel</h2>
         <p>Os valores de <code>Speed</code>, <code>JumpForce</code> e <code>Gravity</code> são <code>[Export]</code> propositalmente — você pode ajustá-los no Inspector <em>enquanto o jogo roda</em> no editor (F5 com a cena aberta) para encontrar o feel certo sem recompilar. Valores de referência para plataforma arcade:</p>
@@ -1203,22 +1193,15 @@
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
-              <strong>Adicione plataformas para teste</strong>
-              <p>Na cena World, adicione 2–3 <code>StaticBody2D</code> com <code>CollisionShape2D</code> em alturas diferentes para ter superfícies onde pular. Um <code>ColorRect</code> filho em cada um serve de visual.</p>
+              <strong>Adicione o flip horizontal</strong>
+              <p>O projeto base já tem o <code>AnimatedSprite2D</code> configurado. Adicione a referência e o código de flip descrito na seção acima. Teste: mova para a esquerda e confirme que o sprite espelha.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">3</div>
             <div class="step-body">
-              <strong>Configure o Sprite2D e o flip horizontal</strong>
-              <p>Se ainda não importou os assets, arraste a pasta do Sunny Land para o FileSystem do Godot (<code>res://assets/</code>). No <code>Sprite2D</code> do Player, atribua o spritesheet do personagem e configure <strong>Hframes / Vframes</strong> para o frame idle. Depois adicione o código de flip horizontal para o sprite virar com a direção do movimento.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-body">
               <strong>Ajuste os valores no Inspector enquanto o jogo roda</strong>
-              <p>Pressione F5. Com o jogo rodando, selecione o node <code>Player</code> na SceneTree do editor. Os campos <code>Speed</code>, <code>JumpForce</code> e <code>Gravity</code> aparecem no Inspector e podem ser editados em tempo real.</p>
+              <p>Pressione F5. Com o jogo rodando, selecione o node <code>Player</code> na SceneTree. Os campos <code>Speed</code>, <code>JumpForce</code> e <code>Gravity</code> aparecem no Inspector e podem ser editados em tempo real — use a plataforma do projeto base para testar os pulos.</p>
             </div>
           </div>
         </div>
