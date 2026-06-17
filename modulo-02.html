@@ -459,6 +459,66 @@
       </div>
 
       <div id="conteudo-1">
+        <h2>O sistema de coordenadas 2D</h2>
+        <p>Antes de mover qualquer coisa, é preciso entender como o Godot organiza o espaço. Quem aprendeu o plano cartesiano na matemática vai precisar ajustar uma intuição importante: <strong>o eixo Y é invertido</strong>.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Como a tela do Godot 2D é organizada</div>
+          <div style="position: relative; background: var(--bg); border: 2px dashed var(--border-strong); border-radius: 8px; height: 210px; margin-bottom: 1rem; overflow: hidden; font-family: var(--font-mono); font-size: 11px;">
+
+            <!-- Origem -->
+            <div style="position: absolute; top: 10px; left: 10px; color: var(--accent); font-weight: 600; line-height: 1;">(0, 0)</div>
+            <div style="position: absolute; top: 30px; left: 16px; width: 8px; height: 8px; background: var(--accent); border-radius: 50%;"></div>
+
+            <!-- Eixo X -->
+            <div style="position: absolute; top: 33px; left: 28px; right: 24px; height: 2px; background: var(--border-strong);"></div>
+            <div style="position: absolute; top: 27px; right: 14px; width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid var(--border-strong);"></div>
+            <div style="position: absolute; top: 14px; right: 20px; color: var(--text-secondary);">+X → direita</div>
+
+            <!-- Eixo Y -->
+            <div style="position: absolute; top: 42px; left: 19px; bottom: 24px; width: 2px; background: var(--border-strong);"></div>
+            <div style="position: absolute; bottom: 14px; left: 13px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid var(--border-strong);"></div>
+            <div style="position: absolute; bottom: 10px; left: 30px; color: var(--text-secondary);">+Y ↓ baixo</div>
+
+            <!-- Player -->
+            <div style="position: absolute; top: 105px; left: 175px;">
+              <div style="width: 18px; height: 18px; background: var(--accent); border-radius: 4px; opacity: 0.85;"></div>
+              <div style="color: var(--text-muted); font-size: 10px; margin-top: 3px; white-space: nowrap;">(175, 105)</div>
+            </div>
+
+            <!-- Setas de direção ao redor do player -->
+            <div style="position: absolute; top: 82px; left: 168px; color: var(--blue); font-size: 11px; white-space: nowrap;">↑ Y negativo (cima / pulo)</div>
+            <div style="position: absolute; top: 132px; left: 168px; color: var(--red); font-size: 11px; white-space: nowrap;">↓ Y positivo (baixo / gravidade)</div>
+            <div style="position: absolute; top: 110px; left: 60px; color: var(--red); font-size: 11px; white-space: nowrap;">X negativo ← (esquerda)</div>
+            <div style="position: absolute; top: 110px; left: 202px; color: var(--blue); font-size: 11px; white-space: nowrap;">→ X positivo (direita)</div>
+
+            <!-- Label da tela -->
+            <div style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); color: var(--text-muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;">Tela do jogo</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div style="background: var(--blue-light); border: 1px solid #B5D4F4; border-radius: 6px; padding: 10px 12px; font-size: 13px; color: #1A3F6B;">
+              <div style="font-weight: 600; margin-bottom: 4px;">Movimento horizontal</div>
+              <code style="display: block; background: none; border: none; padding: 0; font-size: 12px; color: #1A3F6B; margin-bottom: 2px;">velocity.X = +200</code>
+              <span style="font-size: 12px;">→ move para a direita</span>
+              <code style="display: block; background: none; border: none; padding: 0; font-size: 12px; color: #1A3F6B; margin-top: 6px; margin-bottom: 2px;">velocity.X = -200</code>
+              <span style="font-size: 12px;">← move para a esquerda</span>
+            </div>
+            <div style="background: var(--red-light); border: 1px solid #E8B0B0; border-radius: 6px; padding: 10px 12px; font-size: 13px; color: #7A2020;">
+              <div style="font-weight: 600; margin-bottom: 4px;">Movimento vertical</div>
+              <code style="display: block; background: none; border: none; padding: 0; font-size: 12px; color: #7A2020; margin-bottom: 2px;">velocity.Y = +980</code>
+              <span style="font-size: 12px;">↓ gravidade (cai)</span>
+              <code style="display: block; background: none; border: none; padding: 0; font-size: 12px; color: #7A2020; margin-top: 6px; margin-bottom: 2px;">velocity.Y = -500</code>
+              <span style="font-size: 12px;">↑ pulo (sobe)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Diferença em relação à matemática</div>
+          <p>No plano cartesiano da matemática, Y positivo aponta para <strong>cima</strong> e a origem fica no centro. Na tela do computador (e no Godot), a origem <strong>(0, 0) fica no canto superior esquerdo</strong> e Y positivo aponta para <strong>baixo</strong> — porque é assim que pixels são endereçados na memória de vídeo. Toda engine 2D segue essa convenção.</p>
+        </div>
+
         <h2>Qual tipo de corpo físico usar?</h2>
         <p>O Godot tem três tipos de corpo 2D para coisas que colidem. A escolha errada não quebra o jogo imediatamente — mas vai te criar bugs difíceis de diagnosticar mais tarde.</p>
 
@@ -568,11 +628,6 @@
         <span class="fn">MoveAndSlide</span>();
     }
 }</pre>
-        </div>
-
-        <div class="callout info">
-          <div class="callout-label">Y cresce para baixo</div>
-          <p>No Godot 2D, o eixo Y positivo aponta para baixo (como na tela). Gravidade aumenta <code>Velocity.Y</code> — empurra o personagem para baixo. Um pulo precisa de <code>Velocity.Y = -JumpForce</code> (valor negativo, direção para cima).</p>
         </div>
 
         <h2>O loop de física do personagem</h2>
