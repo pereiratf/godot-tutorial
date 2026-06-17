@@ -680,8 +680,8 @@
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
-              <strong>Adicione CollisionShape2D e visual</strong>
-              <p>Adicione <code>CollisionShape2D</code> como filho. No Inspector, crie uma <strong>CapsuleShape2D</strong> (32×64px). Adicione também um <code>ColorRect</code> como filho para visualização — defina Width 32, Height 64, posição (-16, -64). Sem Sprite2D por enquanto; ColorRect é suficiente para testar.</p>
+              <strong>Adicione CollisionShape2D e Sprite2D</strong>
+              <p>Adicione <code>CollisionShape2D</code> como filho. No Inspector, crie uma <strong>CapsuleShape2D</strong> (32×64px). Adicione também um <code>Sprite2D</code> como filho — no Inspector, arraste o spritesheet do personagem Sunny Land (importado em <code>res://assets/character/</code>) para o campo <strong>Texture</strong>. Ajuste <strong>Hframes</strong> e <strong>Vframes</strong> conforme o layout do spritesheet e defina <strong>Frame</strong> 0 para exibir o idle.</p>
             </div>
           </div>
           <div class="step">
@@ -1210,8 +1210,8 @@
           <div class="step">
             <div class="step-num">3</div>
             <div class="step-body">
-              <strong>Substitua o ColorRect por Sprite2D</strong>
-              <p>Remova o <code>ColorRect</code> do Player. Adicione um <code>Sprite2D</code> com qualquer textura (ou use o ícone padrão do Godot em <code>res://icon.svg</code>). Adicione o código de flip horizontal.</p>
+              <strong>Configure o Sprite2D e o flip horizontal</strong>
+              <p>Se ainda não importou os assets, arraste a pasta do Sunny Land para o FileSystem do Godot (<code>res://assets/</code>). No <code>Sprite2D</code> do Player, atribua o spritesheet do personagem e configure <strong>Hframes / Vframes</strong> para o frame idle. Depois adicione o código de flip horizontal para o sprite virar com a direção do movimento.</p>
             </div>
           </div>
           <div class="step">

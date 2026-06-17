@@ -1062,15 +1062,15 @@
         </div>
         <div class="challenge-body">
           <p style="font-size:14px; color:var(--text-secondary); margin-bottom:1rem;">
-            Sem usar prática guiada ou exemplos desta aula como referência, construa uma cena completa de <strong>coletável de moeda</strong> do zero, tomando suas próprias decisões de design de nodes.
+            Sem usar prática guiada ou exemplos desta aula como referência, construa uma cena completa de <strong>coletável de gem</strong> do zero, tomando suas próprias decisões de design de nodes.
           </p>
 
           <h3>Objetivos</h3>
           <ul class="objective-list">
-            <li><div class="obj-num">1</div>Criar uma cena chamada <code>Coin.tscn</code> com a hierarquia de nodes que você achar apropriada para um coletável 2D</li>
-            <li><div class="obj-num">2</div>Anexar um script <code>Coin.cs</code> ao node raiz com pelo menos duas variáveis <code>[Export]</code> que façam sentido para uma moeda (pense: valor, velocidade de animação, etc.)</li>
+            <li><div class="obj-num">1</div>Criar uma cena chamada <code>Gem.tscn</code> com a hierarquia de nodes que você achar apropriada para um coletável 2D</li>
+            <li><div class="obj-num">2</div>Anexar um script <code>Gem.cs</code> ao node raiz com pelo menos duas variáveis <code>[Export]</code> que façam sentido para uma gem (pense: valor em pontos, cor, etc.)</li>
             <li><div class="obj-num">3</div>No <code>_Ready()</code>, imprimir no console o nome do node raiz e a quantidade de filhos que ele tem</li>
-            <li><div class="obj-num">4</div>Criar uma segunda cena <code>Level.tscn</code> e instanciar a moeda nela pelo menos 3 vezes, cada instância com valores <code>[Export]</code> diferentes no Inspector</li>
+            <li><div class="obj-num">4</div>Criar uma segunda cena <code>Level.tscn</code> e instanciar a gem nela pelo menos 3 vezes, cada instância com valores <code>[Export]</code> diferentes no Inspector</li>
             <li><div class="obj-num">5</div>Rodar com F5 e confirmar que os prints aparecem uma vez por instância, com os valores corretos</li>
           </ul>
 
@@ -1085,8 +1085,8 @@
               Dica — só abra se realmente travar
             </button>
             <div class="hint-body">
-              <p>Um coletável 2D geralmente precisa de: algo que <em>detecte</em> quando o player passa por cima (um node de área, não de física sólida) e algo visual (um Sprite2D ou um ColorRect para prototipar sem arte).</p>
-              <p>A pergunta certa é: "minha moeda precisa ter colisão física sólida, ou só precisa saber se algo entrou na área dela?" Isso determina o tipo do node raiz.</p>
+              <p>Um coletável 2D geralmente precisa de: algo que <em>detecte</em> quando o player passa por cima (um node de área, não de física sólida) e algo visual. O pack Sunny Land tem sprites de gem — importe-os em <code>res://assets/</code> e use um <code>Sprite2D</code> com o frame idle da gem.</p>
+              <p>A pergunta certa é: "minha gem precisa ter colisão física sólida, ou só precisa saber se algo entrou na área dela?" Isso determina o tipo do node raiz. A lógica de coleta real — detectar o player e remover a gem da cena — fica para um desafio futuro.</p>
             </div>
           </div>
         </div>
