@@ -120,6 +120,40 @@
   }
   .sidebar-nav li.active a .nav-num { color: var(--accent-mid); }
 
+  /* Module accordion nav */
+  .module-list { list-style: none; }
+  .module-item { border-bottom: 1px solid var(--border); }
+  .module-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 1.5rem;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  a.module-item-header:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .module-item.current > .module-item-header {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .module-item.locked { opacity: 0.45; pointer-events: none; }
+  .module-item-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 22px;
+    flex-shrink: 0;
+  }
+  .module-item.current .module-item-num { color: var(--accent-mid); }
+  .module-item-title { flex: 1; }
+  .module-item-tag { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .module-lessons { padding: 4px 0 6px; }
+  .module-lessons li a { padding-left: 2.75rem; }
+
   /* Main content */
   main { padding: 3rem 4rem; max-width: 840px; }
 
@@ -662,42 +696,68 @@
     <div class="sidebar-logo">
       <a href="index.html" style="text-decoration: none; color: inherit;">
         <div class="eyebrow">Tutorial Godot 4</div>
-        <div class="title">Módulo 01<br>Como a engine pensa</div>
+        <div class="title">C# · Plataforma 2D</div>
       </a>
-      <span class="tag">C# · Plataforma 2D</span>
     </div>
 
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 33%"></div></div>
-    <div class="progress-label" id="progress-label">Aula 1 de 3</div>
+    <div class="progress-label" id="progress-label">Módulo 01 · Aula 1 de 3</div>
 
-    <div class="sidebar-section-label">Aulas</div>
-    <ul class="sidebar-nav">
-      <li class="active" id="nav-1" onclick="goLesson(1)">
-        <a href="#">
-          <span class="nav-num">1.1</span>
-          A lógica de nodes e cenas
+    <div class="sidebar-section-label">Módulos</div>
+    <ul class="module-list">
+
+      <li class="module-item current">
+        <div class="module-item-header">
+          <span class="module-item-num">01</span>
+          <span class="module-item-title">Como a engine pensa</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <ul class="sidebar-nav module-lessons">
+          <li class="active" id="nav-1" onclick="goLesson(1)">
+            <a href="#"><span class="nav-num">1.1</span>A lógica de nodes e cenas</a>
+          </li>
+          <li id="nav-2" onclick="goLesson(2)">
+            <a href="#"><span class="nav-num">1.2</span>Navegando no editor</a>
+          </li>
+          <li id="nav-3" onclick="goLesson(3)">
+            <a href="#"><span class="nav-num">1.3</span>Signals: o padrão Observer nativo</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-02.html" class="module-item-header">
+          <span class="module-item-num">02</span>
+          <span class="module-item-title">Personagem jogável</span>
+          <span class="module-item-tag">→</span>
         </a>
       </li>
-      <li id="nav-2" onclick="goLesson(2)">
-        <a href="#">
-          <span class="nav-num">1.2</span>
-          Navegando no editor
-        </a>
+
+      <li class="module-item locked">
+        <div class="module-item-header">
+          <span class="module-item-num">03</span>
+          <span class="module-item-title">Mundo e câmera</span>
+          <span class="module-item-tag">Em breve</span>
+        </div>
       </li>
-      <li id="nav-3" onclick="goLesson(3)">
-        <a href="#">
-          <span class="nav-num">1.3</span>
-          Signals: o padrão Observer nativo
-        </a>
+
+      <li class="module-item locked">
+        <div class="module-item-header">
+          <span class="module-item-num">04</span>
+          <span class="module-item-title">Inimigos e coletáveis</span>
+          <span class="module-item-tag">Em breve</span>
+        </div>
       </li>
+
+      <li class="module-item locked">
+        <div class="module-item-header">
+          <span class="module-item-num">05</span>
+          <span class="module-item-title">HUD, game loop e exportação</span>
+          <span class="module-item-tag">Em breve</span>
+        </div>
+      </li>
+
     </ul>
-
-    <div style="padding: 1.5rem; border-top: 1px solid var(--border); margin-top: auto;">
-      <div class="sidebar-section-label" style="margin-bottom: 10px;">Milestone do módulo</div>
-      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
-        Cena mínima funcionando no editor com node, script e signal conectados.
-      </p>
-    </div>
   </aside>
 
   <!-- Main -->
@@ -1756,7 +1816,7 @@ hud.<span class="fn">UpdateLives</span>(lives);</pre>
     document.getElementById('nav-' + n).classList.add('active');
     currentLesson = n;
     document.getElementById('progress-fill').style.width = (n / 3 * 100) + '%';
-    document.getElementById('progress-label').textContent = 'Aula ' + n + ' de 3';
+    document.getElementById('progress-label').textContent = 'Módulo 01 · Aula ' + n + ' de 3';
     window.scrollTo(0, 0);
 
     // Reset tabs in new lesson
