@@ -732,12 +732,11 @@
         </div>
         <div class="challenge-body">
           <p>Quando o personagem bate a cabeça no teto durante um pulo, ele tende a "grudar" por alguns frames porque a velocidade Y continua negativa (para cima) enquanto o teto bloqueia o movimento.</p>
-          <p>Implemente a correção: se <code>IsOnCeiling()</code> for verdadeiro após o <code>MoveAndSlide()</code>, zere <code>Velocity.Y</code>. Isso faz o personagem começar a cair imediatamente.</p>
+          <p>Implemente a correção: se <code>IsOnCeiling()</code> for verdadeiro após o <code>MoveAndSlide()</code>, zere <code>Velocity.Y</code>. Isso faz o personagem começar a cair imediatamente. Use as plataformas do projeto base para testar — pule com força suficiente para bater na superfície inferior de uma delas.</p>
           <ul class="objective-list">
-            <li><div class="obj-num">1</div>Adicione um <code>StaticBody2D</code> com teto na cena (retângulo acima do player)</li>
-            <li><div class="obj-num">2</div>No script, após <code>MoveAndSlide()</code>, cheque <code>IsOnCeiling()</code></li>
-            <li><div class="obj-num">3</div>Se verdadeiro, atribua <code>Velocity = new Vector2(Velocity.X, 0)</code></li>
-            <li><div class="obj-num">4</div>Teste: sem a correção o player "flutua" no teto brevemente; com ela cai de imediato</li>
+            <li><div class="obj-num">1</div>No script, após <code>MoveAndSlide()</code>, cheque <code>IsOnCeiling()</code></li>
+            <li><div class="obj-num">2</div>Se verdadeiro, atribua <code>Velocity = new Vector2(Velocity.X, 0)</code></li>
+            <li><div class="obj-num">3</div>Teste: sem a correção o player "flutua" no teto brevemente; com ela cai de imediato</li>
           </ul>
           <div class="hint-accordion">
             <button class="hint-toggle" onclick="toggleHint(this)">
