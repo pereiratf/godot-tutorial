@@ -1096,9 +1096,16 @@
 
 <span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
 {
-    [<span class="at">Export</span>] <span class="kw">public float</span> Speed      = <span class="nm">200f</span>; <span class="cm">// pixels/segundo</span>
-    [<span class="at">Export</span>] <span class="kw">public float</span> JumpForce  = <span class="nm">500f</span>; <span class="cm">// pixels/segundo (para cima)</span>
-    [<span class="at">Export</span>] <span class="kw">public float</span> Gravity    = <span class="nm">1200f</span>;<span class="cm">// pixels/segundo²</span>
+    [<span class="at">Export</span>] <span class="kw">public float</span> Speed      = <span class="nm">200f</span>;
+    [<span class="at">Export</span>] <span class="kw">public float</span> JumpForce  = <span class="nm">500f</span>;
+    [<span class="at">Export</span>] <span class="kw">public float</span> Gravity    = <span class="nm">1200f</span>;
+
+    <span class="kw">private</span> <span class="tp">AnimatedSprite2D</span> _sprite;
+
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        _sprite = <span class="fn">GetNode</span>&lt;<span class="tp">AnimatedSprite2D</span>&gt;(<span class="st">"AnimatedSprite2D"</span>);
+    }
 
     <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
     {
@@ -1122,34 +1129,35 @@
 
         Velocity = velocity;
         <span class="fn">MoveAndSlide</span>();
+        <span class="fn">UpdateAnimations</span>(direction);
+    }
+
+    <span class="kw">private void</span> <span class="fn">UpdateAnimations</span>(<span class="kw">float</span> direction)
+    {
+        <span class="kw">if</span> (direction != <span class="nm">0</span>)
+            _sprite.FlipH = direction &lt; <span class="nm">0</span>;
     }
 }</pre>
         </div>
 
-        <h2>Flip horizontal do sprite</h2>
-        <p>Com o movimento funcionando, o sprite precisa virar quando o personagem muda de direção. O projeto base usa <a href="https://docs.godotengine.org/en/stable/classes/class_animatedsprite2d.html" target="_blank" rel="noopener" class="doc-link"><code>AnimatedSprite2D</code></a>, que tem a mesma propriedade <code>FlipH</code> do <code>Sprite2D</code> — espelha horizontalmente sem precisar de frames separados para cada direção:</p>
+        <h2>UpdateAnimations — centralizando o visual</h2>
+        <p>Em vez de colocar lógica de sprite diretamente em <code>_PhysicsProcess</code>, o script usa um método dedicado <code>UpdateAnimations</code>. O <code>_PhysicsProcess</code> só chama o método ao final, passando a direção como parâmetro — tudo que é visual fica isolado num único lugar.</p>
 
         <div class="code-block">
           <div class="code-header">
-            <span class="code-filename">Player.cs — flip horizontal</span>
+            <span class="code-filename">Player.cs — UpdateAnimations</span>
             <span class="code-lang">C#</span>
           </div>
-          <pre><span class="cm">// Declare no topo da classe:</span>
-<span class="kw">private</span> <span class="tp">AnimatedSprite2D</span> _sprite;
-
-<span class="kw">public override void</span> <span class="fn">_Ready</span>()
+          <pre><span class="kw">private void</span> <span class="fn">UpdateAnimations</span>(<span class="kw">float</span> direction)
 {
-    _sprite = <span class="fn">GetNode</span>&lt;<span class="tp">AnimatedSprite2D</span>&gt;(<span class="st">"AnimatedSprite2D"</span>);
-}
-
-<span class="cm">// Dentro de _PhysicsProcess, após calcular direction:</span>
-<span class="kw">if</span> (direction != <span class="nm">0</span>)
-    _sprite.FlipH = direction &lt; <span class="nm">0</span>; <span class="cm">// true = virado para esquerda</span></pre>
+    <span class="kw">if</span> (direction != <span class="nm">0</span>)
+        _sprite.FlipH = direction &lt; <span class="nm">0</span>; <span class="cm">// true = virado para esquerda</span>
+}</pre>
         </div>
 
-        <div class="callout info">
-          <div class="callout-label">Animações ficam para o próximo módulo</div>
-          <p>O <code>AnimatedSprite2D</code> pode trocar entre animações com <code>_sprite.Play("run")</code>, <code>_sprite.Play("jump")</code> etc. Por enquanto o flip já dá resultado visual satisfatório. A configuração completa das animações com o Sunny Land será feita no módulo "Dar vida ao jogo".</p>
+        <div class="callout tip">
+          <div class="callout-label">Por que separar num método?</div>
+          <p>No módulo "Dar vida ao jogo", este método vai crescer: <code>_sprite.Play("run")</code> quando em movimento, <code>_sprite.Play("jump")</code> no ar, <code>_sprite.Play("idle")</code> parado. Centralizar aqui desde já garante que <code>_PhysicsProcess</code> não acumule lógica visual — cada método tem uma responsabilidade clara.</p>
         </div>
 
         <h2>Ajustando o feel</h2>
@@ -1192,8 +1200,8 @@
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
-              <strong>Adicione o flip horizontal</strong>
-              <p>O projeto base já tem o <code>AnimatedSprite2D</code> configurado. Adicione a referência e o código de flip descrito na seção acima. Teste: mova para a esquerda e confirme que o sprite espelha.</p>
+              <strong>Adicione o método UpdateAnimations</strong>
+              <p>Após o <code>MoveAndSlide()</code>, chame <code>UpdateAnimations(direction)</code>. Crie o método privado com o <code>FlipH</code> conforme o script completo acima. Teste: mova para a esquerda e confirme que o sprite espelha.</p>
             </div>
           </div>
           <div class="step">
@@ -1250,7 +1258,7 @@
           <h3>Conceitos desta aula</h3>
           <div class="concepts-grid">
             <div class="concept-pill"><strong>Script completo</strong>gravidade + input + pulo</div>
-            <div class="concept-pill"><strong>FlipH</strong>espelhar sprite por direção</div>
+            <div class="concept-pill"><strong>UpdateAnimations</strong>lógica visual isolada</div>
             <div class="concept-pill"><strong>[Export]</strong>ajustar feel sem recompilar</div>
             <div class="concept-pill"><strong>IsOnCeiling</strong>cancelar pulo no teto</div>
             <div class="concept-pill"><strong>Feel ratio</strong>JumpForce / Gravity</div>
