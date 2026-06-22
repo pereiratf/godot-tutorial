@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -714,13 +714,13 @@
         </div>
         <ul class="sidebar-nav module-lessons">
           <li class="active" id="nav-1" onclick="goLesson(1)">
-            <a href="#"><span class="nav-num">1.1</span>A lógica de nodes e cenas</a>
+            <a href="#"><span class="nav-num">1.1</span>Licença, download e config</a>
           </li>
           <li id="nav-2" onclick="goLesson(2)">
-            <a href="#"><span class="nav-num">1.2</span>Navegando no editor</a>
+            <a href="#"><span class="nav-num">1.2</span>A lógica de nodes e cenas</a>
           </li>
           <li id="nav-3" onclick="goLesson(3)">
-            <a href="#"><span class="nav-num">1.3</span>Signals: o padrão Observer nativo</a>
+            <a href="#"><span class="nav-num">1.3</span>Navegando no editor</a>
           </li>
         </ul>
       </li>
@@ -767,6 +767,214 @@
     <div class="lesson-content active" id="lesson-1">
       <div class="lesson-header">
         <div class="lesson-eyebrow">Módulo 01 · Aula 1.1</div>
+        <h1 class="lesson-title">Godot: licença, download e configuração</h1>
+        <p class="lesson-subtitle">Do zero ao primeiro projeto rodando — instalação do Godot .NET, configuração do VSCode e criação do projeto base do curso.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Instalação + configuração
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+      </div>
+
+      <div id="conteudo-1">
+        <h2>Por que Godot?</h2>
+        <p>O Godot é uma engine open source com licença <strong>MIT</strong>: você pode usar comercialmente, distribuir modificações e manter 100% dos direitos sobre o que cria — sem royalties nem taxas de publicação. A engine inteira, incluindo o editor, está disponível no GitHub.</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">Godot 4 (MIT)</div>
+            <ul>
+              <li>Gratuito, sem royalties, código aberto</li>
+              <li>Você detém 100% do jogo produzido</li>
+              <li>Editor incluído — sem assinaturas</li>
+              <li>GDScript e C# como linguagens principais</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--text-muted);">Alternativas comuns</div>
+            <ul>
+              <li>Unity: modelo de royalties em versões recentes</li>
+              <li>Unreal: royalty de 5% após USD 1M de receita</li>
+              <li>GameMaker: assinatura para publicação multiplataforma</li>
+              <li>Curva inicial maior, ecossistema mais pesado</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>Por que C# e não GDScript?</h2>
+        <p>O Godot suporta duas linguagens principais: <strong>GDScript</strong> (própria da engine, sintaxe próxima de Python) e <strong>C#</strong> (via .NET). Este curso usa C# por três razões:</p>
+        <ul class="checklist">
+          <li>Tipagem estática — erros aparecem em tempo de compilação, não de execução</li>
+          <li>Integração com VSCode: autocomplete, go-to-definition e refatoração robustos</li>
+          <li>Ecossistema .NET: convenções e padrões transferíveis para outros projetos</li>
+        </ul>
+
+        <div class="callout info">
+          <div class="callout-label">GDScript não é inferior</div>
+          <p>GDScript tem integração mais profunda com o editor Godot e é mais rápido para prototipar. Se você já conhece Python, pode ser mais produtivo nele. C# é a escolha deste curso por ser mais próximo de linguagens usadas em contextos profissionais.</p>
+        </div>
+
+        <h2>O que você vai instalar</h2>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Três componentes necessários</div>
+          <div class="loop-step">
+            <div class="loop-arrow">1</div>
+            <div class="loop-label" style="min-width: 160px;">Godot 4 <strong>.NET</strong></div>
+            <div class="loop-desc">A versão padrão não inclui suporte a C#. É obrigatório baixar a versão com sufixo <strong>.NET</strong> em godotengine.org.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">2</div>
+            <div class="loop-label" style="min-width: 160px;">.NET SDK 8+</div>
+            <div class="loop-desc">O compilador e runtime do C#. Disponível em dot.net. O Godot exige a versão 8 ou superior.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">3</div>
+            <div class="loop-label" style="min-width: 160px;">VSCode + extensões</div>
+            <div class="loop-desc"><strong>C# Dev Kit</strong> (Microsoft) para autocomplete e erros inline. <strong>Godot Tools</strong> para navegação de cenas e integração com o editor.</div>
+          </div>
+        </div>
+
+        <h2>Configurar o Godot para abrir o VSCode</h2>
+        <p>Por padrão o Godot abre scripts no seu editor interno. Para redirecionar ao VSCode: <strong>Editor → Editor Settings → Dotnet → Editor → External Editor → Visual Studio Code</strong>. Após salvar, clicar em qualquer script <code>.cs</code> abre o arquivo no VSCode automaticamente.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Como verificar que a integração funciona</div>
+          <p>Crie um script C# no Godot e abra-o. No VSCode, ao digitar <code>GetNode</code>, o autocomplete deve sugerir a assinatura do método com os tipos corretos do Godot. Se não aparecer, feche e reabra o VSCode com a pasta do projeto aberta — o arquivo <code>.csproj</code> precisa estar visível na raiz.</p>
+        </div>
+      </div>
+
+      <div id="pratica-1" style="display:none">
+        <h2>Configurar o ambiente do zero</h2>
+        <p>Siga os passos abaixo em ordem. Ao final você terá o projeto <code>PlataformaDemo</code> criado e a integração VSCode funcionando.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Instale o Godot 4 .NET</strong>
+              <p>Acesse <strong>godotengine.org → Download</strong>. Baixe a versão <strong>Godot Engine - .NET</strong> para o seu sistema operacional. Extraia o zip e execute o executável — não há instalador, o Godot é portátil.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Instale o .NET SDK 8 ou superior</strong>
+              <p>Acesse <strong>dot.net</strong> e baixe o <strong>.NET SDK</strong> (não o Runtime — precisa ser o SDK completo). Após instalar, confirme no terminal: <code>dotnet --version</code> deve retornar <code>8.x.x</code> ou superior.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Instale as extensões no VSCode</strong>
+              <p>Na aba Extensions do VSCode, instale: <strong>C# Dev Kit</strong> (publicador: Microsoft) e <strong>Godot Tools</strong> (publicador: geequlim). Reinicie o VSCode após instalar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Configure o editor externo no Godot</strong>
+              <p>No Godot: <strong>Editor → Editor Settings</strong>. No painel esquerdo navegue até <strong>Dotnet → Editor</strong>. Em <strong>External Editor</strong>, selecione <strong>Visual Studio Code</strong> e feche as configurações.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Crie o projeto PlataformaDemo</strong>
+              <p>No Godot, clique em <strong>Novo Projeto</strong>. Nome: <code>PlataformaDemo</code>. Renderizador: <strong>Forward+</strong>. Marque <strong>.NET</strong> antes de criar. Clique em <strong>Criar e Editar</strong>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Confirme a integração</strong>
+              <p>Crie uma cena com um <code>Node</code> como raiz. Clique no ícone de script → Criar. O VSCode deve abrir o arquivo <code>.cs</code>. Ao digitar dentro de <code>_Ready()</code>, você deve ver sugestões de métodos do Godot.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Se o autocomplete não aparecer</div>
+          <p>O arquivo <code>.csproj</code> é gerado pelo Godot quando você cria o primeiro script C#. Se o autocomplete não aparecer logo após criar o script, feche e reabra o VSCode apontando para a pasta do projeto.</p>
+        </div>
+      </div>
+
+      <div id="desafio-1" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Primeiro script rodando</strong>
+            <span>Aula 1.1 — Configuração</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Com o ambiente configurado, confirme que o ciclo completo funciona: escrever código no VSCode → compilar → rodar no Godot.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>No projeto PlataformaDemo, crie uma cena com um <code>Node</code> como raiz e salve como <code>res://scenes/TestScene.tscn</code></li>
+            <li><div class="obj-num">2</div>Anexe um script C# ao node. No VSCode, adicione <code>GD.Print("Projeto configurado!");</code> dentro do <code>_Ready()</code></li>
+            <li><div class="obj-num">3</div>Defina <code>TestScene.tscn</code> como cena principal: <strong>Projeto → Configurações → Aplicativo → Execução → Cena Principal</strong></li>
+            <li><div class="obj-num">4</div>Pressione F5 no Godot e confirme que o Output mostra <code>Projeto configurado!</code></li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Se aparecer erro de compilação ao pressionar F5, o Output do Godot mostra o número da linha. O erro mais comum é esquecer o ponto-e-vírgula no final de <code>GD.Print()</code>.</p>
+              <p>Se a janela abrir mas o Output ficar vazio, confirme que a cena principal está definida e que o método está escrito como <code>_Ready()</code> — maiúscula e underscore.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-1" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Licença MIT</strong>sem royalties, você é dono</div>
+            <div class="concept-pill"><strong>Godot .NET</strong>versão obrigatória para C#</div>
+            <div class="concept-pill"><strong>.NET SDK 8+</strong>compilador e runtime</div>
+            <div class="concept-pill"><strong>C# Dev Kit</strong>autocomplete no VSCode</div>
+            <div class="concept-pill"><strong>Godot Tools</strong>integração VSCode ↔ engine</div>
+            <div class="concept-pill"><strong>GD.Print()</strong>saída de debug no Output</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Qual a diferença entre a versão padrão do Godot e a versão .NET?</li>
+          <li>Por que é necessário instalar o .NET SDK separadamente?</li>
+          <li>Como confirmar que a integração VSCode ↔ Godot está funcionando?</li>
+          <li>Onde no Godot você configura o VSCode como editor externo?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn disabled">← Aula anterior</button>
+        <button class="nav-btn primary" onclick="goLesson(2)">Próxima aula →</button>
+      </div>
+    </div>
+    <!-- ======================== AULA 1.2 ======================== -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 01 · Aula 1.2</div>
         <h1 class="lesson-title">A lógica de nodes e cenas</h1>
         <p class="lesson-subtitle">Entender a estrutura fundamental do Godot antes de escrever uma linha de código. O maior choque de quem chega do zero numa engine.</p>
         <div class="lesson-meta">
@@ -782,13 +990,13 @@
       </div>
 
       <div class="lesson-tabs">
-        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
       </div>
 
-      <div id="conteudo-1">
+      <div id="conteudo-2">
         <h2>O que é um node?</h2>
         <p>Se você já trabalhou com POO, sua intuição inicial vai ser: <strong>"node é uma classe, cena é um objeto"</strong>. Isso está parcialmente certo — mas na prática o Godot inverte o que você está acostumado a fazer.</p>
         <p>Em linguagens tradicionais, você escreve uma classe <code>Player</code> que herda de <code>Character</code>, instancia ela no <code>main()</code> e chama métodos. No Godot, você <em>não escreve um <code>main()</code></em>. Você monta uma <strong>árvore de nodes</strong> — e a engine executa essa árvore pra você.</p>
@@ -947,18 +1155,13 @@
           <p>Sem <code>delta</code>, o código <code>Position += new Vector2(Speed, 0)</code> move o personagem <strong>Speed pixels por frame</strong>. Em uma máquina rodando a 120 FPS ele anda o dobro do que em outra rodando a 60 FPS — o jogo fica mais rápido em hardware melhor. Multiplicando por <code>delta</code> você define a velocidade em <strong>pixels por segundo</strong>: a engine escala automaticamente para quantos frames aconteceram naquele intervalo. Em <code>_PhysicsProcess</code> o delta é quase constante (taxa fixa), mas em <code>_Process</code> é essencial para comportamento consistente entre máquinas.</p>
         </div>
 
-        <div class="callout warning">
-          <div class="callout-label">Onde os signals entram nisso</div>
-          <p>Signals não são uma fila separada: <code>EmitSignal()</code> chama os métodos conectados <strong>imediatamente, na mesma execução</strong>, antes de continuar o resto da função que emitiu. Se o <code>Player</code> emite um signal dentro de <code>_PhysicsProcess()</code>, quem está ouvindo já roda ainda dentro daquele mesmo frame de física.</p>
-        </div>
-
         <div class="callout info">
           <div class="callout-label">E quando um node é removido?</div>
           <p>Chamar <code>Free()</code> no meio de um <code>_PhysicsProcess()</code> pode quebrar a iteração da engine sobre a árvore. Por isso o padrão é <a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-queue-free" target="_blank" rel="noopener" class="doc-link"><code>QueueFree()</code></a>: marca o node para ser removido com segurança no fim do frame atual, em vez de destruí-lo instantaneamente.</p>
         </div>
       </div>
 
-      <div id="pratica-1" style="display:none">
+      <div id="pratica-2" style="display:none">
         <h2>Explorando a SceneTree na prática</h2>
         <p>Antes de criar seu projeto completo, faça este exercício para internalizar a estrutura de nodes.</p>
 
@@ -1049,14 +1252,14 @@
         </div>
       </div>
 
-      <div id="desafio-1" style="display:none">
+      <div id="desafio-2" style="display:none">
         <div class="challenge-header">
           <div class="challenge-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
           <div class="challenge-meta">
             <strong>Inventário de cena</strong>
-            <span>Aula 1.1 — Nodes e cenas</span>
+            <span>Aula 1.2 — Nodes e cenas</span>
           </div>
           <span class="difficulty-badge diff-medium">Intermediário</span>
         </div>
@@ -1091,7 +1294,7 @@
         </div>
       </div>
 
-      <div id="resumo-1" style="display:none">
+      <div id="resumo-2" style="display:none">
         <h2>O que você aprendeu</h2>
         <div class="summary-card">
           <h3>Conceitos desta aula</h3>
@@ -1116,15 +1319,16 @@
       </div>
 
       <div class="lesson-footer">
-        <button class="nav-btn disabled">← Aula anterior</button>
-        <button class="nav-btn primary" onclick="goLesson(2)">Próxima aula →</button>
+        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
+        <button class="nav-btn primary" onclick="goLesson(3)">Próxima aula →</button>
       </div>
     </div>
 
-    <!-- ======================== AULA 1.2 ======================== -->
-    <div class="lesson-content" id="lesson-2">
+
+    <!-- ======================== AULA 1.3 ======================== -->
+    <div class="lesson-content" id="lesson-3">
       <div class="lesson-header">
-        <div class="lesson-eyebrow">Módulo 01 · Aula 1.2</div>
+        <div class="lesson-eyebrow">Módulo 01 · Aula 1.3</div>
         <h1 class="lesson-title">Navegando no editor</h1>
         <p class="lesson-subtitle">Conhecer os painéis do Godot e criar o primeiro projeto do zero — da cena vazia até a primeira execução.</p>
         <div class="lesson-meta">
@@ -1140,13 +1344,13 @@
       </div>
 
       <div class="lesson-tabs">
-        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
       </div>
 
-      <div id="conteudo-2">
+      <div id="conteudo-3">
         <h2>Os quatro painéis principais</h2>
         <p>O editor do Godot pode assustar de início, mas tem uma lógica clara. Você vai trabalhar principalmente com quatro áreas:</p>
 
@@ -1261,7 +1465,7 @@
         </div>
       </div>
 
-      <div id="pratica-2" style="display:none">
+      <div id="pratica-3" style="display:none">
         <h2>Criando o projeto do tutorial do zero</h2>
         <div class="steps">
           <div class="step">
@@ -1309,14 +1513,14 @@
         </div>
       </div>
 
-      <div id="desafio-2" style="display:none">
+      <div id="desafio-3" style="display:none">
         <div class="challenge-header">
           <div class="challenge-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
           <div class="challenge-meta">
             <strong>Configuração às cegas</strong>
-            <span>Aula 1.2 — Navegando no editor</span>
+            <span>Aula 1.3 — Navegando no editor</span>
           </div>
           <span class="difficulty-badge diff-medium">Intermediário</span>
         </div>
@@ -1357,7 +1561,7 @@
         </div>
       </div>
 
-      <div id="resumo-2" style="display:none">
+      <div id="resumo-3" style="display:none">
         <h2>O que você aprendeu</h2>
         <div class="summary-card">
           <h3>Conceitos desta aula</h3>
@@ -1381,426 +1585,11 @@
       </div>
 
       <div class="lesson-footer">
-        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
-        <button class="nav-btn primary" onclick="goLesson(3)">Próxima aula →</button>
-      </div>
-    </div>
-
-    <!-- ======================== AULA 1.3 ======================== -->
-    <div class="lesson-content" id="lesson-3">
-      <div class="lesson-header">
-        <div class="lesson-eyebrow">Módulo 01 · Aula 1.3</div>
-        <h1 class="lesson-title">Signals: o padrão Observer nativo</h1>
-        <p class="lesson-subtitle">O mecanismo de comunicação entre nodes do Godot — e por que ele existe em vez de chamadas diretas de método.</p>
-        <div class="lesson-meta">
-          <span class="meta-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            ~35 minutos
-          </span>
-          <span class="meta-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            Código + editor
-          </span>
-        </div>
-      </div>
-
-      <div class="lesson-tabs">
-        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
-        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
-      </div>
-
-      <div id="conteudo-3">
-        <h2>Por que não chamar métodos diretamente?</h2>
-        <p>Imagine que seu <code>Player</code> precisa avisar a <code>HUD</code> quando perde uma vida. A abordagem mais óbvia seria:</p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">Player.cs — abordagem problemática</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="cm">// Player precisa "conhecer" a HUD — acoplamento forte</span>
-<span class="kw">var</span> hud = <span class="fn">GetNode</span>&lt;<span class="tp">HUD</span>&gt;(<span class="st">"/root/Level/UI/HUD"</span>);
-hud.<span class="fn">UpdateLives</span>(lives);</pre>
-        </div>
-
-        <p>Isso <em>funciona</em>, mas cria um problema: o <code>Player</code> agora <strong>depende da estrutura exata da cena</strong>. Se você mover a HUD de lugar, renomear o nó ou criar um nível sem HUD (numa cena de teste, por exemplo), o código quebra.</p>
-
-        <h3>Quando referência direta é aceitável: <code>[Export]</code></h3>
-        <p>Se o <code>Player</code> é pai da <code>HUD</code> e precisa controlá-la, a solução é expor a referência pelo Inspector. O Godot resolve o vínculo na hora de salvar a cena — nenhuma string para quebrar, nenhuma dependência de caminho:</p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">Player.cs — com Export</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
-{
-    <span class="cm">// No Inspector, arraste o node HUD para este campo</span>
-    [<span class="at">Export</span>] <span class="kw">public</span> <span class="tp">HUD</span> Hud;
-
-    <span class="kw">public void</span> <span class="fn">TakeDamage</span>()
-    {
-        _lives--;
-        Hud.<span class="fn">UpdateLives</span>(_lives); <span class="cm">// sem string de caminho</span>
-    }
-}</pre>
-        </div>
-
-        <p>Mas essa abordagem ainda acopla <code>Player</code> ao tipo <code>HUD</code>. Se você quiser usar o <code>Player</code> numa cena de teste sem HUD, vai precisar tratar a referência nula ou remover o campo. Para comunicação de filho para pai — ou entre nodes não relacionados — existe uma solução melhor.</p>
-
-        <div class="callout tip">
-          <div class="callout-label">A regra de ouro da arquitetura Godot</div>
-          <p><strong>Chame para baixo, sinalize para cima.</strong> Um pai pode acessar seus filhos diretamente — com <code>GetNode()</code> ou <code>[Export]</code>. Um filho <em>nunca</em> deve acessar o pai ou irmãos diretamente: ele emite um signal e quem quiser reagir se conecta. Isso mantém cada cena funcional independentemente de onde for instanciada.</p>
-        </div>
-
-        <div class="callout analogy">
-          <div class="callout-label">Analogia com padrão Observer</div>
-          <p>Signals são exatamente o padrão Observer que você já conhece — só que embutido na engine. O emitente <strong>não conhece</strong> os ouvintes. Quem quer saber de um evento se registra para ouvir; quem emite só dispara o sinal sem se preocupar com quem está escutando.</p>
-        </div>
-
-        <h2>Signals embutidos vs. signals customizados</h2>
-        <p>Todo node já vem com signals prontos. Um <code>Button</code> emite <code>pressed</code>. Um <code>Area2D</code> emite <code>body_entered</code>. Você também pode declarar seus próprios signals em C#:</p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">Player.cs</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">using</span> Godot;
-
-<span class="kw">public partial class</span> <span class="tp">Player</span> : <span class="tp">CharacterBody2D</span>
-{
-    <span class="cm">// Declara um signal que passa o número de vidas restantes</span>
-    [<span class="at">Signal</span>] <span class="kw">public delegate void</span> <span class="fn">LifeLostEventHandler</span>(<span class="kw">int</span> livesRemaining);
-
-    <span class="kw">private int</span> _lives = <span class="nm">3</span>;
-
-    <span class="kw">public void</span> <span class="fn">TakeDamage</span>()
-    {
-        _lives--;
-
-        <span class="cm">// Emite o signal — quem estiver ouvindo recebe</span>
-        <span class="fn">EmitSignal</span>(<span class="tp">SignalName</span>.LifeLost, _lives);
-
-        <span class="kw">if</span> (_lives &lt;= <span class="nm">0</span>)
-            <span class="fn">Die</span>();
-    }
-}</pre>
-        </div>
-
-        <div class="callout info">
-          <div class="callout-label">Convenção do Godot 4 em C#</div>
-          <p>O atributo <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_signals.html" target="_blank" rel="noopener" class="doc-link"><code>[Signal]</code></a> sobre um <code>delegate void</code> com sufixo <code>EventHandler</code> é a forma canônica no Godot 4 com C#. O Godot gera automaticamente o nome <code>LifeLost</code> (sem o sufixo) para usar em <a href="https://docs.godotengine.org/en/stable/classes/class_object.html#class-object-method-emit-signal" target="_blank" rel="noopener" class="doc-link"><code>EmitSignal</code></a> e <code>Connect</code>.</p>
-        </div>
-
-        <h2>Conectando signals: editor vs. código</h2>
-        <p>Há duas formas de conectar um signal a um método receptor. Cada uma tem seu lugar:</p>
-
-        <h3>Via editor (drag-and-drop)</h3>
-        <p>Selecione o node emissor na SceneTree → aba <strong>Node</strong> (ao lado de Inspector) → <strong>Signals</strong> → dê duplo-clique no signal → selecione o node receptor → nomeie o método → <strong>Conectar</strong>. O Godot cria o método no script automaticamente.</p>
-
-        <div class="diagram-box">
-          <div class="diagram-title">Conectando um signal pelo editor</div>
-          <div style="display: grid; grid-template-columns: 150px 1fr; gap: 16px; font-family: var(--font-mono); font-size: 12px;">
-            <div style="background: #F4F3EE; border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
-              <div style="font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Scene</div>
-              <div style="line-height: 2; color: var(--text-secondary);">
-                ▾ Level<br>
-                &nbsp;&nbsp;<span class="ui-highlight" style="display:inline-block; padding: 1px 6px; border-radius: 4px;">Player</span><br>
-                &nbsp;&nbsp;UI
-              </div>
-            </div>
-            <div>
-              <div style="display: flex; gap: 14px; border-bottom: 1px solid var(--border); margin-bottom: 10px;">
-                <span style="padding: 6px 0; color: var(--text-muted);">Inspector</span>
-                <span class="ui-highlight" style="padding: 6px 10px; color: var(--accent); font-weight: 500; border-bottom: 2px solid var(--accent-mid); margin-bottom: -1px; border-radius: 4px 4px 0 0;">Node</span>
-                <span style="padding: 6px 0; color: var(--text-muted);">History</span>
-              </div>
-              <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 0;">
-                <div style="padding: 0 12px 6px; color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Signals</div>
-                <div class="ui-highlight" style="display: flex; align-items: center; justify-content: space-between; margin: 0 6px; padding: 6px 8px; border-radius: 4px; color: var(--text-primary);">
-                  <span>body_entered(body: Node2D)</span>
-                  <span class="ui-pointer">duplo-clique aqui</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="compare-grid">
-          <div class="compare-card">
-            <div class="cc-label" style="color: var(--accent);">Use o editor quando</div>
-            <ul>
-              <li>A conexão é estática (nunca muda em runtime)</li>
-              <li>Os dois nodes existem na mesma cena</li>
-              <li>É uma conexão simples, de um para um</li>
-              <li>Prototipando rápido</li>
-            </ul>
-          </div>
-          <div class="compare-card">
-            <div class="cc-label" style="color: var(--blue);">Use código quando</div>
-            <ul>
-              <li>O receptor é instanciado dinamicamente</li>
-              <li>A conexão depende de lógica de runtime</li>
-              <li>Você quer <code>Callable</code> com parâmetros extras</li>
-              <li>O emissor é de outra cena</li>
-            </ul>
-          </div>
-        </div>
-
-        <h3>Via código</h3>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">Level01.cs — conectando por código</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">public partial class</span> <span class="tp">Level01</span> : <span class="tp">Node2D</span>
-{
-    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
-    {
-        <span class="kw">var</span> player = <span class="fn">GetNode</span>&lt;<span class="tp">Player</span>&gt;(<span class="st">"Player"</span>);
-        <span class="kw">var</span> hud    = <span class="fn">GetNode</span>&lt;<span class="tp">HUD</span>&gt;(<span class="st">"UI/HUD"</span>);
-
-        <span class="cm">// Conecta: quando Player emitir LifeLost,</span>
-        <span class="cm">// chama hud.OnLifeLost(livesRemaining)</span>
-        player.LifeLost += hud.<span class="fn">OnLifeLost</span>;
-    }
-}</pre>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">HUD.cs — método receptor</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">public partial class</span> <span class="tp">HUD</span> : <span class="tp">CanvasLayer</span>
-{
-    <span class="cm">// A assinatura deve bater com o delegate do signal</span>
-    <span class="kw">public void</span> <span class="fn">OnLifeLost</span>(<span class="kw">int</span> livesRemaining)
-    {
-        <span class="fn">GetNode</span>&lt;<span class="tp">Label</span>&gt;(<span class="st">"LivesLabel"</span>).Text = <span class="st">$"Vidas: {livesRemaining}"</span>;
-    }
-}</pre>
-        </div>
-
-        <p>Repare que o <code>Player</code> <strong>não importa, não referencia e não conhece</strong> a classe <code>HUD</code>. Ele só emite. Quem conecta é o <code>Level01</code> — o node pai que tem visibilidade de ambos.</p>
-
-        <div class="callout tip">
-          <div class="callout-label">Padrão recomendado</div>
-          <p>Nodes filhos não devem referenciar o pai — isso cria dependência circular. O pai (ou um gerenciador) conhece os filhos e faz a ponte via signals. Signals de filho para cima (filho → pai) são naturais; chamadas de filho para filho atravessando o pai são sinal de que o design precisa de signals.</p>
-        </div>
-
-        <h2>Grupos: comunicação um para muitos</h2>
-        <p>Signals conectam um emissor a receptores específicos. Mas e quando você precisa chamar um método em <em>todos</em> os inimigos ao mesmo tempo, sem manter uma lista de referências? Para isso existe o sistema de grupos — uma tag aplicada a nodes que permite acioná-los em conjunto:</p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">Enemy.cs — entrar no grupo</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">public override void</span> <span class="fn">_Ready</span>()
-{
-    <span class="fn">AddToGroup</span>(<span class="st">"enemies"</span>);
-}
-
-<span class="kw">public void</span> <span class="fn">Explode</span>()
-{
-    <span class="cm">// lógica de explosão</span>
-    <span class="fn">QueueFree</span>();
-}</pre>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">SmartBomb.cs — chamar todos do grupo</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">public void</span> <span class="fn">Detonate</span>()
-{
-    <span class="cm">// Chama Explode() em todos os nodes com a tag "enemies"</span>
-    <span class="fn">GetTree</span>().<span class="fn">CallGroup</span>(<span class="st">"enemies"</span>, <span class="st">"Explode"</span>);
-}</pre>
-        </div>
-
-        <p>Você também pode adicionar nodes a grupos pelo editor: selecione o node → aba <strong>Node</strong> → <strong>Groups</strong>. Grupos definidos pelo editor ficam salvos no <code>.tscn</code> e persistem entre sessões. Veja <a href="https://docs.godotengine.org/en/stable/classes/class_scenetree.html#class-scenetree-method-call-group" target="_blank" rel="noopener" class="doc-link"><code>CallGroup()</code></a> e <a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-method-add-to-group" target="_blank" rel="noopener" class="doc-link"><code>AddToGroup()</code></a> na documentação para variantes e opções disponíveis.</p>
-
-        <div class="callout tip">
-          <div class="callout-label">Grupos vs. signals</div>
-          <p>Signals avisam quem se registrou para ouvir — ótimo para relações de um para um ou poucos receptores conhecidos. Grupos chamam todos os nodes de uma categoria sem referências individuais — ótimo para sistemas de broadcast como dano em área, pausa geral, ou troca de fase. Em projetos reais você vai usar os dois.</p>
-        </div>
-
-        <div class="milestone-banner">
-          <div class="milestone-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          </div>
-          <div class="milestone-text">
-            <strong>Milestone do Módulo 01</strong>
-            <p>Você agora entende a tríade fundamental do Godot: nodes compõem cenas, scripts estendem nodes, signals conectam nodes sem acoplamento. No próximo módulo você aplica tudo isso criando o personagem jogável.</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="pratica-3" style="display:none">
-        <h2>Signals na prática: botão que conta cliques</h2>
-        <p>Exercício simples mas que cobre o ciclo completo: node emissor → signal → node receptor → atualização de UI.</p>
-
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-body">
-              <strong>Monte a cena</strong>
-              <p>Crie uma nova cena com <code>Node2D</code> como raiz. Adicione filhos: <code>Button</code> e <code>Label</code>. Posicione-os no viewport com a ferramenta de mover.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-body">
-              <strong>Conecte o signal pelo editor</strong>
-              <p>Selecione o <code>Button</code> → aba <strong>Node</strong> → signal <code>pressed</code> → duplo clique → selecione o Node2D raiz como receptor → método sugerido: <code>_on_button_pressed</code> → Conectar.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-body">
-              <strong>Implemente o método gerado</strong>
-              <p>O editor cria o método no script do Node2D. Adicione uma variável de contagem e atualize o texto do Label a cada clique.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-body">
-              <strong>Crie e emita um signal customizado</strong>
-              <p>Declare um signal <code>[Signal] public delegate void CountReachedEventHandler(int count);</code> no Node2D. Emita-o quando a contagem atingir 5. Conecte por código a um método que muda a cor do Label.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-filename">SignalDemo.cs</span>
-            <span class="code-lang">C#</span>
-          </div>
-          <pre><span class="kw">using</span> Godot;
-
-<span class="kw">public partial class</span> <span class="tp">SignalDemo</span> : <span class="tp">Node2D</span>
-{
-    [<span class="at">Signal</span>] <span class="kw">public delegate void</span> <span class="fn">CountReachedEventHandler</span>(<span class="kw">int</span> count);
-
-    <span class="kw">private int</span> _count = <span class="nm">0</span>;
-    <span class="kw">private</span> <span class="tp">Label</span> _label;
-
-    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
-    {
-        _label = <span class="fn">GetNode</span>&lt;<span class="tp">Label</span>&gt;(<span class="st">"Label"</span>);
-        <span class="cm">// Conecta o signal customizado por código (lambda)</span>
-        CountReached += count =>
-            _label.Modulate = count >= <span class="nm">5</span> ? <span class="tp">Colors</span>.Green : <span class="tp">Colors</span>.White;
-    }
-
-    <span class="cm">// Gerado pelo editor ao conectar Button.pressed</span>
-    <span class="kw">private void</span> <span class="fn">_on_button_pressed</span>()
-    {
-        _count++;
-        _label.Text = <span class="st">$"Cliques: {_count}"</span>;
-        <span class="kw">if</span> (_count == <span class="nm">5</span>)
-            <span class="fn">EmitSignal</span>(<span class="tp">SignalName</span>.CountReached, _count);
-    }
-}</pre>
-        </div>
-
-        <div class="callout tip">
-          <div class="callout-label">Observe</div>
-          <p>Quando a conexão do editor e a conexão por código coexistem, o signal pode ter <em>vários ouvintes</em>. Um signal pode ser conectado a quantos métodos quiser — todos são chamados na ordem de conexão. Isso é uma das forças do padrão Observer.</p>
-        </div>
-      </div>
-
-      <div id="desafio-3" style="display:none">
-        <div class="challenge-header">
-          <div class="challenge-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div class="challenge-meta">
-            <strong>Placar desacoplado</strong>
-            <span>Aula 1.3 — Signals</span>
-          </div>
-          <span class="difficulty-badge diff-medium">Intermediário</span>
-        </div>
-        <div class="challenge-body">
-          <p style="font-size:14px; color:var(--text-secondary); margin-bottom:1rem;">
-            Implemente um mini-sistema de placar usando signals, onde <strong>nenhuma das cenas conhece a outra diretamente</strong>. Você decide a estrutura — o requisito é o desacoplamento.
-          </p>
-
-          <h3>Contexto</h3>
-          <p style="font-size:14px; color:var(--text-secondary);">Você tem três cenas independentes: um <code>Enemy</code> que pode morrer, um <code>Scoreboard</code> que exibe pontos, e um <code>Level</code> que as instancia. A regra: o script de <code>Enemy</code> não pode ter nenhuma referência à classe <code>Scoreboard</code>, e vice-versa.</p>
-
-          <h3>Objetivos</h3>
-          <ul class="objective-list">
-            <li><div class="obj-num">1</div>Cena <code>Enemy.tscn</code> com um script que declara um signal <code>Died</code> e o emite quando uma tecla (ex: <kbd>K</kbd>) é pressionada — simula o inimigo sendo morto</li>
-            <li><div class="obj-num">2</div>Cena <code>Scoreboard.tscn</code> com um <code>Label</code> que exibe a pontuação e um método público que recebe quantos pontos adicionar</li>
-            <li><div class="obj-num">3</div>Cena <code>Level.tscn</code> que instancia ambos e conecta o signal <code>Died</code> do Enemy ao método do Scoreboard — sem que Enemy ou Scoreboard saibam um do outro</li>
-            <li><div class="obj-num">4</div>Instanciar 3 inimigos diferentes no Level, cada um com um valor de pontos diferente via <code>[Export]</code>. Matar cada um deve adicionar a pontuação correta ao placar</li>
-          </ul>
-
-          <div class="restriction-box">
-            <div class="callout-label">Critério de aprovação</div>
-            <p>Abra o script de <code>Enemy.cs</code> e verifique: há alguma menção à palavra "Scoreboard"? Se sim, o desafio não foi concluído. O mesmo vale para <code>Scoreboard.cs</code> — não pode ter referência a "Enemy". A ponte existe só no <code>Level.cs</code>.</p>
-          </div>
-
-          <div class="hint-accordion">
-            <button class="hint-toggle" onclick="toggleHint(this)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              Dica — só abra se realmente travar
-            </button>
-            <div class="hint-body">
-              <p>O signal <code>Died</code> precisa passar o valor de pontos: <code>[Signal] public delegate void DiedEventHandler(int points);</code>. O inimigo não sabe quem vai receber — ele só emite o valor.</p>
-              <p>No <code>Level.cs</code>, após pegar as referências com <code>GetNode</code>, a conexão fica: <code>enemy.Died += scoreboard.AddPoints;</code>. O método <code>AddPoints</code> no Scoreboard recebe um <code>int</code> e atualiza o Label.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="resumo-3" style="display:none">
-        <h2>O que você aprendeu</h2>
-        <div class="summary-card">
-          <h3>Conceitos desta aula</h3>
-          <div class="concepts-grid">
-            <div class="concept-pill"><strong>[Signal]</strong>declarar signal customizado</div>
-            <div class="concept-pill"><strong>EmitSignal</strong>disparar o evento</div>
-            <div class="concept-pill"><strong>+=</strong>conectar por código</div>
-            <div class="concept-pill"><strong>Aba Node</strong>conectar pelo editor</div>
-            <div class="concept-pill"><strong>Observer</strong>padrão por trás dos signals</div>
-            <div class="concept-pill"><strong>Desacoplamento</strong>emissor não conhece receptor</div>
-          </div>
-        </div>
-
-        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
-        <ul class="checklist">
-          <li>Por que um node filho não deveria chamar métodos diretamente no pai?</li>
-          <li>Qual a diferença entre um signal embutido (como <code>pressed</code>) e um customizado?</li>
-          <li>Em qual situação você prefere conectar signals via editor em vez de código?</li>
-          <li>O que acontece se você emitir um signal que ninguém está ouvindo?</li>
-          <li>Como signals ajudam a reutilizar a cena de <code>Player</code> em diferentes níveis?</li>
-        </ul>
-
-        <div class="milestone-banner" style="margin-top: 2rem;">
-          <div class="milestone-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          </div>
-          <div class="milestone-text">
-            <strong>Módulo 01 completo!</strong>
-            <p>Você entende nodes, cenas, scripts e signals. O Módulo 02 começa o personagem jogável com CharacterBody2D, Input e física de plataforma.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="lesson-footer">
         <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
         <a href="modulo-02.html" class="nav-btn">Módulo 02 →</a>
       </div>
     </div>
+
 
   </main>
 </div>
