@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 03 — Mundo e câmera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F3EE;
+    --border: #E4E2D8;
+    --border-strong: #C8C5B8;
+    --text-primary: #1A1916;
+    --text-secondary: #5A5850;
+    --text-muted: #9A978E;
+    --accent: #2D5A27;
+    --accent-light: #EBF3E8;
+    --accent-mid: #4A8A42;
+    --amber: #8A5A00;
+    --amber-light: #FFF3D6;
+    --blue: #1A3F6B;
+    --blue-light: #E8F0FA;
+    --red: #7A2020;
+    --red-light: #FAEAEA;
+    --purple: #4A2878;
+    --purple-light: #F0EAFA;
+    --code-bg: #F0EFEA;
+    --code-border: #D8D6CE;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+  }
+
+  html { font-size: 16px; background: var(--bg); color: var(--text-primary); }
+  body { font-family: var(--font-body); font-weight: 400; line-height: 1.7; min-height: 100vh; }
+
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-logo .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo .title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sidebar-logo .tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 1.5rem;
+    margin-bottom: 6px;
+  }
+  .sidebar-nav { list-style: none; margin-bottom: 1.5rem; }
+  .sidebar-nav li a {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 1.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-nav li a:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .sidebar-nav li.active a {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-nav li a .nav-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+  .sidebar-nav li.active a .nav-num { color: var(--accent-mid); }
+
+  /* Module accordion nav */
+  .module-list { list-style: none; }
+  .module-item { border-bottom: 1px solid var(--border); }
+  .module-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 1.5rem;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  a.module-item-header:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .module-item.current > .module-item-header {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .module-item.locked { opacity: 0.45; pointer-events: none; }
+  .module-item-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 22px;
+    flex-shrink: 0;
+  }
+  .module-item.current .module-item-num { color: var(--accent-mid); }
+  .module-item-title { flex: 1; }
+  .module-item-tag { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .module-lessons { padding: 4px 0 6px; }
+  .module-lessons li a { padding-left: 2.75rem; }
+
+  main { padding: 3rem 4rem; max-width: 840px; }
+
+  .lesson-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lesson-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .lesson-title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .lesson-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 580px;
+  }
+  .lesson-meta { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .meta-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .meta-pill svg { opacity: 0.5; }
+
+  .lesson-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .lesson-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: var(--font-body);
+  }
+  .lesson-tab:hover { color: var(--text-primary); }
+  .lesson-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .lesson-content { display: none; }
+  .lesson-content.active { display: block; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 2rem 0 0.75rem;
+    line-height: 1.3;
+  }
+  h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin: 1.5rem 0 0.5rem; letter-spacing: 0.01em; }
+  p { margin-bottom: 1rem; color: var(--text-secondary); font-size: 15px; }
+  p strong { color: var(--text-primary); font-weight: 500; }
+
+  .callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; border-left: 3px solid; font-size: 14px; }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+  .callout-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.info { background: var(--blue-light); border-color: var(--blue); }
+  .callout.info .callout-label { color: var(--blue); }
+  .callout.info p { color: #2A4F7A; }
+  .callout.tip { background: var(--accent-light); border-color: var(--accent); }
+  .callout.tip .callout-label { color: var(--accent); }
+  .callout.tip p { color: #2D5A27; }
+  .callout.warning { background: var(--amber-light); border-color: var(--amber); }
+  .callout.warning .callout-label { color: var(--amber); }
+  .callout.warning p { color: #6A4500; }
+  .callout.analogy { background: var(--purple-light); border-color: var(--purple); }
+  .callout.analogy .callout-label { color: var(--purple); }
+  .callout.analogy p { color: #3A1E60; }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; margin: 1.25rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--code-border); background: #E8E7E0; }
+  .code-filename { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .code-lang { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .code-block pre { padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+  .kw { color: #7A3080; font-weight: 500; }
+  .cm { color: #7A9A70; font-style: italic; }
+  .st { color: #A03030; }
+  .nm { color: #1A5A8A; }
+  .fn { color: #2A6A50; }
+  .at { color: #8A5A00; }
+  .tp { color: #4A2878; }
+
+  .diagram-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .diagram-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2; color: var(--text-secondary); white-space: pre; }
+  .tree .node-name { color: var(--text-primary); font-weight: 500; }
+  .tree .node-type { color: var(--accent-mid); font-size: 12px; }
+  .tree .node-script { color: #8A5A00; font-size: 12px; }
+
+  a.doc-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-mid);
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s, color 0.15s;
+  }
+  a.doc-link:hover { text-decoration-style: solid; text-decoration-color: var(--accent); color: var(--accent); }
+  a.doc-link::after { content: " ↗"; font-size: 0.65em; color: var(--accent-mid); vertical-align: super; line-height: 0; transition: color 0.15s; }
+  a.doc-link:hover::after { color: var(--accent); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+  .compare-card .cc-label { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .compare-card ul { list-style: none; }
+  .compare-card ul li { font-size: 13px; color: var(--text-secondary); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
+  .compare-card ul li:last-child { border-bottom: none; }
+  .compare-card ul li::before { content: "—"; color: var(--text-muted); flex-shrink: 0; }
+
+  .steps { margin: 1.5rem 0; }
+  .step { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body > strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .step-body p { font-size: 14px; margin-bottom: 0; }
+
+  .checklist { list-style: none; margin: 1rem 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "○"; color: var(--border-strong); flex-shrink: 0; margin-top: 1px; }
+
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 2rem 0 0; }
+  .summary-card h3 { margin-top: 0; margin-bottom: 1rem; font-size: 14px; }
+  .concepts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .concept-pill { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .concept-pill strong { display: block; font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 2px; }
+
+  .milestone-banner { background: linear-gradient(135deg, var(--accent-light), #F0FAF0); border: 1px solid #C0DDB8; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 2rem 0; display: flex; align-items: flex-start; gap: 14px; }
+  .milestone-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .milestone-icon svg { color: white; }
+  .milestone-text strong { font-size: 14px; color: var(--accent); display: block; margin-bottom: 4px; }
+  .milestone-text p { font-size: 13px; color: #3A6A35; margin: 0; }
+
+  .lesson-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: 13px; color: var(--text-secondary); font-family: var(--font-body); transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--surface-alt); }
+  .nav-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #245020; border-color: #245020; }
+  .nav-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+  .progress-bar { background: var(--border); height: 2px; border-radius: 2px; margin: 1rem 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+  .progress-label { font-size: 11px; color: var(--text-muted); padding: 0 1.5rem; margin-bottom: 1.5rem; }
+
+  code { font-family: var(--font-mono); font-size: 13px; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 6px; color: var(--text-primary); }
+
+  .challenge-header { display: flex; align-items: center; gap: 12px; padding: 1.25rem 1.5rem; background: var(--amber-light); border: 1px solid #E8C870; border-radius: 10px 10px 0 0; }
+  .challenge-icon { width: 36px; height: 36px; background: var(--amber); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .challenge-meta { flex: 1; }
+  .challenge-meta strong { font-size: 15px; font-weight: 500; color: #5A3800; display: block; }
+  .challenge-meta span { font-size: 12px; color: #8A6020; }
+  .difficulty-badge { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.05em; }
+  .diff-medium { background: #FFE8A0; color: #7A4A00; border: 1px solid #E8C870; }
+  .diff-hard { background: #FAEAEA; color: #7A2020; border: 1px solid #E8B0B0; }
+  .challenge-body { border: 1px solid #E8C870; border-top: none; border-radius: 0 0 10px 10px; padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
+  .objective-list { list-style: none; margin: 1rem 0; }
+  .objective-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .objective-list li:last-child { border-bottom: none; }
+  .obj-num { width: 22px; height: 22px; border-radius: 50%; background: var(--amber-light); color: var(--amber); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .hint-accordion { border: 1px solid var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; }
+  .hint-toggle { width: 100%; text-align: left; padding: 12px 16px; background: var(--surface-alt); border: none; cursor: pointer; font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .hint-toggle:hover { background: var(--border); color: var(--text-primary); }
+  .hint-toggle svg { flex-shrink: 0; transition: transform 0.2s; }
+  .hint-toggle.open svg { transform: rotate(180deg); }
+  .hint-body { display: none; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .hint-body.open { display: block; }
+  .hint-body p { font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .hint-body p:last-child { margin-bottom: 0; }
+
+  /* Physics loop diagram */
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .loop-step:last-child { border-bottom: none; }
+  .loop-arrow { color: var(--accent-mid); font-weight: 500; flex-shrink: 0; width: 20px; margin-top: 1px; }
+  .loop-label { font-family: var(--font-mono); color: var(--text-primary); font-weight: 500; min-width: 160px; }
+  .loop-desc { color: var(--text-secondary); }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    main { padding: 2rem 1.5rem; }
+    .compare-grid, .concepts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-logo">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="eyebrow">Tutorial Godot 4</div>
+        <div class="title">C# · Plataforma 2D</div>
+      </a>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 33%"></div></div>
+    <div class="progress-label" id="progress-label">Módulo 03 · Aula 1 de 3</div>
+
+    <div class="sidebar-section-label">Módulos</div>
+    <ul class="module-list">
+
+      <li class="module-item">
+        <a href="modulo-01.html" class="module-item-header">
+          <span class="module-item-num">01</span>
+          <span class="module-item-title">Como a engine pensa</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-02.html" class="module-item-header">
+          <span class="module-item-num">02</span>
+          <span class="module-item-title">Personagem jogável</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item current">
+        <div class="module-item-header">
+          <span class="module-item-num">03</span>
+          <span class="module-item-title">Mundo e câmera</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <ul class="sidebar-nav module-lessons">
+          <li class="active" id="nav-1" onclick="goLesson(1)">
+            <a href="#"><span class="nav-num">3.1</span>TileMapLayer e tilesets</a>
+          </li>
+          <li id="nav-2" onclick="goLesson(2)">
+            <a href="#"><span class="nav-num">3.2</span>Camera2D que segue o player</a>
+          </li>
+          <li id="nav-3" onclick="goLesson(3)">
+            <a href="#"><span class="nav-num">3.3</span>Profundidade com parallax</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="module-item locked">
+        <div class="module-item-header">
+          <span class="module-item-num">04</span>
+          <span class="module-item-title">Inimigos e coletáveis</span>
+          <span class="module-item-tag">Em breve</span>
+        </div>
+      </li>
+
+      <li class="module-item locked">
+        <div class="module-item-header">
+          <span class="module-item-num">05</span>
+          <span class="module-item-title">HUD, game loop e exportação</span>
+          <span class="module-item-tag">Em breve</span>
+        </div>
+      </li>
+
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ======================== AULA 3.1 ======================== -->
+    <div class="lesson-content active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 03 · Aula 3.1</div>
+        <h1 class="lesson-title">TileMapLayer e tilesets</h1>
+        <p class="lesson-subtitle">Construir o cenário pintando tiles em vez de posicionar sprites um a um — e dar colisão ao mundo de forma eficiente.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Editor + recursos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+      </div>
+
+      <div id="conteudo-1">
+        <h2>Por que não posicionar sprites um a um?</h2>
+        <p>No Módulo 02 o projeto base tinha um chão e uma plataforma. Para um nível real você precisa de centenas de blocos. Posicionar cada um como um <code>Sprite2D</code> individual seria insustentável: a cena ficaria gigante, a colisão teria que ser configurada peça por peça, e ajustar o layout seria um pesadelo.</p>
+        <p>A solução é o <a href="https://docs.godotengine.org/en/stable/classes/class_tilemaplayer.html" target="_blank" rel="noopener" class="doc-link"><code>TileMapLayer</code></a>: um node que pinta um grid de tiles a partir de um catálogo reutilizável — o <a href="https://docs.godotengine.org/en/stable/classes/class_tileset.html" target="_blank" rel="noopener" class="doc-link"><code>TileSet</code></a>. Você "pinta" o nível com o mouse e o Godot cuida da renderização e da colisão de forma otimizada.</p>
+
+        <div class="callout info">
+          <div class="callout-label">TileMapLayer, não TileMap</div>
+          <p>Em versões antigas do Godot havia um único node <code>TileMap</code> com várias camadas internas. A partir do Godot 4.3 cada camada é seu próprio node <code>TileMapLayer</code>. Isso deixa cada camada (chão, decoração, frente) independente na SceneTree — mais fácil de mostrar/ocultar, mover e organizar.</p>
+        </div>
+
+        <h2>TileSet vs TileMapLayer</h2>
+        <p>São duas coisas distintas e é fundamental separá-las na cabeça:</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--purple);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_tileset.html" target="_blank" rel="noopener" class="doc-link">TileSet</a>
+            </div>
+            <ul>
+              <li>É um <strong>recurso</strong> (<code>.tres</code>), não um node</li>
+              <li>O catálogo: quais tiles existem</li>
+              <li>Define colisão, tamanho do tile, fonte (atlas)</li>
+              <li>Reutilizável entre vários mapas</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_tilemaplayer.html" target="_blank" rel="noopener" class="doc-link">TileMapLayer</a>
+            </div>
+            <ul>
+              <li>É um <strong>node</strong> na cena</li>
+              <li>O desenho: onde cada tile está pintado</li>
+              <li>Usa um <code>TileSet</code> como paleta</li>
+              <li>Uma camada visual do nível</li>
+            </ul>
+          </div>
+        </div>
+
+        <p>A analogia: o <code>TileSet</code> é a sua caixa de carimbos; o <code>TileMapLayer</code> é a folha onde você carimba. A mesma caixa serve para desenhar quantos níveis quiser.</p>
+
+        <h2>Atlas: recortando a imagem em tiles</h2>
+        <p>O Sunny Land vem com folhas de tiles (<em>tilesheets</em>) — uma única imagem PNG com vários blocos lado a lado. Dentro do <code>TileSet</code> você adiciona essa imagem como uma <strong>fonte de atlas</strong> (<a href="https://docs.godotengine.org/en/stable/classes/class_tilesetatlassource.html" target="_blank" rel="noopener" class="doc-link"><code>TileSetAtlasSource</code></a>) e informa o tamanho do tile (ex.: 16×16). O Godot recorta a imagem automaticamente nesse grid, e cada célula vira um tile selecionável.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Da imagem ao nível pintado</div>
+          <div class="loop-step">
+            <div class="loop-arrow">1</div>
+            <div class="loop-label">Tilesheet PNG</div>
+            <div class="loop-desc">A imagem do Sunny Land com vários blocos numa grade</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">2</div>
+            <div class="loop-label">Atlas Source</div>
+            <div class="loop-desc">Adicionada ao <code>TileSet</code>, recortada em tiles de 16×16</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">3</div>
+            <div class="loop-label">Physics Layer</div>
+            <div class="loop-desc">Colisão desenhada nos tiles sólidos (chão, paredes)</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">4</div>
+            <div class="loop-label">Pintar no mapa</div>
+            <div class="loop-desc">Com o <code>TileMapLayer</code> selecionado, pinte os tiles na viewport</div>
+          </div>
+        </div>
+
+        <h2>Colisão: a camada de física do TileSet</h2>
+        <p>Aqui está a grande vantagem sobre sprites soltos. Em vez de criar um <code>CollisionShape2D</code> por bloco, você define a colisão <strong>uma vez por tipo de tile</strong>, no próprio <code>TileSet</code>:</p>
+        <ul class="checklist">
+          <li>No <code>TileSet</code>, adicione uma <strong>Physics Layer</strong></li>
+          <li>Selecione um tile sólido e desenhe o polígono de colisão sobre ele (geralmente o quadrado inteiro)</li>
+          <li>Todo tile daquele tipo pintado no mapa herda essa colisão automaticamente</li>
+        </ul>
+        <p>O <code>CharacterBody2D</code> do player vai colidir com esses tiles exatamente como colidia com o <code>StaticBody2D</code> do projeto base — o <code>IsOnFloor()</code> continua funcionando sem nenhuma mudança no script.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Performance</div>
+          <p>O <code>TileMapLayer</code> mescla a colisão de tiles vizinhos e renderiza tudo numa passada só. Um nível com milhares de tiles é muito mais leve que milhares de <code>Sprite2D</code> + <code>StaticBody2D</code> separados.</p>
+        </div>
+      </div>
+
+      <div id="pratica-1" style="display:none">
+        <h2>Pintar o primeiro nível</h2>
+        <p>Vamos transformar o <code>World.tscn</code> do projeto base num nível de verdade, pintado com tiles do Sunny Land e com colisão funcional.</p>
+
+        <div class="callout info">
+          <div class="callout-label">Projeto base deste módulo</div>
+          <p>Continue do projeto do Módulo 02 (com o <code>Player.cs</code> funcional) ou baixe o projeto base já atualizado. Ele inclui as tilesheets e imagens de fundo do Sunny Land em <code>res://assets/</code>, prontas para serem importadas no <code>TileSet</code> e nas camadas de parallax. Os tiles do pack são de <code>16×16</code>.</p>
+          <a href="#" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: var(--accent); color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">⬇ Baixar projeto base</a>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Adicione um TileMapLayer ao mundo</strong>
+              <p>Abra <code>World.tscn</code>. Com o node raiz selecionado, adicione um filho <code>TileMapLayer</code>. Renomeie para <code>Ground</code> para deixar claro o papel dessa camada.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Crie o TileSet</strong>
+              <p>Com o <code>Ground</code> selecionado, no Inspector, no campo <code>Tile Set</code>, clique em <code>New TileSet</code>. Um painel <strong>TileSet</strong> abre na parte de baixo do editor.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Adicione a tilesheet como atlas</strong>
+              <p>No painel TileSet, clique no <code>+</code> e escolha <code>Atlas</code>. Arraste a tilesheet do Sunny Land (de <code>res://assets/</code>) para o campo de textura. Confirme o <code>Texture Region Size</code> como <code>16×16</code> (o tamanho dos tiles do pack). O Godot pergunta se quer criar os tiles automaticamente — aceite.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Defina a colisão</strong>
+              <p>No painel TileSet, abra a aba <strong>TileSet</strong> (não a Paint), selecione <code>Physics Layers</code> e adicione uma camada. Depois selecione um tile de chão e, na seção de física, clique para desenhar o retângulo de colisão cobrindo o tile inteiro. Repita para os outros tiles sólidos.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Pinte o chão</strong>
+              <p>Mude para o painel <strong>TileMap</strong> (ao lado do TileSet). Selecione um tile e pinte uma linha de chão na viewport, mais uma plataforma flutuante. Use o botão esquerdo para pintar e o direito para apagar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Teste a colisão</strong>
+              <p>Coloque a cena do player sobre o chão pintado e pressione F5. O personagem deve cair e parar no chão de tiles, andar sobre ele e pousar na plataforma — tudo usando o mesmo script do Módulo 02.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Atravessou o chão?</div>
+          <p>Se o player cair através dos tiles, quase sempre é porque a <strong>Physics Layer</strong> não foi adicionada ao <code>TileSet</code>, ou o polígono de colisão não foi desenhado naquele tile específico. Volte ao painel TileSet e confirme que o tile usado tem a colisão visível.</p>
+        </div>
+      </div>
+
+      <div id="desafio-1" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Camada de decoração sem colisão</strong>
+            <span>Aula 3.1 · TileMapLayer</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Nem todo tile deve bloquear o player. Grama alta, flores, plaquinhas e fundos decorativos precisam aparecer <em>sobre ou atrás</em> do chão, mas sem colisão. A forma correta de fazer isso é com uma segunda <code>TileMapLayer</code>.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione um segundo <code>TileMapLayer</code> ao mundo, chamado <code>Decoration</code></li>
+            <li><div class="obj-num">2</div>Reutilize o <strong>mesmo</strong> <code>TileSet</code> do <code>Ground</code> (arraste o recurso ou use o dropdown)</li>
+            <li><div class="obj-num">3</div>Pinte tiles decorativos (grama, flores) que <em>não</em> têm polígono de colisão</li>
+            <li><div class="obj-num">4</div>Ordene a camada: para decoração na frente, coloque <code>Decoration</code> abaixo de <code>Ground</code> na SceneTree (ou ajuste o <code>Z Index</code>)</li>
+            <li><div class="obj-num">5</div>Teste: o player deve passar livremente pelos tiles decorativos, colidindo só com o chão</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>A colisão vive no <code>TileSet</code>, por tile — não na camada. Tiles sem polígono de física simplesmente não colidem, mesmo compartilhando o mesmo <code>TileSet</code> de tiles sólidos.</p>
+              <p>A ordem de desenho segue a SceneTree: nodes mais abaixo na lista de irmãos são desenhados por cima. Se a decoração precisa aparecer na frente do player, considere também o <code>Z Index</code> no Inspector.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-1" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>TileMapLayer</strong>node que pinta tiles</div>
+            <div class="concept-pill"><strong>TileSet</strong>recurso-catálogo reutilizável</div>
+            <div class="concept-pill"><strong>Atlas Source</strong>recorta a tilesheet</div>
+            <div class="concept-pill"><strong>Physics Layer</strong>colisão por tipo de tile</div>
+            <div class="concept-pill"><strong>Camadas</strong>chão vs decoração</div>
+            <div class="concept-pill"><strong>Z Index</strong>ordem de desenho</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Qual a diferença entre um <code>TileSet</code> e um <code>TileMapLayer</code>?</li>
+          <li>Por que definir colisão no <code>TileSet</code> é melhor que um <code>CollisionShape2D</code> por bloco?</li>
+          <li>Como fazer um tile decorativo que o player atravessa?</li>
+          <li>Por que o script do player não precisa mudar ao trocar <code>StaticBody2D</code> por tiles?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <a href="modulo-02.html" class="nav-btn">← Módulo 02</a>
+        <button class="nav-btn" onclick="goLesson(2)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 3.2 ======================== -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 03 · Aula 3.2</div>
+        <h1 class="lesson-title">Camera2D que segue o player</h1>
+        <p class="lesson-subtitle">Fazer a câmera acompanhar o personagem com suavidade e respeitar os limites do mapa — sem mostrar o vazio fora do nível.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~20 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Editor + Inspector
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
+      </div>
+
+      <div id="conteudo-2">
+        <h2>Como funciona a Camera2D</h2>
+        <p>A <a href="https://docs.godotengine.org/en/stable/classes/class_camera2d.html" target="_blank" rel="noopener" class="doc-link"><code>Camera2D</code></a> define qual parte do mundo aparece na tela. A regra-chave do Godot é simples: a câmera <strong>segue o node pai</strong>. Se você adicionar a <code>Camera2D</code> como filha do <code>Player</code>, ela acompanha o personagem automaticamente — sem uma linha de código.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Camera2D como filha do Player</div>
+          <div class="tree"><span class="node-name">Player</span>  <span class="node-type">(CharacterBody2D)</span>
+├── <span class="node-name">AnimatedSprite2D</span>
+├── <span class="node-name">CollisionShape2D</span>
+└── <span class="node-name">Camera2D</span></div>
+        </div>
+
+        <p>Quando o <code>Player</code> se move, a <code>Camera2D</code> se move junto, mantendo o personagem centralizado. Isso já é suficiente para um protótipo — mas falta polimento: a câmera grudada gera um movimento mecânico e revela áreas vazias nas bordas do nível.</p>
+
+        <h2>Suavização: tirar o movimento robótico</h2>
+        <p>Uma câmera que copia exatamente a posição do player parece dura. O <strong>position smoothing</strong> faz a câmera "perseguir" o alvo com um pequeno atraso, criando um deslize natural.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Propriedades de suavização no Inspector</div>
+          <div class="loop-step">
+            <div class="loop-label"><code>Position Smoothing → Enabled</code></div>
+            <div class="loop-desc">Liga a suavização do movimento da câmera</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label"><code>Position Smoothing → Speed</code></div>
+            <div class="loop-desc">Quão rápido a câmera alcança o player. Valores baixos = mais "preguiçosa"; altos = mais colada</div>
+          </div>
+        </div>
+
+        <h2>Limites: não mostrar o lado de fora</h2>
+        <p>Sem limites, andar até a borda do nível revela o vazio cinza atrás dele. As propriedades <code>Limit</code> da <code>Camera2D</code> travam a câmera dentro de um retângulo, em pixels do mundo:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Camera2D — propriedades de limite</span>
+            <span class="code-lang">Inspector</span>
+          </div>
+          <pre>Limit
+├── Left    = 0       <span class="cm">// borda esquerda do nível (px)</span>
+├── Top     = 0       <span class="cm">// topo</span>
+├── Right   = 2048    <span class="cm">// largura total do nível (px)</span>
+└── Bottom  = 1152    <span class="cm">// altura total</span></pre>
+        </div>
+
+        <p>Com isso, mesmo que o player encoste na parede esquerda do mapa, a câmera para em <code>Left = 0</code> e nunca mostra além da borda. Os valores vêm do tamanho do seu nível em tiles × tamanho do tile.</p>
+
+        <div class="callout tip">
+          <div class="callout-label">Descobrindo os limites</div>
+          <p>Se o nível tem 128 tiles de largura com tiles de 16px, o limite direito é <code>128 × 16 = 2048</code>. Você também pode olhar a extensão pintada do <code>TileMapLayer</code> na viewport para estimar.</p>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Marque "Current"</div>
+          <p>Se houver mais de uma <code>Camera2D</code> na cena, só a que tem a propriedade <code>Enabled</code>/<code>Current</code> marcada controla a tela. Esqueça isso e a câmera simplesmente não funciona ao rodar.</p>
+        </div>
+      </div>
+
+      <div id="pratica-2" style="display:none">
+        <h2>Câmera que acompanha o personagem</h2>
+        <p>Vamos dar uma câmera de verdade ao player: suave, presa ao personagem e limitada ao nível pintado na aula anterior.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Adicione a Camera2D ao Player</strong>
+              <p>Abra <code>Player.tscn</code>. Com o node <code>Player</code> selecionado, adicione um filho <code>Camera2D</code>. Confirme que ela aparece como filha na SceneTree.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Marque como atual</strong>
+              <p>No Inspector da <code>Camera2D</code>, ative <code>Enabled</code> (em algumas versões, <code>Current</code>). Pressione F5 — a câmera já deve seguir o player, mas de forma rígida.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Ligue a suavização</strong>
+              <p>No Inspector, abra <code>Position Smoothing</code>, marque <code>Enabled</code> e defina <code>Speed</code> como <code>5</code>. Rode de novo e sinta a diferença: a câmera desliza atrás do player em vez de copiá-lo.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Defina os limites do nível</strong>
+              <p>Ainda no Inspector, abra <code>Limit</code>. Defina <code>Left</code> e <code>Top</code> como <code>0</code>, e <code>Right</code>/<code>Bottom</code> com base no tamanho do seu <code>TileMapLayer</code> (ex.: <code>2048</code> e <code>1152</code>). Ande até as bordas e confirme que a câmera para sem revelar o vazio.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Ajuste o zoom (opcional)</strong>
+              <p>Pixel art em telas grandes costuma ficar pequena. No Inspector, ajuste <code>Zoom</code> para <code>2, 2</code> ou <code>3, 3</code> para aproximar e valorizar os pixels do Sunny Land.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Ponto de verificação</div>
+          <p>A câmera deve: (1) seguir o player ao andar e pular, (2) deslizar suavemente em vez de colar, (3) parar nas bordas do nível sem mostrar área fora do mapa, (4) manter os pixels nítidos no zoom escolhido.</p>
+        </div>
+      </div>
+
+      <div id="desafio-2" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Look-ahead com drag margins</strong>
+            <span>Aula 3.2 · Camera2D</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Em jogos de plataforma polidos, a câmera não mantém o player perfeitamente centralizado: ela "olha à frente" na direção do movimento, dando ao jogador mais visão do que está por vir. Isso se consegue com as <strong>drag margins</strong> da <code>Camera2D</code>.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>No Inspector da <code>Camera2D</code>, abra a seção <code>Drag</code></li>
+            <li><div class="obj-num">2</div>Ative <code>Horizontal Enabled</code></li>
+            <li><div class="obj-num">3</div>Ajuste <code>Drag Left/Right Margin</code> (ex.: <code>0.2</code>) para criar uma zona morta onde o player se move sem mover a câmera</li>
+            <li><div class="obj-num">4</div>Teste: ao andar, a câmera só começa a seguir depois que o player cruza a margem — revelando mais terreno na frente</li>
+            <li><div class="obj-num">5</div>Combine com o <code>Position Smoothing</code> da prática para um resultado fluido</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>As <em>drag margins</em> definem uma zona morta retangular ao redor do alvo: enquanto o player está dentro dela, a câmera não se move. Margens horizontais maiores dão mais "folga" antes da câmera reagir.</p>
+              <p>Para um look-ahead que aponta na direção do movimento, explore também as propriedades <code>Drag Horizontal Offset</code> ou ajuste o <code>Offset</code> da câmera por código com base no <code>Velocity.X</code> do player — mas comece só com as margens.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-2" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Camera2D</strong>recorte do mundo na tela</div>
+            <div class="concept-pill"><strong>Filha do Player</strong>segue sem código</div>
+            <div class="concept-pill"><strong>Smoothing</strong>deslize natural</div>
+            <div class="concept-pill"><strong>Limit</strong>trava nas bordas do nível</div>
+            <div class="concept-pill"><strong>Zoom</strong>aproxima a pixel art</div>
+            <div class="concept-pill"><strong>Drag margins</strong>zona morta / look-ahead</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que tornar a <code>Camera2D</code> filha do <code>Player</code> já faz ela seguir o personagem?</li>
+          <li>O que o <code>Position Smoothing</code> muda na sensação de movimento?</li>
+          <li>Como calcular o valor de <code>Limit Right</code> a partir do tamanho do nível?</li>
+          <li>O que acontece se você esquecer de marcar a câmera como <code>Current</code>?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
+        <button class="nav-btn" onclick="goLesson(3)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 3.3 ======================== -->
+    <div class="lesson-content" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 03 · Aula 3.3</div>
+        <h1 class="lesson-title">Profundidade com parallax</h1>
+        <p class="lesson-subtitle">Dar sensação de profundidade ao cenário com camadas de fundo que se movem em velocidades diferentes da câmera.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~25 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Editor + composição
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
+      </div>
+
+      <div id="conteudo-3">
+        <h2>O que é o efeito parallax</h2>
+        <p>Olhe pela janela de um carro em movimento: postes próximos passam rápido, montanhas distantes quase não se mexem. Esse é o <strong>parallax</strong> — objetos mais longe se deslocam mais devagar em relação ao observador. Em jogos 2D, simular isso cria uma ilusão convincente de profundidade num mundo plano.</p>
+        <p>A ideia: enquanto a câmera segue o player, as camadas de fundo se movem em <em>frações</em> da velocidade da câmera. O céu quase parado; as árvores distantes lentas; os arbustos próximos quase na velocidade do chão.</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">A pilha de vidros</div>
+          <p>Imagine várias placas de vidro pintadas, empilhadas com espaço entre elas. Ao andar de lado, as placas da frente deslizam mais que as de trás. O parallax é exatamente isso: várias camadas com "velocidade relativa" diferente, dando volume a uma cena sem profundidade real.</p>
+        </div>
+
+        <h2>Parallax2D no Godot 4</h2>
+        <p>O Godot oferece o node <a href="https://docs.godotengine.org/en/stable/classes/class_parallax2d.html" target="_blank" rel="noopener" class="doc-link"><code>Parallax2D</code></a>: uma camada que se move automaticamente em relação à câmera ativa, com base num fator de escala. Você cria um <code>Parallax2D</code> por camada de profundidade e coloca a arte de fundo dentro dele.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Estrutura de um fundo com parallax</div>
+          <div class="tree"><span class="node-name">World</span>
+├── <span class="node-name">SkyLayer</span>     <span class="node-type">(Parallax2D)  scroll 0.1</span>
+│   └── <span class="node-name">Sky</span>        <span class="node-type">(Sprite2D)</span>
+├── <span class="node-name">HillsLayer</span>   <span class="node-type">(Parallax2D)  scroll 0.4</span>
+│   └── <span class="node-name">Hills</span>      <span class="node-type">(Sprite2D)</span>
+├── <span class="node-name">Ground</span>       <span class="node-type">(TileMapLayer)</span>
+└── <span class="node-name">Player</span>       <span class="node-type">(CharacterBody2D)</span></div>
+        </div>
+
+        <p>A propriedade central é o <code>Scroll Scale</code> (ou <code>Autoscroll</code>/fator de movimento): <code>1.0</code> significa que a camada se move junto com o mundo (velocidade do chão); valores menores que <code>1</code> a deixam mais lenta, parecendo distante. <code>0.1</code> é quase fixa — perfeita para o céu.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Velocidade relativa por camada</div>
+          <div class="loop-step">
+            <div class="loop-arrow">▲</div>
+            <div class="loop-label">Céu · 0.1</div>
+            <div class="loop-desc">Mal se move — sensação de distância máxima</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">▲</div>
+            <div class="loop-label">Montanhas · 0.3</div>
+            <div class="loop-desc">Movimento lento de fundo</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">▲</div>
+            <div class="loop-label">Árvores · 0.6</div>
+            <div class="loop-desc">Camada intermediária, mais perceptível</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">●</div>
+            <div class="loop-label">Chão · 1.0</div>
+            <div class="loop-desc">Velocidade real do mundo — o <code>TileMapLayer</code></div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Ordem de desenho importa</div>
+          <p>As camadas de fundo precisam ser desenhadas <em>atrás</em> do nível e do player. Garanta isso pela ordem na SceneTree (camadas de parallax acima do <code>Ground</code> na lista de irmãos) ou por <code>Z Index</code> negativo nos nodes de fundo.</p>
+        </div>
+
+        <h2>Repetição: fundos infinitos</h2>
+        <p>Um fundo precisa cobrir todo o trajeto do player. Em vez de uma imagem gigante, o <code>Parallax2D</code> permite <strong>repetir</strong> a arte: defina o <code>Repeat Size</code> com a largura da imagem e a camada se reproduz infinitamente conforme a câmera avança — o céu nunca "acaba".</p>
+      </div>
+
+      <div id="pratica-3" style="display:none">
+        <h2>Montar um fundo em camadas</h2>
+        <p>Vamos adicionar profundidade ao nível com os fundos do Sunny Land: um céu quase fixo e uma camada de morros lenta atrás do chão.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Crie a camada do céu</strong>
+              <p>No <code>World.tscn</code>, adicione um <code>Parallax2D</code> como filho da raiz, chamado <code>SkyLayer</code>. Dentro dele, adicione um <code>Sprite2D</code> com a imagem de céu/fundo do Sunny Land.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Deixe o céu distante</strong>
+              <p>No <code>SkyLayer</code>, defina o <code>Scroll Scale</code> para algo como <code>0.1, 0.1</code>. Garanta que essa camada fique atrás de tudo (acima do <code>Ground</code> na SceneTree ou com <code>Z Index</code> negativo).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Adicione os morros</strong>
+              <p>Crie outro <code>Parallax2D</code> chamado <code>HillsLayer</code> com um <code>Sprite2D</code> de morros/árvores. Defina o <code>Scroll Scale</code> como <code>0.4, 0.4</code> — mais rápido que o céu, mais lento que o chão.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Habilite a repetição</strong>
+              <p>Em cada camada, defina o <code>Repeat Size</code> com a largura da imagem de fundo, para que ela se repita ao longo do nível em vez de terminar no meio do caminho.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Teste o movimento</strong>
+              <p>Pressione F5 e ande pelo nível. O céu deve mal se mexer, os morros deslizarem devagar e o chão de tiles acompanhar o player na velocidade real — criando profundidade.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Sem câmera, sem parallax</div>
+          <p>O <code>Parallax2D</code> reage ao movimento da <code>Camera2D</code> ativa. Se o efeito não acontecer, confirme que a câmera da Aula 3.2 está presente e marcada como <code>Current</code> — sem ela, nada se desloca.</p>
+        </div>
+      </div>
+
+      <div id="desafio-3" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Cena de fundo em três camadas</strong>
+            <span>Aula 3.3 · Parallax</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Duas camadas dão profundidade; três dão um cenário convincente. Componha um fundo completo com céu, montanhas e uma camada de vegetação próxima, cada uma na sua velocidade.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione uma terceira <code>Parallax2D</code> chamada <code>BushesLayer</code> com vegetação do Sunny Land</li>
+            <li><div class="obj-num">2</div>Defina <code>Scroll Scale</code> em torno de <code>0.7</code> — quase na velocidade do chão, parecendo próxima</li>
+            <li><div class="obj-num">3</div>Garanta a ordem de profundidade: céu (0.1) atrás, montanhas (0.4) no meio, arbustos (0.7) na frente do fundo mas atrás do chão</li>
+            <li><div class="obj-num">4</div>Ajuste os <code>Z Index</code> para que nenhuma camada de fundo cubra o player ou o <code>TileMapLayer</code></li>
+            <li><div class="obj-num">5</div>Ande nas duas direções e confirme que as três camadas se movem em velocidades visivelmente diferentes</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Pense no <code>Scroll Scale</code> como "distância": quanto menor, mais longe e mais lento. A progressão <code>0.1 → 0.4 → 0.7 → 1.0</code> (chão) cria degraus de profundidade perceptíveis.</p>
+              <p>Se uma camada de fundo aparecer na frente do player, ela está com <code>Z Index</code> alto demais ou na posição errada da SceneTree. Fundos devem ter <code>Z Index</code> menor que o chão e o player.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-3" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Parallax</strong>profundidade por velocidade</div>
+            <div class="concept-pill"><strong>Parallax2D</strong>camada que segue a câmera</div>
+            <div class="concept-pill"><strong>Scroll Scale</strong>fator de "distância"</div>
+            <div class="concept-pill"><strong>Repeat Size</strong>fundo infinito</div>
+            <div class="concept-pill"><strong>Z Index</strong>camadas atrás do mundo</div>
+            <div class="concept-pill"><strong>Composição</strong>céu / morros / arbustos</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que camadas distantes devem ter <code>Scroll Scale</code> menor?</li>
+          <li>O que o <code>Repeat Size</code> resolve num fundo de nível longo?</li>
+          <li>Como garantir que o fundo não cubra o player?</li>
+          <li>Por que o parallax depende de uma <code>Camera2D</code> ativa?</li>
+        </ul>
+
+        <div class="milestone-banner" style="margin-top: 2rem;">
+          <div class="milestone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="milestone-text">
+            <strong>Módulo 03 completo!</strong>
+            <p>Você tem um nível pintado com tiles, colisão de mundo, câmera que segue o player e um fundo com profundidade. O Módulo 04 traz vida ao mundo: instanciar inimigos e coletáveis, Areas e detecção.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
+        <a href="index.html" class="nav-btn disabled">Módulo 04 →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let currentLesson = 1;
+
+  function goLesson(n) {
+    document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('lesson-' + n).classList.add('active');
+    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
+    document.getElementById('nav-' + n).classList.add('active');
+    currentLesson = n;
+    document.getElementById('progress-fill').style.width = (n / 3 * 100) + '%';
+    document.getElementById('progress-label').textContent = 'Módulo 03 · Aula ' + n + ' de 3';
+    window.scrollTo(0, 0);
+
+    const tabs = document.querySelectorAll('#lesson-' + n + ' .lesson-tab');
+    if (tabs.length) {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[0].classList.add('active');
+      const firstId = tabs[0].getAttribute('onclick').match(/'([^']+)'/)[1];
+      document.querySelectorAll('#lesson-' + n + ' [id^="conteudo-"], #lesson-' + n + ' [id^="pratica-"], #lesson-' + n + ' [id^="desafio-"], #lesson-' + n + ' [id^="resumo-"]').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById(firstId).style.display = 'block';
+    }
+  }
+
+  function switchTab(btn, targetId) {
+    const lesson = btn.closest('.lesson-content');
+    lesson.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const lessonNum = lesson.id.split('-')[1];
+    ['conteudo', 'pratica', 'desafio', 'resumo'].forEach(prefix => {
+      const el = document.getElementById(prefix + '-' + lessonNum);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById(targetId).style.display = 'block';
+  }
+
+  function toggleHint(btn) {
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
