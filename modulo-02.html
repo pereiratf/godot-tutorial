@@ -403,12 +403,12 @@
         </ul>
       </li>
 
-      <li class="module-item locked">
-        <div class="module-item-header">
+      <li class="module-item">
+        <a href="modulo-03.html" class="module-item-header">
           <span class="module-item-num">03</span>
           <span class="module-item-title">Mundo e câmera</span>
-          <span class="module-item-tag">Em breve</span>
-        </div>
+          <span class="module-item-tag">→</span>
+        </a>
       </li>
 
       <li class="module-item locked">
@@ -598,10 +598,6 @@
             <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-is-on-ceiling" target="_blank" rel="noopener" class="doc-link"><code>IsOnCeiling()</code></a></div>
             <div class="loop-desc">O body colidiu com uma superfície acima. Cancelar velocidade Y evita "grudar" no teto.</div>
           </div>
-          <div class="loop-step">
-            <div class="loop-label"><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-get-wall-normal" target="_blank" rel="noopener" class="doc-link"><code>GetWallNormal()</code></a></div>
-            <div class="loop-desc">Retorna um <code>Vector2</code> apontando <em>para fora da parede</em> em direção ao player. <code>Normal.X &gt; 0</code> = parede à esquerda; <code>Normal.X &lt; 0</code> = parede à direita.</div>
-          </div>
         </div>
 
         <h2>Gravidade manual — por que é assim?</h2>
@@ -750,49 +746,6 @@
           </div>
         </div>
 
-        <div class="challenge-header" style="margin-top: 1.5rem;">
-          <div class="challenge-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          </div>
-          <div class="challenge-meta">
-            <strong>Wall jump com GetWallNormal()</strong>
-            <span>Aula 2.1 · Física</span>
-          </div>
-          <span class="difficulty-badge diff-hard">Difícil</span>
-        </div>
-        <div class="challenge-body">
-          <p>O wall jump é uma mecânica clássica de plataforma: o personagem pode pular enquanto está em contato com uma parede, sendo lançado na direção oposta. A chave é saber de que lado está a parede — e para isso usamos <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-get-wall-normal" target="_blank" rel="noopener" class="doc-link"><code>GetWallNormal()</code></a>.</p>
-
-          <div class="callout info">
-            <div class="callout-label">Como funciona a normal da parede</div>
-            <p>Uma <em>normal</em> é um vetor perpendicular a uma superfície, apontando para fora dela. <code>GetWallNormal()</code> retorna esse vetor apontando <strong>em direção ao player</strong>. Parede à direita → normal aponta para a esquerda (<code>Normal.X = -1</code>). Parede à esquerda → normal aponta para a direita (<code>Normal.X = +1</code>). Isso é conveniente para o wall jump: a normal já indica a direção exata em que o player deve ser lançado para se afastar da parede.</p>
-          </div>
-
-          <ul class="objective-list">
-            <li><div class="obj-num">1</div>No script, declare <code>[Export] public float WallJumpForce = 350f</code></li>
-            <li><div class="obj-num">2</div>Adicione a condição de wall jump: <code>IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; IsActionJustPressed("jump")</code></li>
-            <li><div class="obj-num">3</div>Dentro dessa condição, leia <code>GetWallNormal()</code> e use o eixo X como direção horizontal do pulo</li>
-            <li><div class="obj-num">4</div>Aplique <code>velocity.Y = -JumpForce</code> e <code>velocity.X = GetWallNormal().X * WallJumpForce</code></li>
-            <li><div class="obj-num">5</div>Adicione duas paredes verticais (<code>StaticBody2D</code>) na cena e confirme que o player ricocheteia corretamente em ambos os lados</li>
-          </ul>
-
-          <div class="hint-accordion">
-            <button class="hint-toggle" onclick="toggleHint(this)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              Ver dica
-            </button>
-            <div class="hint-body">
-              <p>A normal já aponta na direção certa para o lançamento — não precisa inverter. Se o player está encostado na parede direita (<code>Normal.X = -1</code>), multiplicar por <code>WallJumpForce</code> dá velocidade negativa (para a esquerda), que é exatamente o que queremos.</p>
-              <p>A condição completa dentro de <code>_PhysicsProcess</code>, antes do <code>MoveAndSlide()</code>:</p>
-              <pre style="font-family: var(--font-mono); font-size: 12px; background: var(--code-bg); border-radius: 6px; padding: 10px; overflow-x: auto; margin-top: 8px;">if (IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; Input.IsActionJustPressed("jump"))
-{
-    var n = GetWallNormal();
-    velocity.Y = -JumpForce;
-    velocity.X = n.X * WallJumpForce;
-}</pre>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div id="resumo-1" style="display:none">
@@ -1027,6 +980,49 @@
             </div>
           </div>
         </div>
+
+        <div class="challenge-header" style="margin-top: 1.5rem;">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Wall jump com GetWallNormal()</strong>
+            <span>Aula 2.2 · Física + Input</span>
+          </div>
+          <span class="difficulty-badge diff-hard">Difícil</span>
+        </div>
+        <div class="challenge-body">
+          <p>O wall jump é uma mecânica clássica de plataforma: o personagem pode pular enquanto está em contato com uma parede, sendo lançado na direção oposta. A chave é saber de que lado está a parede — e para isso usamos <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html#class-characterbody2d-method-get-wall-normal" target="_blank" rel="noopener" class="doc-link"><code>GetWallNormal()</code></a>.</p>
+
+          <div class="callout info">
+            <div class="callout-label">Como funciona a normal da parede</div>
+            <p>Uma <em>normal</em> é um vetor perpendicular a uma superfície, apontando para fora dela. <code>GetWallNormal()</code> retorna esse vetor apontando <strong>em direção ao player</strong>. Parede à direita → normal aponta para a esquerda (<code>Normal.X = -1</code>). Parede à esquerda → normal aponta para a direita (<code>Normal.X = +1</code>). O <code>Normal.X</code> já indica a direção exata em que o player deve ser lançado para se afastar da parede.</p>
+          </div>
+
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Declare <code>[Export] public float WallJumpForce = 350f</code> no script</li>
+            <li><div class="obj-num">2</div>Adicione a condição: <code>IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; IsActionJustPressed("jump")</code></li>
+            <li><div class="obj-num">3</div>Dentro dessa condição, leia <code>GetWallNormal()</code> e use o eixo X como direção horizontal do pulo</li>
+            <li><div class="obj-num">4</div>Aplique <code>velocity.Y = -JumpForce</code> e <code>velocity.X = GetWallNormal().X * WallJumpForce</code></li>
+            <li><div class="obj-num">5</div>Adicione duas paredes verticais (<code>StaticBody2D</code>) na cena e confirme que o player ricocheteia corretamente em ambos os lados</li>
+          </ul>
+
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>A normal já aponta na direção certa — não precisa inverter. Se o player está encostado na parede direita (<code>Normal.X = -1</code>), multiplicar por <code>WallJumpForce</code> dá velocidade negativa (para a esquerda), que é exatamente o que queremos.</p>
+              <pre style="font-family: var(--font-mono); font-size: 12px; background: var(--code-bg); border-radius: 6px; padding: 10px; overflow-x: auto; margin-top: 8px;">if (IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; Input.IsActionJustPressed("jump"))
+{
+    var n = GetWallNormal();
+    velocity.Y = -JumpForce;
+    velocity.X = n.X * WallJumpForce;
+}</pre>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="resumo-2" style="display:none">
@@ -1225,6 +1221,48 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div class="challenge-meta">
+            <strong>Animações no UpdateAnimations</strong>
+            <span>Aula 2.3 · AnimatedSprite2D</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>O projeto base já tem as animações <code>"idle"</code>, <code>"run"</code>, <code>"jump"</code> e <code>"fall"</code> configuradas no <code>AnimatedSprite2D</code>. Expanda o método <code>UpdateAnimations</code> para chamar <code>_sprite.Play()</code> com a animação correta de acordo com o estado do personagem.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Quando <code>!IsOnFloor()</code> e <code>Velocity.Y &lt; 0</code>, reproduza <code>"jump"</code></li>
+            <li><div class="obj-num">2</div>Quando <code>!IsOnFloor()</code> e <code>Velocity.Y &gt;= 0</code>, reproduza <code>"fall"</code></li>
+            <li><div class="obj-num">3</div>Quando <code>IsOnFloor()</code> e <code>direction != 0</code>, reproduza <code>"run"</code></li>
+            <li><div class="obj-num">4</div>Quando <code>IsOnFloor()</code> e <code>direction == 0</code>, reproduza <code>"idle"</code></li>
+            <li><div class="obj-num">5</div>Teste: caminhe até a borda de uma plataforma e caia — o sprite deve mudar de <code>"run"</code> para <code>"fall"</code> imediatamente</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>A ordem dos <code>if/else</code> importa: cheque o estado aéreo primeiro (<code>!IsOnFloor()</code>), depois o estado no chão. Se você checar <code>direction != 0</code> antes, um personagem correndo para fora de uma borda vai mostrar <code>"run"</code> em vez de <code>"fall"</code> no primeiro frame.</p>
+              <pre style="font-family: var(--font-mono); font-size: 12px; background: var(--code-bg); border-radius: 6px; padding: 10px; overflow-x: auto; margin-top: 8px;">private void UpdateAnimations(float direction)
+{
+    if (direction != 0)
+        _sprite.FlipH = direction &lt; 0;
+
+    if (!IsOnFloor())
+        _sprite.Play(Velocity.Y &lt; 0 ? "jump" : "fall");
+    else if (direction != 0)
+        _sprite.Play("run");
+    else
+        _sprite.Play("idle");
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="challenge-header" style="margin-top: 1.5rem;">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
             <strong>Coyote Time</strong>
             <span>Aula 2.3 · Game feel</span>
           </div>
@@ -1262,6 +1300,7 @@
             <div class="concept-pill"><strong>[Export]</strong>ajustar feel sem recompilar</div>
             <div class="concept-pill"><strong>IsOnCeiling</strong>cancelar pulo no teto</div>
             <div class="concept-pill"><strong>Feel ratio</strong>JumpForce / Gravity</div>
+            <div class="concept-pill"><strong>Play("idle/run/…")</strong>animação por estado do player</div>
             <div class="concept-pill"><strong>Coyote Time</strong>tolerância de pulo pós-borda</div>
           </div>
         </div>
@@ -1287,7 +1326,7 @@
 
       <div class="lesson-footer">
         <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
-        <a href="modulo-01.html" class="nav-btn disabled">Módulo 03 →</a>
+        <a href="modulo-03.html" class="nav-btn">Módulo 03 →</a>
       </div>
     </div>
 
