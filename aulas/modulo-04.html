@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 04 — Inimigos e coletáveis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F3EE;
+    --border: #E4E2D8;
+    --border-strong: #C8C5B8;
+    --text-primary: #1A1916;
+    --text-secondary: #5A5850;
+    --text-muted: #9A978E;
+    --accent: #2D5A27;
+    --accent-light: #EBF3E8;
+    --accent-mid: #4A8A42;
+    --amber: #8A5A00;
+    --amber-light: #FFF3D6;
+    --blue: #1A3F6B;
+    --blue-light: #E8F0FA;
+    --red: #7A2020;
+    --red-light: #FAEAEA;
+    --purple: #4A2878;
+    --purple-light: #F0EAFA;
+    --code-bg: #F0EFEA;
+    --code-border: #D8D6CE;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+  }
+
+  html { font-size: 16px; background: var(--bg); color: var(--text-primary); }
+  body { font-family: var(--font-body); font-weight: 400; line-height: 1.7; min-height: 100vh; }
+
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-logo .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo .title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sidebar-logo .tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 1.5rem;
+    margin-bottom: 6px;
+  }
+  .sidebar-nav { list-style: none; margin-bottom: 1.5rem; }
+  .sidebar-nav li a {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 1.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-nav li a:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .sidebar-nav li.active a {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-nav li a .nav-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+  .sidebar-nav li.active a .nav-num { color: var(--accent-mid); }
+
+  /* Module accordion nav */
+  .module-list { list-style: none; }
+  .module-item { border-bottom: 1px solid var(--border); }
+  .module-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 1.5rem;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  a.module-item-header:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .module-item.current > .module-item-header {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .module-item.locked { opacity: 0.45; pointer-events: none; }
+  .module-item-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 22px;
+    flex-shrink: 0;
+  }
+  .module-item.current .module-item-num { color: var(--accent-mid); }
+  .module-item-title { flex: 1; }
+  .module-item-tag { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .module-lessons { padding: 4px 0 6px; }
+  .module-lessons li a { padding-left: 2.75rem; }
+
+  main { padding: 3rem 4rem; max-width: 840px; }
+
+  .lesson-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lesson-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .lesson-title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .lesson-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 580px;
+  }
+  .lesson-meta { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .meta-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .meta-pill svg { opacity: 0.5; }
+
+  .lesson-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .lesson-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: var(--font-body);
+  }
+  .lesson-tab:hover { color: var(--text-primary); }
+  .lesson-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .lesson-content { display: none; }
+  .lesson-content.active { display: block; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 2rem 0 0.75rem;
+    line-height: 1.3;
+  }
+  h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin: 1.5rem 0 0.5rem; letter-spacing: 0.01em; }
+  p { margin-bottom: 1rem; color: var(--text-secondary); font-size: 15px; }
+  p strong { color: var(--text-primary); font-weight: 500; }
+
+  .callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; border-left: 3px solid; font-size: 14px; }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+  .callout-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.info { background: var(--blue-light); border-color: var(--blue); }
+  .callout.info .callout-label { color: var(--blue); }
+  .callout.info p { color: #2A4F7A; }
+  .callout.tip { background: var(--accent-light); border-color: var(--accent); }
+  .callout.tip .callout-label { color: var(--accent); }
+  .callout.tip p { color: #2D5A27; }
+  .callout.warning { background: var(--amber-light); border-color: var(--amber); }
+  .callout.warning .callout-label { color: var(--amber); }
+  .callout.warning p { color: #6A4500; }
+  .callout.analogy { background: var(--purple-light); border-color: var(--purple); }
+  .callout.analogy .callout-label { color: var(--purple); }
+  .callout.analogy p { color: #3A1E60; }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; margin: 1.25rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--code-border); background: #E8E7E0; }
+  .code-filename { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .code-lang { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .code-block pre { padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+  .kw { color: #7A3080; font-weight: 500; }
+  .cm { color: #7A9A70; font-style: italic; }
+  .st { color: #A03030; }
+  .nm { color: #1A5A8A; }
+  .fn { color: #2A6A50; }
+  .at { color: #8A5A00; }
+  .tp { color: #4A2878; }
+
+  .diagram-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .diagram-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2; color: var(--text-secondary); white-space: pre; }
+  .tree .node-name { color: var(--text-primary); font-weight: 500; }
+  .tree .node-type { color: var(--accent-mid); font-size: 12px; }
+  .tree .node-script { color: #8A5A00; font-size: 12px; }
+
+  a.doc-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-mid);
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s, color 0.15s;
+  }
+  a.doc-link:hover { text-decoration-style: solid; text-decoration-color: var(--accent); color: var(--accent); }
+  a.doc-link::after { content: " ↗"; font-size: 0.65em; color: var(--accent-mid); vertical-align: super; line-height: 0; transition: color 0.15s; }
+  a.doc-link:hover::after { color: var(--accent); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+  .compare-card .cc-label { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .compare-card ul { list-style: none; }
+  .compare-card ul li { font-size: 13px; color: var(--text-secondary); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
+  .compare-card ul li:last-child { border-bottom: none; }
+  .compare-card ul li::before { content: "—"; color: var(--text-muted); flex-shrink: 0; }
+
+  .steps { margin: 1.5rem 0; }
+  .step { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body > strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .step-body p { font-size: 14px; margin-bottom: 0; }
+
+  .checklist { list-style: none; margin: 1rem 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "○"; color: var(--border-strong); flex-shrink: 0; margin-top: 1px; }
+
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 2rem 0 0; }
+  .summary-card h3 { margin-top: 0; margin-bottom: 1rem; font-size: 14px; }
+  .concepts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .concept-pill { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .concept-pill strong { display: block; font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 2px; }
+
+  .milestone-banner { background: linear-gradient(135deg, var(--accent-light), #F0FAF0); border: 1px solid #C0DDB8; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 2rem 0; display: flex; align-items: flex-start; gap: 14px; }
+  .milestone-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .milestone-icon svg { color: white; }
+  .milestone-text strong { font-size: 14px; color: var(--accent); display: block; margin-bottom: 4px; }
+  .milestone-text p { font-size: 13px; color: #3A6A35; margin: 0; }
+
+  .lesson-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: 13px; color: var(--text-secondary); font-family: var(--font-body); transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--surface-alt); }
+  .nav-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #245020; border-color: #245020; }
+  .nav-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+  .progress-bar { background: var(--border); height: 2px; border-radius: 2px; margin: 1rem 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+  .progress-label { font-size: 11px; color: var(--text-muted); padding: 0 1.5rem; margin-bottom: 1.5rem; }
+
+  code { font-family: var(--font-mono); font-size: 13px; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 6px; color: var(--text-primary); }
+
+  .challenge-header { display: flex; align-items: center; gap: 12px; padding: 1.25rem 1.5rem; background: var(--amber-light); border: 1px solid #E8C870; border-radius: 10px 10px 0 0; }
+  .challenge-icon { width: 36px; height: 36px; background: var(--amber); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .challenge-meta { flex: 1; }
+  .challenge-meta strong { font-size: 15px; font-weight: 500; color: #5A3800; display: block; }
+  .challenge-meta span { font-size: 12px; color: #8A6020; }
+  .difficulty-badge { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.05em; }
+  .diff-medium { background: #FFE8A0; color: #7A4A00; border: 1px solid #E8C870; }
+  .diff-hard { background: #FAEAEA; color: #7A2020; border: 1px solid #E8B0B0; }
+  .challenge-body { border: 1px solid #E8C870; border-top: none; border-radius: 0 0 10px 10px; padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
+  .objective-list { list-style: none; margin: 1rem 0; }
+  .objective-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .objective-list li:last-child { border-bottom: none; }
+  .obj-num { width: 22px; height: 22px; border-radius: 50%; background: var(--amber-light); color: var(--amber); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .hint-accordion { border: 1px solid var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; }
+  .hint-toggle { width: 100%; text-align: left; padding: 12px 16px; background: var(--surface-alt); border: none; cursor: pointer; font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .hint-toggle:hover { background: var(--border); color: var(--text-primary); }
+  .hint-toggle svg { flex-shrink: 0; transition: transform 0.2s; }
+  .hint-toggle.open svg { transform: rotate(180deg); }
+  .hint-body { display: none; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .hint-body.open { display: block; }
+  .hint-body p { font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .hint-body p:last-child { margin-bottom: 0; }
+
+  /* Physics / signal loop diagram */
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .loop-step:last-child { border-bottom: none; }
+  .loop-arrow { color: var(--accent-mid); font-weight: 500; flex-shrink: 0; width: 20px; margin-top: 1px; }
+  .loop-label { font-family: var(--font-mono); color: var(--text-primary); font-weight: 500; min-width: 160px; }
+  .loop-desc { color: var(--text-secondary); }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    main { padding: 2rem 1.5rem; }
+    .compare-grid, .concepts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-logo">
+      <a href="../index.html" style="text-decoration: none; color: inherit;">
+        <div class="eyebrow">Tutorial Godot 4</div>
+        <div class="title">C# · Plataforma 2D</div>
+      </a>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 33%"></div></div>
+    <div class="progress-label" id="progress-label">Módulo 04 · Aula 1 de 3</div>
+
+    <div class="sidebar-section-label">Módulos</div>
+    <ul class="module-list">
+
+      <li class="module-item">
+        <a href="modulo-01.html" class="module-item-header">
+          <span class="module-item-num">01</span>
+          <span class="module-item-title">Como a engine pensa</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-02.html" class="module-item-header">
+          <span class="module-item-num">02</span>
+          <span class="module-item-title">Personagem jogável</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-03.html" class="module-item-header">
+          <span class="module-item-num">03</span>
+          <span class="module-item-title">Mundo e câmera</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item current">
+        <div class="module-item-header">
+          <span class="module-item-num">04</span>
+          <span class="module-item-title">Inimigos e coletáveis</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <ul class="sidebar-nav module-lessons">
+          <li class="active" id="nav-1" onclick="goLesson(1)">
+            <a href="#"><span class="nav-num">4.1</span>Cenas instanciáveis e coletáveis</a>
+          </li>
+          <li id="nav-2" onclick="goLesson(2)">
+            <a href="#"><span class="nav-num">4.2</span>Inimigo com patrulha</a>
+          </li>
+          <li id="nav-3" onclick="goLesson(3)">
+            <a href="#"><span class="nav-num">4.3</span>Pisar na cabeça e tomar dano</a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="module-item locked">
+        <div class="module-item-header">
+          <span class="module-item-num">05</span>
+          <span class="module-item-title">HUD, game loop e exportação</span>
+          <span class="module-item-tag">Em breve</span>
+        </div>
+      </li>
+
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ======================== AULA 4.1 ======================== -->
+    <div class="lesson-content active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 04 · Aula 4.1</div>
+        <h1 class="lesson-title">Cenas instanciáveis e coletáveis</h1>
+        <p class="lesson-subtitle">Transformar uma cena num "molde" reutilizável e usar Area2D para detectar quando o player toca uma moeda — sem colisão física.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Editor + C#
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+      </div>
+
+      <div id="conteudo-1">
+        <h2>Uma cena como molde reutilizável</h2>
+        <p>Até agora cada cena foi uma coisa única: um player, um mundo. Mas uma moeda você quer espalhar às dezenas pelo nível. A pergunta é: como criar muitas cópias de algo sem duplicar nodes na mão?</p>
+        <p>A resposta é o conceito mais poderoso do Godot: qualquer cena salva (<code>.tscn</code>) pode virar um <strong>molde</strong> — um <a href="https://docs.godotengine.org/en/stable/classes/class_packedscene.html" target="_blank" rel="noopener" class="doc-link"><code>PackedScene</code></a>. A partir desse molde você cria quantas <strong>instâncias</strong> quiser, cada uma independente, todas seguindo o mesmo projeto. Editar a cena-molde atualiza todas as cópias de uma vez.</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">A forma de bolo</div>
+          <p>Uma cena instanciável é como uma forma de bolo: você desenha o formato uma vez e assa quantos bolos quiser. Mudar a forma muda todos os próximos bolos. Cada bolo (instância) é separado — comer um não afeta os outros.</p>
+        </div>
+
+        <h2>Area2D: detectar sem empurrar</h2>
+        <p>Uma moeda não deve <em>bloquear</em> o player como o chão faz — ela só precisa <em>perceber</em> quando foi tocada e então sumir. Para isso existe a <a href="https://docs.godotengine.org/en/stable/classes/class_area2d.html" target="_blank" rel="noopener" class="doc-link"><code>Area2D</code></a>: um node que detecta sobreposição com outros corpos físicos, mas não aplica colisão.</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--blue);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html" target="_blank" rel="noopener" class="doc-link">CharacterBody2D / StaticBody2D</a>
+            </div>
+            <ul>
+              <li>Corpo <strong>sólido</strong>: bloqueia o movimento</li>
+              <li>O player para ao encostar</li>
+              <li>Usado para chão, paredes, plataformas</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <div class="cc-label" style="color: var(--accent);">
+              <a href="https://docs.godotengine.org/en/stable/classes/class_area2d.html" target="_blank" rel="noopener" class="doc-link">Area2D</a>
+            </div>
+            <ul>
+              <li>Zona <strong>fantasma</strong>: o player atravessa</li>
+              <li>Apenas <em>avisa</em> que houve contato</li>
+              <li>Usado para moedas, gatilhos, zonas de dano</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>Signals: a Area2D avisa quando algo entra</h2>
+        <p>No Módulo 01 você viu signals — a forma do Godot de dizer "algo aconteceu". A <code>Area2D</code> emite o signal <a href="https://docs.godotengine.org/en/stable/classes/class_area2d.html#class-area2d-signal-body-entered" target="_blank" rel="noopener" class="doc-link"><code>body_entered</code></a> sempre que um corpo físico — como o <code>Player</code> — entra na sua zona. Conectamos esse signal a um método e reagimos.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Do contato à coleta</div>
+          <div class="loop-step">
+            <div class="loop-arrow">1</div>
+            <div class="loop-label">Player entra na Area2D</div>
+            <div class="loop-desc">O <code>CharacterBody2D</code> sobrepõe o <code>CollisionShape2D</code> da moeda</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">2</div>
+            <div class="loop-label">body_entered emitido</div>
+            <div class="loop-desc">A <code>Area2D</code> dispara o signal, passando o corpo que entrou</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">3</div>
+            <div class="loop-label">Método reage</div>
+            <div class="loop-desc">Confirmamos que é o player e chamamos a lógica de coleta</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">4</div>
+            <div class="loop-label">QueueFree()</div>
+            <div class="loop-desc">A moeda se remove da cena com segurança</div>
+          </div>
+        </div>
+
+        <h2>O script da moeda</h2>
+        <p>O script vive na cena-molde da moeda. Como todo corpo físico pode disparar o signal, é boa prática confirmar que foi mesmo o player que entrou — por grupo ou por tipo:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Coin.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">Coin</span> : <span class="tp">Area2D</span>
+{
+    <span class="cm">// Conectado ao signal body_entered da própria Area2D</span>
+    <span class="kw">private void</span> <span class="fn">OnBodyEntered</span>(<span class="tp">Node2D</span> body)
+    {
+        <span class="cm">// Só o player coleta — ignora inimigos e outros corpos</span>
+        <span class="kw">if</span> (body.<span class="fn">IsInGroup</span>(<span class="st">"player"</span>))
+        {
+            <span class="cm">// (No Módulo 05: somar pontos ao HUD aqui)</span>
+            <span class="fn">QueueFree</span>(); <span class="cm">// remove a moeda da cena</span>
+        }
+    }
+}</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">QueueFree, não Free</div>
+          <p>Use sempre <code>QueueFree()</code> para remover um node durante o jogo. Ele agenda a remoção para o fim do frame atual, quando é seguro. Chamar <code>Free()</code> no meio de um signal de física pode derrubar o jogo, porque o node ainda está sendo processado.</p>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Grupos</div>
+          <p>Um <strong>grupo</strong> é uma etiqueta que você cola num node pela aba <em>Node → Groups</em> no editor. Colocar o <code>Player</code> no grupo <code>"player"</code> permite que qualquer script pergunte <code>IsInGroup("player")</code> sem precisar conhecer o tipo exato — desacoplando a moeda do player.</p>
+        </div>
+      </div>
+
+      <div id="pratica-1" style="display:none">
+        <h2>Criar uma moeda coletável</h2>
+        <p>Vamos montar a cena-molde da moeda, dar a ela detecção por <code>Area2D</code> e espalhar várias cópias pelo nível do Módulo 03.</p>
+
+        <div class="callout info">
+          <div class="callout-label">Projeto base deste módulo</div>
+          <p>Continue do projeto do Módulo 03 (com nível em tiles, câmera e parallax). As imagens de moeda/cereja do Sunny Land estão em <code>res://assets/</code>, prontas para virar um <code>AnimatedSprite2D</code> ou <code>Sprite2D</code>.</p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Marque o player com um grupo</strong>
+              <p>Abra <code>Player.tscn</code>, selecione o node raiz <code>Player</code>, vá na aba <strong>Node → Groups</strong> e adicione o grupo <code>player</code>. É isso que a moeda vai checar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Crie a cena da moeda</strong>
+              <p>Cena nova com <code>Area2D</code> como raiz, renomeada para <code>Coin</code>. Adicione como filhos um <code>AnimatedSprite2D</code> (com a moeda do Sunny Land) e um <code>CollisionShape2D</code> com um círculo cobrindo a moeda. Salve como <code>Coin.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Anexe o script</strong>
+              <p>Crie <code>Coin.cs</code> herdando de <code>Area2D</code> (código da aba Conteúdo) e anexe ao node <code>Coin</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Conecte o signal</strong>
+              <p>Com o node <code>Coin</code> selecionado, na aba <strong>Node → Signals</strong>, dê duplo clique em <code>body_entered</code> e conecte ao método <code>OnBodyEntered</code>. Confirme que a assinatura bate com a do script.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Instancie no mundo</strong>
+              <p>Abra <code>World.tscn</code>. Clique no ícone de <em>corrente</em> (Instantiate Child Scene) ou arraste <code>Coin.tscn</code> do FileSystem para a cena. Posicione a moeda sobre uma plataforma. Repita para criar várias.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Teste a coleta</strong>
+              <p>Pressione F5 e ande até uma moeda. Ela deve desaparecer ao toque, sem frear o player, e as outras moedas devem continuar intactas.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Editou o molde, atualizou todas</div>
+          <p>Mude algo em <code>Coin.tscn</code> — o tamanho do collision shape, a animação — e salve. Todas as instâncias no <code>World.tscn</code> herdam a mudança automaticamente. Esse é o poder de instanciar a partir de um molde.</p>
+        </div>
+      </div>
+
+      <div id="desafio-1" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Cereja com efeito de coleta</strong>
+            <span>Aula 4.1 · Area2D + signals</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Coletar sem feedback é sem graça. Crie um segundo coletável — a cereja do Sunny Land — que dá um retorno visual antes de sumir, em vez de desaparecer instantaneamente.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Duplique a estrutura da moeda numa nova cena <code>Cherry.tscn</code> (Area2D + sprite + collision)</li>
+            <li><div class="obj-num">2</div>No <code>OnBodyEntered</code>, em vez de chamar <code>QueueFree()</code> direto, dispare uma animação de coleta (ex.: brilho/encolher)</li>
+            <li><div class="obj-num">3</div>Desative o <code>CollisionShape2D</code> assim que coletada, para não disparar o signal duas vezes</li>
+            <li><div class="obj-num">4</div>Só chame <code>QueueFree()</code> quando a animação terminar (use o signal <code>animation_finished</code>)</li>
+            <li><div class="obj-num">5</div>Espalhe algumas cerejas pelo nível e confirme que cada uma toca a animação antes de sumir</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Para desativar a colisão com segurança dentro de um signal de física, use <code>SetDeferred("disabled", true)</code> no <code>CollisionShape2D</code> — alterar a física no meio do frame exige o "deferred".</p>
+              <p>Conecte o signal <code>animation_finished</code> do <code>AnimatedSprite2D</code> a um método que chama <code>QueueFree()</code>. Assim a moeda só some quando o efeito acaba — o jogador <em>vê</em> que coletou.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-1" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>PackedScene</strong>cena como molde</div>
+            <div class="concept-pill"><strong>Instância</strong>cópia independente</div>
+            <div class="concept-pill"><strong>Area2D</strong>detecta sem bloquear</div>
+            <div class="concept-pill"><strong>body_entered</strong>signal de contato</div>
+            <div class="concept-pill"><strong>Grupos</strong>identificar o player</div>
+            <div class="concept-pill"><strong>QueueFree</strong>remover com segurança</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Qual a diferença entre uma cena-molde e uma instância dela?</li>
+          <li>Por que uma moeda usa <code>Area2D</code> em vez de um corpo sólido?</li>
+          <li>O que o signal <code>body_entered</code> entrega ao método conectado?</li>
+          <li>Por que usar <code>QueueFree()</code> em vez de <code>Free()</code> durante o jogo?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <a href="modulo-03.html" class="nav-btn">← Módulo 03</a>
+        <button class="nav-btn" onclick="goLesson(2)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 4.2 ======================== -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 04 · Aula 4.2</div>
+        <h1 class="lesson-title">Inimigo com patrulha</h1>
+        <p class="lesson-subtitle">Dar vida ao mundo com um inimigo que anda de um lado para o outro e dá meia-volta ao chegar na beira da plataforma ou numa parede.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            C# + física
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
+      </div>
+
+      <div id="conteudo-2">
+        <h2>O inimigo é um CharacterBody2D também</h2>
+        <p>Boa notícia: o inimigo usa a mesma base do player. Um <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html" target="_blank" rel="noopener" class="doc-link"><code>CharacterBody2D</code></a> com gravidade e <code>MoveAndSlide()</code>, exatamente como no Módulo 02. A diferença é o "cérebro": em vez de ler o input do teclado, o inimigo decide sozinho para onde andar.</p>
+        <p>A patrulha mais simples: andar numa direção até bater em algo, então inverter. O desafio é o inimigo saber <em>quando</em> virar — antes de cair da plataforma ou ao encostar numa parede.</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">O robô de brinquedo</div>
+          <p>Pense num robozinho de corda que anda reto até bater na parede e gira. Nosso inimigo é igual — só que adicionamos um "sensor" que também olha para baixo, para ele não andar reto para fora da plataforma como um lemingue.</p>
+        </div>
+
+        <h2>RayCast2D: os sensores do inimigo</h2>
+        <p>Como o inimigo "enxerga" a beirada e a parede? Com o <a href="https://docs.godotengine.org/en/stable/classes/class_raycast2d.html" target="_blank" rel="noopener" class="doc-link"><code>RayCast2D</code></a>: um raio invisível que dispara numa direção e informa se acertou algo. Dois raios bastam:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Dois sensores na frente do inimigo</div>
+          <div class="loop-step">
+            <div class="loop-arrow">↓</div>
+            <div class="loop-label">RayCast do chão</div>
+            <div class="loop-desc">Aponta para baixo, à frente dos pés. Se <em>não</em> acertar chão → tem um abismo → vire</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">→</div>
+            <div class="loop-label">RayCast da parede</div>
+            <div class="loop-desc">Aponta para a frente, na altura do corpo. Se acertar algo → tem uma parede → vire</div>
+          </div>
+        </div>
+
+        <p>A lógica de virada é só inverter a direção e espelhar tanto o sprite quanto os sensores, para eles sempre olharem para onde o inimigo anda.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Estrutura da cena do inimigo</div>
+          <div class="tree"><span class="node-name">Enemy</span>  <span class="node-type">(CharacterBody2D)</span>  <span class="node-script">Enemy.cs</span>
+├── <span class="node-name">AnimatedSprite2D</span>
+├── <span class="node-name">CollisionShape2D</span>
+├── <span class="node-name">FloorRay</span>     <span class="node-type">(RayCast2D)  → para baixo</span>
+└── <span class="node-name">WallRay</span>      <span class="node-type">(RayCast2D)  → para a frente</span></div>
+        </div>
+
+        <h2>O script de patrulha</h2>
+        <p>No <code>_PhysicsProcess</code>: aplicar gravidade, mover na direção atual e checar os sensores. Se faltar chão à frente ou houver parede, inverte a direção.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Enemy.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">Enemy</span> : <span class="tp">CharacterBody2D</span>
+{
+    [<span class="tp">Export</span>] <span class="kw">public float</span> Speed = <span class="nm">40f</span>;
+    [<span class="tp">Export</span>] <span class="kw">public float</span> Gravity = <span class="nm">900f</span>;
+
+    <span class="kw">private int</span> _direction = <span class="nm">1</span>; <span class="cm">// 1 = direita, -1 = esquerda</span>
+    <span class="kw">private</span> <span class="tp">RayCast2D</span> _floorRay;
+    <span class="kw">private</span> <span class="tp">RayCast2D</span> _wallRay;
+    <span class="kw">private</span> <span class="tp">AnimatedSprite2D</span> _sprite;
+
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        _floorRay = <span class="fn">GetNode</span>&lt;<span class="tp">RayCast2D</span>&gt;(<span class="st">"FloorRay"</span>);
+        _wallRay  = <span class="fn">GetNode</span>&lt;<span class="tp">RayCast2D</span>&gt;(<span class="st">"WallRay"</span>);
+        _sprite   = <span class="fn">GetNode</span>&lt;<span class="tp">AnimatedSprite2D</span>&gt;(<span class="st">"AnimatedSprite2D"</span>);
+    }
+
+    <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+    {
+        <span class="tp">Vector2</span> velocity = Velocity;
+        velocity.Y += Gravity * (<span class="kw">float</span>)delta; <span class="cm">// gravidade</span>
+        velocity.X = _direction * Speed;        <span class="cm">// patrulha</span>
+
+        <span class="cm">// Vira se faltar chão à frente OU houver parede</span>
+        <span class="kw">if</span> (IsOnFloor() &amp;&amp; (!_floorRay.<span class="fn">IsColliding</span>() || _wallRay.<span class="fn">IsColliding</span>()))
+            <span class="fn">Flip</span>();
+
+        Velocity = velocity;
+        <span class="fn">MoveAndSlide</span>();
+    }
+
+    <span class="kw">private void</span> <span class="fn">Flip</span>()
+    {
+        _direction *= <span class="nm">-1</span>;
+        _sprite.FlipH = _direction &lt; <span class="nm">0</span>;
+        <span class="cm">// Espelha os sensores para a nova direção</span>
+        _floorRay.Position = <span class="kw">new</span> <span class="tp">Vector2</span>(<span class="tp">Mathf</span>.<span class="fn">Abs</span>(_floorRay.Position.X) * _direction, _floorRay.Position.Y);
+        _wallRay.TargetPosition = <span class="kw">new</span> <span class="tp">Vector2</span>(<span class="tp">Mathf</span>.<span class="fn">Abs</span>(_wallRay.TargetPosition.X) * _direction, _wallRay.TargetPosition.Y);
+    }
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">[Export] para ajustar sem recompilar</div>
+          <p>Marcar <code>Speed</code> e <code>Gravity</code> com <code>[Export]</code> faz esses valores aparecerem no Inspector. Você ajusta a velocidade de cada inimigo direto no editor — um lento, outro rápido — sem tocar no código.</p>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Posicione bem os raios</div>
+          <p>O <code>FloorRay</code> deve ficar <em>à frente</em> dos pés do inimigo e apontar para baixo o suficiente para detectar a falta de chão. Se ele estiver curto demais ou no centro do corpo, o inimigo vira tarde demais e cai. Veja os raios em <strong>Debug → Visible Collision Shapes</strong>.</p>
+        </div>
+      </div>
+
+      <div id="pratica-2" style="display:none">
+        <h2>Montar o inimigo patrulheiro</h2>
+        <p>Vamos criar a cena do inimigo com os dois sensores, anexar o script de patrulha e instanciá-lo sobre uma plataforma do nível.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Crie a cena do inimigo</strong>
+              <p>Cena nova com <code>CharacterBody2D</code> como raiz, renomeada para <code>Enemy</code>. Adicione <code>AnimatedSprite2D</code> (com um inimigo do Sunny Land, ex.: o opossum) e um <code>CollisionShape2D</code>. Salve como <code>Enemy.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Adicione o sensor de chão</strong>
+              <p>Adicione um <code>RayCast2D</code> chamado <code>FloorRay</code>. Posicione-o à frente dos pés (ex.: <code>x = 10</code>) e ajuste o <code>Target Position</code> para apontar para baixo (ex.: <code>0, 12</code>). Marque <code>Enabled</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Adicione o sensor de parede</strong>
+              <p>Adicione outro <code>RayCast2D</code> chamado <code>WallRay</code>, na altura do corpo, com <code>Target Position</code> apontando para a frente (ex.: <code>12, 0</code>). Marque <code>Enabled</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Anexe o script</strong>
+              <p>Crie <code>Enemy.cs</code> (código da aba Conteúdo) e anexe ao node <code>Enemy</code>. Confirme que os nomes dos nodes batem com os <code>GetNode</code> do <code>_Ready</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Instancie no nível</strong>
+              <p>No <code>World.tscn</code>, instancie <code>Enemy.tscn</code> sobre uma plataforma com bordas. Ative <strong>Debug → Visible Collision Shapes</strong> para enxergar os raios.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Teste a patrulha</strong>
+              <p>Pressione F5. O inimigo deve andar até a beirada, dar meia-volta antes de cair, e inverter também ao bater numa parede — repetindo o trajeto indefinidamente.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Ponto de verificação</div>
+          <p>O inimigo deve: (1) andar continuamente numa direção, (2) virar antes de cair da plataforma, (3) virar ao encostar numa parede, (4) ter o sprite e os sensores espelhados na direção do movimento.</p>
+        </div>
+      </div>
+
+      <div id="desafio-2" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Inimigo que detecta o player</strong>
+            <span>Aula 4.2 · RayCast + Area2D</span>
+          </div>
+          <span class="difficulty-badge diff-hard">Difícil</span>
+        </div>
+        <div class="challenge-body">
+          <p>Um inimigo que só anda em linha reta é previsível. Faça-o reagir ao player: quando o personagem entra num campo de visão à frente, o inimigo acelera (persegue) na direção dele.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione uma <code>Area2D</code> de "visão" à frente do inimigo (um <code>CollisionShape2D</code> retangular largo)</li>
+            <li><div class="obj-num">2</div>Conecte <code>body_entered</code> e <code>body_exited</code> para saber quando o player está à vista</li>
+            <li><div class="obj-num">3</div>Crie um estado: enquanto o player está visível, use uma <code>Speed</code> maior (perseguição)</li>
+            <li><div class="obj-num">4</div>Garanta que ele ainda respeita o <code>FloorRay</code> — não persegue para fora da plataforma</li>
+            <li><div class="obj-num">5</div>Ao perder o player de vista, volte à patrulha normal</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Guarde uma referência ao player quando ele entra na área de visão (<code>body_entered</code>) e limpe-a quando sai (<code>body_exited</code>). Um <code>bool _chasing</code> ou um campo <code>Node2D _target</code> basta para alternar o comportamento.</p>
+              <p>Para perseguir, defina <code>_direction</code> com base no sinal de <code>_target.GlobalPosition.X - GlobalPosition.X</code>. Mantenha a checagem do <code>FloorRay</code> ativa para o inimigo não se jogar no abismo atrás do player.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-2" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Enemy</strong>CharacterBody2D com IA</div>
+            <div class="concept-pill"><strong>Patrulha</strong>andar e inverter</div>
+            <div class="concept-pill"><strong>RayCast2D</strong>sensor invisível</div>
+            <div class="concept-pill"><strong>Beira / parede</strong>quando virar</div>
+            <div class="concept-pill"><strong>Flip</strong>espelhar sprite e raios</div>
+            <div class="concept-pill"><strong>[Export]</strong>ajustar no Inspector</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que o inimigo usa o mesmo <code>CharacterBody2D</code> do player?</li>
+          <li>Para que servem os dois <code>RayCast2D</code> na patrulha?</li>
+          <li>O que precisa ser espelhado quando o inimigo dá meia-volta?</li>
+          <li>Por que checar <code>IsOnFloor()</code> antes de decidir virar?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
+        <button class="nav-btn" onclick="goLesson(3)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 4.3 ======================== -->
+    <div class="lesson-content" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 04 · Aula 4.3</div>
+        <h1 class="lesson-title">Pisar na cabeça e tomar dano</h1>
+        <p class="lesson-subtitle">A interação clássica de plataforma: pular sobre o inimigo o derrota, mas encostar de lado machuca o player.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            C# + lógica de jogo
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
+      </div>
+
+      <div id="conteudo-3">
+        <h2>O problema: o mesmo contato, dois resultados</h2>
+        <p>Player e inimigo se tocaram. O jogo precisa decidir: o player <em>pisou</em> na cabeça (inimigo morre) ou <em>esbarrou</em> de lado (player se machuca)? O mesmo evento de colisão tem dois desfechos opostos — e a diferença está em <strong>de onde</strong> veio o contato.</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">O critério de Mario</div>
+          <p>A regra que todo jogo de plataforma usa: se o player está <em>acima</em> do inimigo e <em>caindo</em>, foi um pisão — vitória. Caso contrário, foi um encontro lateral — dano. Vamos traduzir "acima e caindo" em código.</p>
+        </div>
+
+        <h2>Detectando o pisão: a Area2D na cabeça</h2>
+        <p>A forma mais limpa: dar ao inimigo uma <code>Area2D</code> só na <strong>parte de cima</strong> (a "Hitbox da cabeça"). Se o player entra por ali enquanto está caindo, foi pisão. O contato em qualquer outro lugar conta como dano ao player.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Duas zonas no inimigo</div>
+          <div class="loop-step">
+            <div class="loop-arrow">▲</div>
+            <div class="loop-label">StompArea (cabeça)</div>
+            <div class="loop-desc">Area2D fina no topo. Player caindo entra aqui → inimigo morre</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">■</div>
+            <div class="loop-label">HurtArea (corpo)</div>
+            <div class="loop-desc">Area2D no resto do corpo. Player entra aqui → player toma dano</div>
+          </div>
+        </div>
+
+        <h2>"Acima e caindo" em código</h2>
+        <p>Confirmamos o pisão com duas condições: a velocidade vertical do player é positiva (caindo, em Godot Y cresce para baixo) e ele está acima do inimigo. Ao confirmar, o inimigo morre e o player ganha um pequeno "quique" para cima — o feedback satisfatório do pulo no inimigo.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Enemy.cs — detecção de pisão</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="cm">// Conectado ao body_entered da StompArea (no topo do inimigo)</span>
+<span class="kw">private void</span> <span class="fn">OnStompAreaBodyEntered</span>(<span class="tp">Node2D</span> body)
+{
+    <span class="kw">if</span> (!body.<span class="fn">IsInGroup</span>(<span class="st">"player"</span>)) <span class="kw">return</span>;
+
+    <span class="kw">if</span> (body <span class="kw">is</span> <span class="tp">CharacterBody2D</span> player &amp;&amp; player.Velocity.Y &gt; <span class="nm">0</span>)
+    {
+        <span class="cm">// Player vinha caindo sobre a cabeça → pisão válido</span>
+        player.<span class="fn">Bounce</span>();   <span class="cm">// quique para cima (método no Player)</span>
+        <span class="fn">Die</span>();              <span class="cm">// remove o inimigo</span>
+    }
+}
+
+<span class="kw">private void</span> <span class="fn">Die</span>()
+{
+    <span class="cm">// (Opcional: tocar animação de morte antes do QueueFree)</span>
+    <span class="fn">QueueFree</span>();
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Player.cs — quique e dano</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre>[<span class="tp">Export</span>] <span class="kw">public float</span> BounceForce = <span class="nm">300f</span>;
+
+<span class="kw">public void</span> <span class="fn">Bounce</span>()
+{
+    <span class="tp">Vector2</span> v = Velocity;
+    v.Y = -BounceForce; <span class="cm">// empurra para cima após o pisão</span>
+    Velocity = v;
+}
+
+<span class="cm">// Conectado ao body_entered da HurtArea do inimigo</span>
+<span class="kw">public void</span> <span class="fn">TakeDamage</span>()
+{
+    <span class="cm">// (No Módulo 05: descontar uma vida, piscar, knockback)</span>
+    <span class="tp">GD</span>.<span class="fn">Print</span>(<span class="st">"Player tomou dano!"</span>);
+}</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Ordem das checagens importa</div>
+          <p>O pisão precisa ter prioridade. Se as duas áreas dispararem no mesmo frame, trate primeiro o pisão e ignore o dano — senão o player morre <em>e</em> mata o inimigo ao mesmo tempo. Uma <code>HurtArea</code> menor, sem cobrir o topo, evita a maioria desses casos.</p>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Por enquanto, só um Print</div>
+          <p>Vidas, HUD e tela de game over chegam no Módulo 05. Aqui o <code>TakeDamage()</code> só registra o dano com <code>GD.Print</code> — o importante é a <em>detecção</em> estar correta. A consequência visual vem depois.</p>
+        </div>
+      </div>
+
+      <div id="pratica-3" style="display:none">
+        <h2>Implementar pisão e dano</h2>
+        <p>Vamos dar ao inimigo da aula anterior as duas zonas de interação e ligar a lógica de pisão no inimigo e de dano no player.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Adicione a StompArea</strong>
+              <p>No <code>Enemy.tscn</code>, adicione uma <code>Area2D</code> chamada <code>StompArea</code> com um <code>CollisionShape2D</code> fino, posicionado no <em>topo</em> do inimigo (a "cabeça").</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Adicione a HurtArea</strong>
+              <p>Adicione outra <code>Area2D</code> chamada <code>HurtArea</code> cobrindo o corpo (sem invadir o topo). É ela que vai machucar o player.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Ligue o pisão</strong>
+              <p>Conecte o <code>body_entered</code> da <code>StompArea</code> ao método <code>OnStompAreaBodyEntered</code> no <code>Enemy.cs</code>. Adicione os métodos <code>Die()</code> e a checagem de <code>Velocity.Y &gt; 0</code> (código da aba Conteúdo).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Adicione Bounce e TakeDamage ao player</strong>
+              <p>No <code>Player.cs</code>, adicione os métodos <code>Bounce()</code> e <code>TakeDamage()</code>. Confirme que o player está no grupo <code>player</code> (Aula 4.1).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Ligue o dano</strong>
+              <p>Conecte o <code>body_entered</code> da <code>HurtArea</code> a um método que chame <code>TakeDamage()</code> no player. Verifique <code>IsInGroup("player")</code> antes de aplicar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Teste os dois casos</strong>
+              <p>F5. Pule sobre o inimigo: ele deve morrer e o player quicar. Encoste de lado: o console deve imprimir "Player tomou dano!". Ajuste o tamanho das áreas até os dois casos ficarem confiáveis.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Veja as áreas durante o teste</div>
+          <p>Mantenha <strong>Debug → Visible Collision Shapes</strong> ligado. Ver a <code>StompArea</code> e a <code>HurtArea</code> desenhadas ajuda a entender por que um pisão virou dano (ou vice-versa) e a ajustar os tamanhos.</p>
+        </div>
+      </div>
+
+      <div id="desafio-3" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Invencibilidade temporária e knockback</strong>
+            <span>Aula 4.3 · Estado e timers</span>
+          </div>
+          <span class="difficulty-badge diff-hard">Difícil</span>
+        </div>
+        <div class="challenge-body">
+          <p>Tomar dano repetido no mesmo segundo é injusto. Dê ao player um período curto de invencibilidade após ser atingido, com um empurrão (knockback) e o sprite piscando — o padrão de quase todo jogo de plataforma.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione um estado <code>_invincible</code> ao player e ignore <code>TakeDamage()</code> enquanto ele estiver ativo</li>
+            <li><div class="obj-num">2</div>Use um <code>Timer</code> (ou contador por <code>delta</code>) de ~1 segundo para desligar a invencibilidade</li>
+            <li><div class="obj-num">3</div>No dano, aplique um knockback: empurre o player para cima e para o lado oposto ao inimigo</li>
+            <li><div class="obj-num">4</div>Faça o sprite piscar durante a invencibilidade (alternar <code>Visible</code> ou a <code>Modulate</code>)</li>
+            <li><div class="obj-num">5</div>Teste: ao tomar dano, o player recua, pisca e fica imune por um instante antes de poder ser atingido de novo</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Para o knockback, calcule a direção a partir das posições: <code>Mathf.Sign(GlobalPosition.X - enemy.GlobalPosition.X)</code> dá o lado para onde empurrar. Passe a referência do inimigo no <code>TakeDamage</code> para saber de onde veio o golpe.</p>
+              <p>Para piscar, anime a <code>Modulate.A</code> (alpha) num <code>Tween</code>, ou alterne <code>Visible</code> a cada poucos frames. Um <code>Timer</code> com <code>OneShot</code> ligado ao fim da invencibilidade mantém a lógica limpa.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-3" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Stomp</strong>pisão na cabeça</div>
+            <div class="concept-pill"><strong>StompArea</strong>zona no topo</div>
+            <div class="concept-pill"><strong>HurtArea</strong>zona de dano</div>
+            <div class="concept-pill"><strong>Velocity.Y &gt; 0</strong>"caindo"</div>
+            <div class="concept-pill"><strong>Bounce</strong>quique após pisar</div>
+            <div class="concept-pill"><strong>TakeDamage</strong>gancho para o HUD</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Como o jogo distingue um pisão de um encontro lateral?</li>
+          <li>Por que <code>Velocity.Y &gt; 0</code> significa que o player está caindo?</li>
+          <li>Por que o pisão deve ter prioridade sobre o dano no mesmo frame?</li>
+          <li>O que ficou só como <code>GD.Print</code> esperando o Módulo 05?</li>
+        </ul>
+
+        <div class="milestone-banner" style="margin-top: 2rem;">
+          <div class="milestone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="milestone-text">
+            <strong>Módulo 04 completo!</strong>
+            <p>Seu mundo tem coletáveis, inimigos que patrulham e a interação de combate por pisão. O Módulo 05 fecha o jogo: HUD com pontos e vidas, game over, transições de cena e exportação para desktop.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
+        <a href="../index.html" class="nav-btn disabled">Módulo 05 →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let currentLesson = 1;
+
+  function goLesson(n) {
+    document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('lesson-' + n).classList.add('active');
+    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
+    document.getElementById('nav-' + n).classList.add('active');
+    currentLesson = n;
+    document.getElementById('progress-fill').style.width = (n / 3 * 100) + '%';
+    document.getElementById('progress-label').textContent = 'Módulo 04 · Aula ' + n + ' de 3';
+    window.scrollTo(0, 0);
+
+    const tabs = document.querySelectorAll('#lesson-' + n + ' .lesson-tab');
+    if (tabs.length) {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[0].classList.add('active');
+      const firstId = tabs[0].getAttribute('onclick').match(/'([^']+)'/)[1];
+      document.querySelectorAll('#lesson-' + n + ' [id^="conteudo-"], #lesson-' + n + ' [id^="pratica-"], #lesson-' + n + ' [id^="desafio-"], #lesson-' + n + ' [id^="resumo-"]').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById(firstId).style.display = 'block';
+    }
+  }
+
+  function switchTab(btn, targetId) {
+    const lesson = btn.closest('.lesson-content');
+    lesson.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const lessonNum = lesson.id.split('-')[1];
+    ['conteudo', 'pratica', 'desafio', 'resumo'].forEach(prefix => {
+      const el = document.getElementById(prefix + '-' + lessonNum);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById(targetId).style.display = 'block';
+  }
+
+  function toggleHint(btn) {
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
