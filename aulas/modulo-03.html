@@ -538,66 +538,93 @@
           <div class="callout-label">Performance</div>
           <p>O <code>TileMapLayer</code> mescla a colisão de tiles vizinhos e renderiza tudo numa passada só. Um nível com milhares de tiles é muito mais leve que milhares de <code>Sprite2D</code> + <code>StaticBody2D</code> separados.</p>
         </div>
+
+        <h2>Como o <code>mapa_1</code> já vem montado</h2>
+        <p>Desenhar um nível inteiro e definir a colisão tile a tile leva tempo — e não é o foco aqui. Por isso o projeto base já traz o cenário <strong>pronto</strong> em <code>mapa_1.tscn</code>, com todos os conceitos acima já aplicados. Vale conhecer essa estrutura antes da prática:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Estrutura de mapa_1.tscn</div>
+          <div class="loop-step">
+            <div class="loop-label"><code>Mapa1</code> <span style="color: var(--text-muted);">(Node2D)</span></div>
+            <div class="loop-desc">O node raiz da cena do nível.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label">↳ <code>Tiles</code> <span style="color: var(--text-muted);">(instância de tiles.tscn)</span></div>
+            <div class="loop-desc">O cenário em si vive numa cena separada, <code>tiles.tscn</code>, instanciada aqui. Assim o mesmo conjunto de tiles pode ser reaproveitado em outros mapas.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label">&nbsp;&nbsp;&nbsp;↳ <code>tileset</code> <span style="color: var(--text-muted);">(TileMapLayer)</span></div>
+            <div class="loop-desc">A camada onde os tiles foram pintados. É nela que o <code>TileSet</code> está configurado.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label">↳ <code>Player</code> <span style="color: var(--text-muted);">(instância de player.tscn)</span></div>
+            <div class="loop-desc">O personagem do Módulo 02, já posicionado sobre o chão.</div>
+          </div>
+        </div>
+
+        <p>E o <code>TileSet</code> desse <code>tileset</code> já foi configurado exatamente como descrito acima:</p>
+        <ul class="checklist">
+          <li>Uma <strong>Atlas Source</strong> a partir de <code>res://Assets/environment/tileset.png</code>, recortada em tiles de <code>16×16</code></li>
+          <li>Uma <strong>Physics Layer</strong> com o polígono de colisão desenhado nos tiles sólidos (chão e blocos)</li>
+        </ul>
+
+        <div class="callout tip">
+          <div class="callout-label">Você não vai refazer isso</div>
+          <p>Como o mapa já está montado, na prática a seguir você só vai <strong>pintar alguns tiles</strong> para sentir o fluxo e <strong>ativar a colisão one-way</strong> numa plataforma — a mecânica de "pular e atravessar por baixo, pousar em cima". Construir um nível do zero fica como exercício livre depois.</p>
+        </div>
       </div>
 
       <div id="pratica-1" style="display:none">
-        <h2>Pintar o primeiro nível</h2>
-        <p>Vamos transformar o <code>World.tscn</code> do projeto base num nível de verdade, pintado com tiles do Sunny Land e com colisão funcional.</p>
+        <h2>Pintar tiles e criar uma plataforma atravessável</h2>
+        <p>O nível já vem pronto em <code>mapa_1.tscn</code>. Aqui o foco não é construir do zero, e sim <strong>sentir o fluxo de pintura</strong> e implementar uma mecânica clássica de plataforma: a colisão <strong>one-way</strong>, em que o player sobe atravessando a plataforma por baixo e pousa em cima dela.</p>
 
         <div class="callout info">
           <div class="callout-label">Projeto base deste módulo</div>
-          <p>Continue do projeto do Módulo 02 (com o <code>Player.cs</code> funcional) ou baixe o projeto base já atualizado. Ele inclui as tilesheets e imagens de fundo do Sunny Land em <code>res://assets/</code>, prontas para serem importadas no <code>TileSet</code> e nas camadas de parallax. Os tiles do pack são de <code>16×16</code>.</p>
-          <a href="#" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: var(--accent); color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">⬇ Baixar projeto base</a>
+          <p>Continue do projeto do Módulo 02 (com o <code>Player.cs</code> funcional) ou baixe o projeto base já atualizado. Ele já traz o cenário montado em <code>mapa_1.tscn</code> e as imagens do Sunny Land em <code>res://Assets/</code>. Os tiles do pack são de <code>16×16</code>.</p>
+          <a href="https://github.com/pereiratf/godot-tutorial-starter/releases/latest" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: var(--accent); color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">⬇ Baixar projeto base</a>
         </div>
 
         <div class="steps">
           <div class="step">
             <div class="step-num">1</div>
             <div class="step-body">
-              <strong>Adicione um TileMapLayer ao mundo</strong>
-              <p>Abra <code>World.tscn</code>. Com o node raiz selecionado, adicione um filho <code>TileMapLayer</code>. Renomeie para <code>Ground</code> para deixar claro o papel dessa camada.</p>
+              <strong>Abra o mapa e observe a estrutura</strong>
+              <p>Abra <code>mapa_1.tscn</code>. Na árvore de Cena, expanda <code>Tiles</code> e selecione o node <code>tileset</code> (o <code>TileMapLayer</code>). Confirme que ele tem um <code>TileSet</code> no Inspector — é o cenário que você viu na aba Conteúdo, já pronto.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
-              <strong>Crie o TileSet</strong>
-              <p>Com o <code>Ground</code> selecionado, no Inspector, no campo <code>Tile Set</code>, clique em <code>New TileSet</code>. Um painel <strong>TileSet</strong> abre na parte de baixo do editor.</p>
+              <strong>Pinte e apague alguns tiles</strong>
+              <p>Com o <code>tileset</code> selecionado, abra o painel <strong>TileMap</strong> na parte de baixo do editor. Escolha um tile na paleta e pinte na viewport com o <strong>botão esquerdo</strong>; apague com o <strong>botão direito</strong>. Experimente estender o chão ou adicionar alguns blocos — só para pegar o fluxo. Rode com F5 e veja o player colidindo com o que você pintou.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">3</div>
             <div class="step-body">
-              <strong>Adicione a tilesheet como atlas</strong>
-              <p>No painel TileSet, clique no <code>+</code> e escolha <code>Atlas</code>. Arraste a tilesheet do Sunny Land (de <code>res://assets/</code>) para o campo de textura. Confirme o <code>Texture Region Size</code> como <code>16×16</code> (o tamanho dos tiles do pack). O Godot pergunta se quer criar os tiles automaticamente — aceite.</p>
+              <strong>Abra o TileSet na plataforma</strong>
+              <p>Com o <code>tileset</code> selecionado, abra o painel <strong>TileSet</strong> (ao lado da aba TileMap). Selecione o tile usado nas <strong>plataformas flutuantes</strong> do mapa. Ele já tem um polígono de colisão na <code>Physics Layer</code> (foi assim que o chão ganhou colisão).</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">4</div>
             <div class="step-body">
-              <strong>Defina a colisão</strong>
-              <p>No painel TileSet, abra a aba <strong>TileSet</strong> (não a Paint), selecione <code>Physics Layers</code> e adicione uma camada. Depois selecione um tile de chão e, na seção de física, clique para desenhar o retângulo de colisão cobrindo o tile inteiro. Repita para os outros tiles sólidos.</p>
+              <strong>Ative o One Way nesse polígono</strong>
+              <p>Ainda no tile da plataforma, selecione o polígono de colisão. Nas propriedades dele, marque <strong>One Way</strong> (colisão de um lado só). Por padrão, o lado bloqueado é o de cima — o player pousa na superfície, mas não é barrado ao subir por baixo. O <code>One Way Margin</code> pode ficar no valor padrão.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">5</div>
             <div class="step-body">
-              <strong>Pinte o chão</strong>
-              <p>Mude para o painel <strong>TileMap</strong> (ao lado do TileSet). Selecione um tile e pinte uma linha de chão na viewport, mais uma plataforma flutuante. Use o botão esquerdo para pintar e o direito para apagar.</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-num">6</div>
-            <div class="step-body">
-              <strong>Teste a colisão</strong>
-              <p>Coloque a cena do player sobre o chão pintado e pressione F5. O personagem deve cair e parar no chão de tiles, andar sobre ele e pousar na plataforma — tudo usando o mesmo script do Módulo 02.</p>
+              <strong>Teste a plataforma atravessável</strong>
+              <p>Pressione F5. Posicione o player <em>embaixo</em> da plataforma e pule (Space): ele deve <strong>atravessar por baixo</strong> e <strong>pousar em cima</strong>. Ande sobre ela normalmente — a colisão segue valendo no topo. Compare com o chão sólido, que bloqueia dos dois lados.</p>
             </div>
           </div>
         </div>
 
         <div class="callout warning">
-          <div class="callout-label">Atravessou o chão?</div>
-          <p>Se o player cair através dos tiles, quase sempre é porque a <strong>Physics Layer</strong> não foi adicionada ao <code>TileSet</code>, ou o polígono de colisão não foi desenhado naquele tile específico. Volte ao painel TileSet e confirme que o tile usado tem a colisão visível.</p>
+          <div class="callout-label">O player bate por baixo em vez de atravessar?</div>
+          <p>Se a plataforma ainda bloqueia os dois lados, o <strong>One Way</strong> não foi marcado no polígono certo — confirme que você selecionou o <em>polígono de colisão</em> daquele tile (não o tile inteiro) antes de marcar a opção. Se o player atravessa <em>também por cima</em> (não pousa), a colisão desse tile não existe: verifique se há um polígono desenhado na <code>Physics Layer</code>.</p>
         </div>
       </div>
 
@@ -948,7 +975,7 @@
             <div class="step-num">1</div>
             <div class="step-body">
               <strong>Crie a camada do céu</strong>
-              <p>No <code>World.tscn</code>, adicione um <code>Parallax2D</code> como filho da raiz, chamado <code>SkyLayer</code>. Dentro dele, adicione um <code>Sprite2D</code> com a imagem de céu/fundo do Sunny Land.</p>
+              <p>No <code>mapa_1.tscn</code>, adicione um <code>Parallax2D</code> como filho da raiz, chamado <code>SkyLayer</code>. Dentro dele, adicione um <code>Sprite2D</code> com a imagem de céu/fundo do Sunny Land.</p>
             </div>
           </div>
           <div class="step">
