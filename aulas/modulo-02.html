@@ -721,18 +721,20 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div class="challenge-meta">
-            <strong>Cancelar pulo no teto</strong>
+            <strong>Respawn ao cair no vazio</strong>
             <span>Aula 2.1 · Física</span>
           </div>
           <span class="difficulty-badge diff-medium">Médio</span>
         </div>
         <div class="challenge-body">
-          <p>Quando o personagem bate a cabeça no teto durante um pulo, ele tende a "grudar" por alguns frames porque a velocidade Y continua negativa (para cima) enquanto o teto bloqueia o movimento.</p>
-          <p>Implemente a correção: se <code>IsOnCeiling()</code> for verdadeiro após o <code>MoveAndSlide()</code>, zere <code>Velocity.Y</code>. Isso faz o personagem começar a cair imediatamente. Use as plataformas do projeto base para testar — pule com força suficiente para bater na superfície inferior de uma delas.</p>
+          <p>Em jogos de plataforma, cair num buraco "mata" o personagem e o devolve a um ponto seguro. Você vai implementar esse respawn usando só o que viu nesta aula: posição, velocidade e a noção de eixo Y.</p>
+          <p>A ideia: guardar um <strong>ponto de respawn</strong> e, a cada frame, checar se o personagem caiu longe demais. Atenção ao eixo Y — como ele cresce <em>para baixo</em>, "caiu demais" significa <code>Position.Y</code> <strong>maior</strong> que um limite (não menor, como o instinto da matemática sugere).</p>
+          <p>Para testar agora — antes de termos movimento horizontal — arraste o Player no editor para um ponto <strong>sem chão embaixo</strong> (além da borda do cenário) e rode: ele cai, ultrapassa o limite e reaparece no <code>SpawnPoint</code>, parado.</p>
           <ul class="objective-list">
-            <li><div class="obj-num">1</div>No script, após <code>MoveAndSlide()</code>, cheque <code>IsOnCeiling()</code></li>
-            <li><div class="obj-num">2</div>Se verdadeiro, atribua <code>Velocity = new Vector2(Velocity.X, 0)</code></li>
-            <li><div class="obj-num">3</div>Teste: sem a correção o player "flutua" no teto brevemente; com ela cai de imediato</li>
+            <li><div class="obj-num">1</div>Declare <code>[Export] Vector2 SpawnPoint = new Vector2(80, 32)</code> e <code>[Export] float FallLimit = 400f</code></li>
+            <li><div class="obj-num">2</div>Após o <code>MoveAndSlide()</code>, cheque se <code>Position.Y &gt; FallLimit</code></li>
+            <li><div class="obj-num">3</div>Se verdadeiro, faça <code>Position = SpawnPoint</code> e <code>Velocity = Vector2.Zero</code></li>
+            <li><div class="obj-num">4</div>Teste: posicione o Player sobre um vazio — ele deve cair, sumir e reaparecer no SpawnPoint</li>
           </ul>
           <div class="hint-accordion">
             <button class="hint-toggle" onclick="toggleHint(this)">
@@ -740,8 +742,9 @@
               Ver dica
             </button>
             <div class="hint-body">
-              <p>A verificação acontece <em>depois</em> do <code>MoveAndSlide()</code>, não antes. A sequência correta é: mover → checar colisão → reagir.</p>
-              <p><code>if (IsOnCeiling()) Velocity = new Vector2(Velocity.X, 0);</code></p>
+              <p>O sinal da comparação é o que mais confunde: Y cresce para baixo, então quem despencou tem <code>Position.Y</code> <strong>grande</strong>. Use <code>&gt;</code>, não <code>&lt;</code>.</p>
+              <p>Zerar <code>Velocity</code> no respawn evita que o personagem reapareça já "despencando" com a velocidade acumulada da queda.</p>
+              <p><code>if (Position.Y &gt; FallLimit) { Position = SpawnPoint; Velocity = Vector2.Zero; }</code></p>
             </div>
           </div>
         </div>
