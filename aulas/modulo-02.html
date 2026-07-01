@@ -571,15 +571,22 @@
             <span class="code-filename">Player.cs — uso mínimo</span>
             <span class="code-lang">C#</span>
           </div>
-          <pre><span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
+          <pre><span class="kw">private</span> <span class="tp">Vector2</span> _velocity;
+
+<span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
 {
-    <span class="kw">var</span> velocity = Velocity; <span class="cm">// lê a propriedade atual</span>
+    _velocity = Velocity;  <span class="cm">// relê o estado que o MoveAndSlide resolveu</span>
 
-    <span class="cm">// ... modifica velocity ...</span>
+    <span class="cm">// ... modifica _velocity ...</span>
 
-    Velocity = velocity;   <span class="cm">// grava de volta</span>
-    <span class="fn">MoveAndSlide</span>();        <span class="cm">// move o body e resolve colisões</span>
+    Velocity = _velocity;  <span class="cm">// grava de volta</span>
+    <span class="fn">MoveAndSlide</span>();       <span class="cm">// move o body e resolve colisões</span>
 }</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Por que reler Velocity todo frame</div>
+          <p>A linha <code>_velocity = Velocity;</code> no topo não é opcional: o <code>MoveAndSlide()</code> <strong>reescreve</strong> a propriedade <code>Velocity</code> ao resolver colisões (zera o Y ao pousar, o X ao bater na parede). Reler garante que você continua do estado real resolvido. Se tratar <code>_velocity</code> como fonte única e parar de reler, o valor da queda fica "preso" e o personagem despenca em velocidade máxima ao sair de uma borda.</p>
         </div>
 
         <p>Após chamar <code>MoveAndSlide()</code>, você pode consultar o estado da colisão com três métodos:</p>
@@ -612,15 +619,17 @@
 {
     [<span class="at">Export</span>] <span class="kw">public float</span> Gravity = <span class="nm">980f</span>; <span class="cm">// pixels/segundo²</span>
 
+    <span class="kw">private</span> <span class="tp">Vector2</span> _velocity;
+
     <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
     {
-        <span class="kw">var</span> velocity = Velocity;
+        _velocity = Velocity;
 
         <span class="cm">// Aplica gravidade somente quando no ar</span>
         <span class="kw">if</span> (!<span class="fn">IsOnFloor</span>())
-            velocity.Y += Gravity * (<span class="kw">float</span>)delta;
+            _velocity.Y += Gravity * (<span class="kw">float</span>)delta;
 
-        Velocity = velocity;
+        Velocity = _velocity;
         <span class="fn">MoveAndSlide</span>();
     }
 }</pre>
@@ -639,12 +648,12 @@
           <div class="loop-step">
             <div class="loop-arrow">2</div>
             <div class="loop-label">Aplica gravidade</div>
-            <div class="loop-desc"><code>velocity.Y += Gravity * delta</code> se não estiver no chão</div>
+            <div class="loop-desc"><code>_velocity.Y += Gravity * delta</code> se não estiver no chão</div>
           </div>
           <div class="loop-step">
             <div class="loop-arrow">3</div>
             <div class="loop-label">Calcula velocidade</div>
-            <div class="loop-desc">Define <code>velocity.X</code> pelo input; aplica pulo se condições OK</div>
+            <div class="loop-desc">Define <code>_velocity.X</code> pelo input; aplica pulo se condições OK</div>
           </div>
           <div class="loop-step">
             <div class="loop-arrow">4</div>
@@ -694,14 +703,16 @@
 {
     [<span class="at">Export</span>] <span class="kw">public float</span> Gravity = <span class="nm">980f</span>;
 
+    <span class="kw">private</span> <span class="tp">Vector2</span> _velocity;
+
     <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
     {
-        <span class="kw">var</span> velocity = Velocity;
+        _velocity = Velocity;
 
         <span class="kw">if</span> (!<span class="fn">IsOnFloor</span>())
-            velocity.Y += Gravity * (<span class="kw">float</span>)delta;
+            _velocity.Y += Gravity * (<span class="kw">float</span>)delta;
 
-        Velocity = velocity;
+        Velocity = _velocity;
         <span class="fn">MoveAndSlide</span>();
     }
 }</pre>
@@ -731,7 +742,7 @@
           <p>A ideia: guardar um <strong>ponto de respawn</strong> e, a cada frame, checar se o personagem caiu longe demais. Atenção ao eixo Y — como ele cresce <em>para baixo</em>, "caiu demais" significa <code>Position.Y</code> <strong>maior</strong> que um limite (não menor, como o instinto da matemática sugere).</p>
           <p>Para testar agora — antes de termos movimento horizontal — arraste o Player no editor para um ponto <strong>sem chão embaixo</strong> (além da borda do cenário) e rode: ele cai, ultrapassa o limite e reaparece no <code>SpawnPoint</code>, parado.</p>
           <ul class="objective-list">
-            <li><div class="obj-num">1</div>Declare <code>[Export] Vector2 SpawnPoint = new Vector2(80, 32)</code> e <code>[Export] float FallLimit = 400f</code></li>
+            <li><div class="obj-num">1</div>Declare <code>[Export] Vector2 SpawnPoint = new Vector2(192, 192)</code> e <code>[Export] float FallLimit = 600f</code></li>
             <li><div class="obj-num">2</div>Após o <code>MoveAndSlide()</code>, cheque se <code>Position.Y &gt; FallLimit</code></li>
             <li><div class="obj-num">3</div>Se verdadeiro, faça <code>Position = SpawnPoint</code> e <code>Velocity = Vector2.Zero</code></li>
             <li><div class="obj-num">4</div>Teste: posicione o Player sobre um vazio — ele deve cair, sumir e reaparecer no SpawnPoint</li>
@@ -816,7 +827,7 @@
           </div>
           <pre><span class="cm">// Frágil: amarrado ao teclado, não remapeável, não funciona com gamepad</span>
 <span class="kw">if</span> (<span class="tp">Input</span>.<span class="fn">IsKeyPressed</span>(<span class="tp">Key</span>.Space))
-    velocity.Y = -JumpForce;</pre>
+    _velocity.Y = -JumpForce;</pre>
         </div>
 
         <p>O problema: esse código conhece a implementação física do controle (a tecla Space). Se o jogador quiser remapear para gamepad, ou se você quiser suporte a controle sem mexer no código, não tem como. O <a href="https://docs.godotengine.org/en/stable/classes/class_inputmap.html" target="_blank" rel="noopener" class="doc-link"><strong>InputMap</strong></a> resolve isso: você define <em>ações</em> com nomes semânticos, mapeia dispositivos para elas no editor, e o código só conhece o nome da ação.</p>
@@ -978,7 +989,7 @@
               Ver dica
             </button>
             <div class="hint-body">
-              <p>Use <code>_dashTimer -= (float)delta</code> em cada frame. A velocidade horizontal fica: <code>velocity.X = direction * Speed * (_dashTimer > 0 ? 3f : 1f)</code>.</p>
+              <p>Use <code>_dashTimer -= (float)delta</code> em cada frame. A velocidade horizontal fica: <code>_velocity.X = direction * Speed * (_dashTimer > 0 ? 3f : 1f)</code>.</p>
               <p>Guarde a direção no momento do dash para que ele continue na mesma direção mesmo se o jogador soltar a tecla.</p>
             </div>
           </div>
@@ -1006,7 +1017,7 @@
             <li><div class="obj-num">1</div>Declare <code>[Export] public float WallJumpForce = 350f</code> no script</li>
             <li><div class="obj-num">2</div>Adicione a condição: <code>IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; IsActionJustPressed("jump")</code></li>
             <li><div class="obj-num">3</div>Dentro dessa condição, leia <code>GetWallNormal()</code> e use o eixo X como direção horizontal do pulo</li>
-            <li><div class="obj-num">4</div>Aplique <code>velocity.Y = -JumpForce</code> e <code>velocity.X = GetWallNormal().X * WallJumpForce</code></li>
+            <li><div class="obj-num">4</div>Aplique <code>_velocity.Y = -JumpForce</code> e <code>_velocity.X = GetWallNormal().X * WallJumpForce</code></li>
             <li><div class="obj-num">5</div>Adicione duas paredes verticais (<code>StaticBody2D</code>) na cena e confirme que o player ricocheteia corretamente em ambos os lados</li>
           </ul>
 
@@ -1020,8 +1031,8 @@
               <pre style="font-family: var(--font-mono); font-size: 12px; background: var(--code-bg); border-radius: 6px; padding: 10px; overflow-x: auto; margin-top: 8px;">if (IsOnWall() &amp;&amp; !IsOnFloor() &amp;&amp; Input.IsActionJustPressed("jump"))
 {
     var n = GetWallNormal();
-    velocity.Y = -JumpForce;
-    velocity.X = n.X * WallJumpForce;
+    _velocity.Y = -JumpForce;
+    _velocity.X = n.X * WallJumpForce;
 }</pre>
             </div>
           </div>
@@ -1100,6 +1111,7 @@
     [<span class="at">Export</span>] <span class="kw">public float</span> Gravity    = <span class="nm">1200f</span>;
 
     <span class="kw">private</span> <span class="tp">AnimatedSprite2D</span> _sprite;
+    <span class="kw">private</span> <span class="tp">Vector2</span> _velocity;
 
     <span class="kw">public override void</span> <span class="fn">_Ready</span>()
     {
@@ -1108,25 +1120,25 @@
 
     <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
     {
-        <span class="kw">var</span> velocity = Velocity;
+        _velocity = Velocity;
 
         <span class="cm">// 1. Gravidade</span>
         <span class="kw">if</span> (!<span class="fn">IsOnFloor</span>())
-            velocity.Y += Gravity * (<span class="kw">float</span>)delta;
+            _velocity.Y += Gravity * (<span class="kw">float</span>)delta;
 
         <span class="cm">// 2. Movimento horizontal</span>
         <span class="kw">float</span> direction = <span class="tp">Input</span>.<span class="fn">GetAxis</span>(<span class="st">"move_left"</span>, <span class="st">"move_right"</span>);
-        velocity.X = direction * Speed;
+        _velocity.X = direction * Speed;
 
         <span class="cm">// 3. Pulo</span>
         <span class="kw">if</span> (<span class="tp">Input</span>.<span class="fn">IsActionJustPressed</span>(<span class="st">"jump"</span>) &amp;&amp; <span class="fn">IsOnFloor</span>())
-            velocity.Y = -JumpForce;
+            _velocity.Y = -JumpForce;
 
         <span class="cm">// 4. Cancelar pulo no teto</span>
         <span class="kw">if</span> (<span class="fn">IsOnCeiling</span>())
-            velocity.Y = <span class="nm">0</span>;
+            _velocity.Y = <span class="nm">0</span>;
 
-        Velocity = velocity;
+        Velocity = _velocity;
         <span class="fn">MoveAndSlide</span>();
         <span class="fn">UpdateAnimations</span>(direction);
     }
@@ -1312,7 +1324,7 @@
         <ul class="checklist">
           <li>Por que a condição de pulo usa <code>&amp;&amp; IsOnFloor()</code> em vez de um boolean separado?</li>
           <li>Como você tornaria o pulo mais alto sem aumentar <code>JumpForce</code>?</li>
-          <li>O que acontece se <code>IsOnCeiling()</code> não zerar <code>velocity.Y</code>?</li>
+          <li>O que acontece se <code>IsOnCeiling()</code> não zerar <code>_velocity.Y</code>?</li>
           <li>Como o coyote time melhora a experiência do jogador sem mudar o que ele "vê"?</li>
         </ul>
 

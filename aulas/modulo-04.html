@@ -758,6 +758,7 @@
     [<span class="tp">Export</span>] <span class="kw">public float</span> Gravity = <span class="nm">900f</span>;
 
     <span class="kw">private int</span> _direction = <span class="nm">1</span>; <span class="cm">// 1 = direita, -1 = esquerda</span>
+    <span class="kw">private</span> <span class="tp">Vector2</span> _velocity;
     <span class="kw">private</span> <span class="tp">RayCast2D</span> _floorRay;
     <span class="kw">private</span> <span class="tp">RayCast2D</span> _wallRay;
     <span class="kw">private</span> <span class="tp">AnimatedSprite2D</span> _sprite;
@@ -771,15 +772,15 @@
 
     <span class="kw">public override void</span> <span class="fn">_PhysicsProcess</span>(<span class="kw">double</span> delta)
     {
-        <span class="tp">Vector2</span> velocity = Velocity;
-        velocity.Y += Gravity * (<span class="kw">float</span>)delta; <span class="cm">// gravidade</span>
-        velocity.X = _direction * Speed;        <span class="cm">// patrulha</span>
+        _velocity = Velocity;                   <span class="cm">// relê o estado resolvido pelo MoveAndSlide</span>
+        _velocity.Y += Gravity * (<span class="kw">float</span>)delta; <span class="cm">// gravidade</span>
+        _velocity.X = _direction * Speed;        <span class="cm">// patrulha</span>
 
         <span class="cm">// Vira se faltar chão à frente OU houver parede</span>
         <span class="kw">if</span> (IsOnFloor() &amp;&amp; (!_floorRay.<span class="fn">IsColliding</span>() || _wallRay.<span class="fn">IsColliding</span>()))
             <span class="fn">Flip</span>();
 
-        Velocity = velocity;
+        Velocity = _velocity;
         <span class="fn">MoveAndSlide</span>();
     }
 
