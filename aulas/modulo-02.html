@@ -742,7 +742,7 @@
           <p>A ideia: guardar um <strong>ponto de respawn</strong> e, a cada frame, checar se o personagem caiu longe demais. Atenção ao eixo Y — como ele cresce <em>para baixo</em>, "caiu demais" significa <code>Position.Y</code> <strong>maior</strong> que um limite (não menor, como o instinto da matemática sugere).</p>
           <p>Para testar agora — antes de termos movimento horizontal — arraste o Player no editor para um ponto <strong>sem chão embaixo</strong> (além da borda do cenário) e rode: ele cai, ultrapassa o limite e reaparece no <code>SpawnPoint</code>, parado.</p>
           <ul class="objective-list">
-            <li><div class="obj-num">1</div>Declare <code>[Export] Vector2 SpawnPoint = new Vector2(192, 192)</code> e <code>[Export] float FallLimit = 600f</code></li>
+            <li><div class="obj-num">1</div>Declare <code>[Export] Vector2 SpawnPoint = new Vector2(160, 352)</code> e <code>[Export] float FallLimit = 600f</code></li>
             <li><div class="obj-num">2</div>Após o <code>MoveAndSlide()</code>, cheque se <code>Position.Y &gt; FallLimit</code></li>
             <li><div class="obj-num">3</div>Se verdadeiro, faça <code>Position = SpawnPoint</code> e <code>Velocity = Vector2.Zero</code></li>
             <li><div class="obj-num">4</div>Teste: posicione o Player sobre um vazio — ele deve cair, sumir e reaparecer no SpawnPoint</li>
