@@ -438,7 +438,7 @@
       <div class="lesson-header">
         <div class="lesson-eyebrow">Módulo 04 · Aula 4.1</div>
         <h1 class="lesson-title">Cenas instanciáveis e coletáveis</h1>
-        <p class="lesson-subtitle">Transformar uma cena num "molde" reutilizável e usar Area2D para detectar quando o player toca uma moeda — sem colisão física.</p>
+        <p class="lesson-subtitle">Transformar uma cena num "molde" reutilizável e usar Area2D para detectar quando o player toca uma gema — sem colisão física.</p>
         <div class="lesson-meta">
           <span class="meta-pill">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -460,7 +460,7 @@
 
       <div id="conteudo-1">
         <h2>Uma cena como molde reutilizável</h2>
-        <p>Até agora cada cena foi uma coisa única: um player, um mundo. Mas uma moeda você quer espalhar às dezenas pelo nível. A pergunta é: como criar muitas cópias de algo sem duplicar nodes na mão?</p>
+        <p>Até agora cada cena foi uma coisa única: um player, um mundo. Mas uma gema você quer espalhar às dezenas pelo nível. A pergunta é: como criar muitas cópias de algo sem duplicar nodes na mão?</p>
         <p>A resposta é o conceito mais poderoso do Godot: qualquer cena salva (<code>.tscn</code>) pode virar um <strong>molde</strong> — um <a href="https://docs.godotengine.org/en/stable/classes/class_packedscene.html" target="_blank" rel="noopener" class="doc-link"><code>PackedScene</code></a>. A partir desse molde você cria quantas <strong>instâncias</strong> quiser, cada uma independente, todas seguindo o mesmo projeto. Editar a cena-molde atualiza todas as cópias de uma vez.</p>
 
         <div class="callout analogy">
@@ -469,7 +469,7 @@
         </div>
 
         <h2>Area2D: detectar sem empurrar</h2>
-        <p>Uma moeda não deve <em>bloquear</em> o player como o chão faz — ela só precisa <em>perceber</em> quando foi tocada e então sumir. Para isso existe a <a href="https://docs.godotengine.org/en/stable/classes/class_area2d.html" target="_blank" rel="noopener" class="doc-link"><code>Area2D</code></a>: um node que detecta sobreposição com outros corpos físicos, mas não aplica colisão.</p>
+        <p>Uma gema não deve <em>bloquear</em> o player como o chão faz — ela só precisa <em>perceber</em> quando foi tocada e então sumir. Para isso existe a <a href="https://docs.godotengine.org/en/stable/classes/class_area2d.html" target="_blank" rel="noopener" class="doc-link"><code>Area2D</code></a>: um node que detecta sobreposição com outros corpos físicos, mas não aplica colisão.</p>
 
         <div class="compare-grid">
           <div class="compare-card">
@@ -489,7 +489,7 @@
             <ul>
               <li>Zona <strong>fantasma</strong>: o player atravessa</li>
               <li>Apenas <em>avisa</em> que houve contato</li>
-              <li>Usado para moedas, gatilhos, zonas de dano</li>
+              <li>Usado para gemas, gatilhos, zonas de dano</li>
             </ul>
           </div>
         </div>
@@ -502,7 +502,7 @@
           <div class="loop-step">
             <div class="loop-arrow">1</div>
             <div class="loop-label">Player entra na Area2D</div>
-            <div class="loop-desc">O <code>CharacterBody2D</code> sobrepõe o <code>CollisionShape2D</code> da moeda</div>
+            <div class="loop-desc">O <code>CharacterBody2D</code> sobrepõe o <code>CollisionShape2D</code> da gema</div>
           </div>
           <div class="loop-step">
             <div class="loop-arrow">2</div>
@@ -517,21 +517,21 @@
           <div class="loop-step">
             <div class="loop-arrow">4</div>
             <div class="loop-label">QueueFree()</div>
-            <div class="loop-desc">A moeda se remove da cena com segurança</div>
+            <div class="loop-desc">A gema se remove da cena com segurança</div>
           </div>
         </div>
 
-        <h2>O script da moeda</h2>
-        <p>O script vive na cena-molde da moeda. Como todo corpo físico pode disparar o signal, é boa prática confirmar que foi mesmo o player que entrou — por grupo ou por tipo:</p>
+        <h2>O script da gema</h2>
+        <p>O script vive na cena-molde da gema. Como todo corpo físico pode disparar o signal, é boa prática confirmar que foi mesmo o player que entrou — por grupo ou por tipo:</p>
 
         <div class="code-block">
           <div class="code-header">
-            <span class="code-filename">Coin.cs</span>
+            <span class="code-filename">Gem.cs</span>
             <span class="code-lang">C#</span>
           </div>
           <pre><span class="kw">using</span> Godot;
 
-<span class="kw">public partial class</span> <span class="tp">Coin</span> : <span class="tp">Area2D</span>
+<span class="kw">public partial class</span> <span class="tp">Gem</span> : <span class="tp">Area2D</span>
 {
     <span class="cm">// Conectado ao signal body_entered da própria Area2D</span>
     <span class="kw">private void</span> <span class="fn">OnBodyEntered</span>(<span class="tp">Node2D</span> body)
@@ -540,7 +540,7 @@
         <span class="kw">if</span> (body.<span class="fn">IsInGroup</span>(<span class="st">"player"</span>))
         {
             <span class="cm">// (No Módulo 05: somar pontos ao HUD aqui)</span>
-            <span class="fn">QueueFree</span>(); <span class="cm">// remove a moeda da cena</span>
+            <span class="fn">QueueFree</span>(); <span class="cm">// remove a gema da cena</span>
         }
     }
 }</pre>
@@ -553,17 +553,17 @@
 
         <div class="callout info">
           <div class="callout-label">Grupos</div>
-          <p>Um <strong>grupo</strong> é uma etiqueta que você cola num node pela aba <em>Node → Groups</em> no editor. Colocar o <code>Player</code> no grupo <code>"player"</code> permite que qualquer script pergunte <code>IsInGroup("player")</code> sem precisar conhecer o tipo exato — desacoplando a moeda do player.</p>
+          <p>Um <strong>grupo</strong> é uma etiqueta que você cola num node pela aba <em>Node → Groups</em> no editor. Colocar o <code>Player</code> no grupo <code>"player"</code> permite que qualquer script pergunte <code>IsInGroup("player")</code> sem precisar conhecer o tipo exato — desacoplando a gema do player.</p>
         </div>
       </div>
 
       <div id="pratica-1" style="display:none">
-        <h2>Criar uma moeda coletável</h2>
-        <p>Vamos montar a cena-molde da moeda, dar a ela detecção por <code>Area2D</code> e espalhar várias cópias pelo nível do Módulo 03.</p>
+        <h2>Criar uma gema coletável</h2>
+        <p>Vamos montar a cena-molde da gema, dar a ela detecção por <code>Area2D</code> e espalhar várias cópias pelo nível do Módulo 03.</p>
 
         <div class="callout info">
           <div class="callout-label">Projeto base deste módulo</div>
-          <p>Continue do projeto do Módulo 03 (com nível em tiles, câmera e parallax). As imagens de moeda/cereja do Sunny Land estão em <code>res://assets/</code>, prontas para virar um <code>AnimatedSprite2D</code> ou <code>Sprite2D</code>.</p>
+          <p>Continue do projeto do Módulo 03 (com nível em tiles, câmera e parallax). As sprites da gema e da cereja do Sunny Land estão em <code>res://Assets/Misc/Sunnyland items/</code> (frames avulsos em <code>Sprites/</code> e as folhas <code>gem.png</code> / <code>cherry.png</code> em <code>Spritesheets/</code>), prontas para virar um <code>AnimatedSprite2D</code>.</p>
         </div>
 
         <div class="steps">
@@ -571,49 +571,54 @@
             <div class="step-num">1</div>
             <div class="step-body">
               <strong>Marque o player com um grupo</strong>
-              <p>Abra <code>Player.tscn</code>, selecione o node raiz <code>Player</code>, vá na aba <strong>Node → Groups</strong> e adicione o grupo <code>player</code>. É isso que a moeda vai checar.</p>
+              <p>Abra <code>Player.tscn</code>, selecione o node raiz <code>Player</code>, vá na aba <strong>Node → Groups</strong> e adicione o grupo <code>player</code>. É isso que a gema vai checar.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">2</div>
             <div class="step-body">
-              <strong>Crie a cena da moeda</strong>
-              <p>Cena nova com <code>Area2D</code> como raiz, renomeada para <code>Coin</code>. Adicione como filhos um <code>AnimatedSprite2D</code> (com a moeda do Sunny Land) e um <code>CollisionShape2D</code> com um círculo cobrindo a moeda. Salve como <code>Coin.tscn</code>.</p>
+              <strong>Crie a cena da gema</strong>
+              <p>Cena nova com <code>Area2D</code> como raiz, renomeada para <code>Gem</code>. Adicione como filhos um <code>AnimatedSprite2D</code> (com a gema do Sunny Land) e um <code>CollisionShape2D</code> com um círculo cobrindo a gema. Salve como <code>Gem.tscn</code>.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">3</div>
             <div class="step-body">
               <strong>Anexe o script</strong>
-              <p>Crie <code>Coin.cs</code> herdando de <code>Area2D</code> (código da aba Conteúdo) e anexe ao node <code>Coin</code>.</p>
+              <p>Crie <code>Gem.cs</code> herdando de <code>Area2D</code> (código da aba Conteúdo) e anexe ao node <code>Gem</code>.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">4</div>
             <div class="step-body">
               <strong>Conecte o signal</strong>
-              <p>Com o node <code>Coin</code> selecionado, na aba <strong>Node → Signals</strong>, dê duplo clique em <code>body_entered</code> e conecte ao método <code>OnBodyEntered</code>. Confirme que a assinatura bate com a do script.</p>
+              <p>Com o node <code>Gem</code> selecionado, na aba <strong>Node → Signals</strong>, dê duplo clique em <code>body_entered</code> e conecte ao método <code>OnBodyEntered</code>. Confirme que a assinatura bate com a do script.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">5</div>
             <div class="step-body">
               <strong>Instancie no mundo</strong>
-              <p>Abra <code>World.tscn</code>. Clique no ícone de <em>corrente</em> (Instantiate Child Scene) ou arraste <code>Coin.tscn</code> do FileSystem para a cena. Posicione a moeda sobre uma plataforma. Repita para criar várias.</p>
+              <p>Abra <code>World.tscn</code>. Clique no ícone de <em>corrente</em> (Instantiate Child Scene) ou arraste <code>Gem.tscn</code> do FileSystem para a cena. Posicione a gema sobre uma plataforma. Repita para criar várias.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">6</div>
             <div class="step-body">
               <strong>Teste a coleta</strong>
-              <p>Pressione F5 e ande até uma moeda. Ela deve desaparecer ao toque, sem frear o player, e as outras moedas devem continuar intactas.</p>
+              <p>Pressione F5 e ande até uma gema. Ela deve desaparecer ao toque, sem frear o player, e as outras gemas devem continuar intactas.</p>
             </div>
           </div>
         </div>
 
+        <div class="callout info">
+          <div class="callout-label">Colisão não precisa ser perfeita</div>
+          <p>Repare que a gema é meio losangular, mas cobrimos com um <em>círculo</em>. Tudo bem: a colisão de gameplay é uma <strong>aproximação</strong>, não um decalque do sprite. Um círculo um pouco maior ou menor que o desenho passa despercebido em jogo — e é mais barato de calcular. Precisão pixel-perfect raramente compensa; o que importa é a coleta <em>parecer</em> justa para quem joga.</p>
+        </div>
+
         <div class="callout tip">
           <div class="callout-label">Editou o molde, atualizou todas</div>
-          <p>Mude algo em <code>Coin.tscn</code> — o tamanho do collision shape, a animação — e salve. Todas as instâncias no <code>World.tscn</code> herdam a mudança automaticamente. Esse é o poder de instanciar a partir de um molde.</p>
+          <p>Mude algo em <code>Gem.tscn</code> — o tamanho do collision shape, a animação — e salve. Todas as instâncias no <code>World.tscn</code> herdam a mudança automaticamente. Esse é o poder de instanciar a partir de um molde.</p>
         </div>
       </div>
 
@@ -631,7 +636,7 @@
         <div class="challenge-body">
           <p>Coletar sem feedback é sem graça. Crie um segundo coletável — a cereja do Sunny Land — que dá um retorno visual antes de sumir, em vez de desaparecer instantaneamente.</p>
           <ul class="objective-list">
-            <li><div class="obj-num">1</div>Duplique a estrutura da moeda numa nova cena <code>Cherry.tscn</code> (Area2D + sprite + collision)</li>
+            <li><div class="obj-num">1</div>Duplique a estrutura da gema numa nova cena <code>Cherry.tscn</code> (Area2D + sprite + collision)</li>
             <li><div class="obj-num">2</div>No <code>OnBodyEntered</code>, em vez de chamar <code>QueueFree()</code> direto, dispare uma animação de coleta (ex.: brilho/encolher)</li>
             <li><div class="obj-num">3</div>Desative o <code>CollisionShape2D</code> assim que coletada, para não disparar o signal duas vezes</li>
             <li><div class="obj-num">4</div>Só chame <code>QueueFree()</code> quando a animação terminar (use o signal <code>animation_finished</code>)</li>
@@ -644,7 +649,7 @@
             </button>
             <div class="hint-body">
               <p>Para desativar a colisão com segurança dentro de um signal de física, use <code>SetDeferred("disabled", true)</code> no <code>CollisionShape2D</code> — alterar a física no meio do frame exige o "deferred".</p>
-              <p>Conecte o signal <code>animation_finished</code> do <code>AnimatedSprite2D</code> a um método que chama <code>QueueFree()</code>. Assim a moeda só some quando o efeito acaba — o jogador <em>vê</em> que coletou.</p>
+              <p>Conecte o signal <code>animation_finished</code> do <code>AnimatedSprite2D</code> a um método que chama <code>QueueFree()</code>. Assim a gema só some quando o efeito acaba — o jogador <em>vê</em> que coletou.</p>
             </div>
           </div>
         </div>
@@ -667,7 +672,7 @@
         <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
         <ul class="checklist">
           <li>Qual a diferença entre uma cena-molde e uma instância dela?</li>
-          <li>Por que uma moeda usa <code>Area2D</code> em vez de um corpo sólido?</li>
+          <li>Por que uma gema usa <code>Area2D</code> em vez de um corpo sólido?</li>
           <li>O que o signal <code>body_entered</code> entrega ao método conectado?</li>
           <li>Por que usar <code>QueueFree()</code> em vez de <code>Free()</code> durante o jogo?</li>
         </ul>
