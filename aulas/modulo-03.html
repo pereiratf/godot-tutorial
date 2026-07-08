@@ -532,7 +532,7 @@
           <li>Selecione um tile sólido e desenhe o polígono de colisão sobre ele (geralmente o quadrado inteiro)</li>
           <li>Todo tile daquele tipo pintado no mapa herda essa colisão automaticamente</li>
         </ul>
-        <p>O <code>CharacterBody2D</code> do player vai colidir com esses tiles exatamente como colidia com o <code>StaticBody2D</code> do projeto base — o <code>IsOnFloor()</code> continua funcionando sem nenhuma mudança no script.</p>
+        <p>O <code>CharacterBody2D</code> do player colide com esses tiles como colidiria com qualquer corpo sólido — o <code>MoveAndSlide()</code> e o <code>IsOnFloor()</code> do Módulo 02 continuam funcionando sem nenhuma mudança no script.</p>
 
         <div class="callout tip">
           <div class="callout-label">Performance</div>
@@ -565,18 +565,24 @@
         <p>E o <code>TileSet</code> desse <code>tileset</code> já foi configurado exatamente como descrito acima:</p>
         <ul class="checklist">
           <li>Uma <strong>Atlas Source</strong> a partir de <code>res://Assets/environment/tileset.png</code>, recortada em tiles de <code>16×16</code></li>
-          <li>Uma <strong>Physics Layer</strong> com o polígono de colisão desenhado nos tiles sólidos (chão e blocos)</li>
+          <li>Uma <strong>Physics Layer</strong> com o polígono de colisão desenhado nos tiles <strong>sólidos</strong> (chão e blocos)</li>
+          <li>As <strong>plataformas flutuantes</strong> são a exceção: de propósito, o tile delas está <strong>sem</strong> polígono de colisão</li>
         </ul>
+
+        <div class="callout analogy">
+          <div class="callout-label">Aquela dúvida do Módulo 02</div>
+          <p>Lembra que, ao testar o mapa no Módulo 02, o player <em>atravessava</em> as plataformas flutuantes e caía no abismo? Não era bug: aquele tile simplesmente não tem colisão. Na prática a seguir você resolve isso — desenhando a colisão dessas plataformas e, de brinde, tornando-a <strong>one-way</strong>.</p>
+        </div>
 
         <div class="callout tip">
           <div class="callout-label">Você não vai refazer isso</div>
-          <p>Como o mapa já está montado, na prática a seguir você só vai <strong>pintar alguns tiles</strong> para sentir o fluxo e <strong>ativar a colisão one-way</strong> numa plataforma — a mecânica de "pular e atravessar por baixo, pousar em cima". Construir um nível do zero fica como exercício livre depois.</p>
+          <p>Como o mapa já está montado, na prática a seguir você só vai <strong>pintar alguns tiles</strong> para sentir o fluxo e <strong>dar colisão às plataformas flutuantes</strong> — desenhando o polígono e tornando-o <strong>one-way</strong> ("pular e atravessar por baixo, pousar em cima"). Construir um nível do zero fica como exercício livre depois.</p>
         </div>
       </div>
 
       <div id="pratica-1" style="display:none">
-        <h2>Pintar tiles e criar uma plataforma atravessável</h2>
-        <p>O nível já vem pronto em <code>mapa_1.tscn</code>. Aqui o foco não é construir do zero, e sim <strong>sentir o fluxo de pintura</strong> e implementar uma mecânica clássica de plataforma: a colisão <strong>one-way</strong>, em que o player sobe atravessando a plataforma por baixo e pousa em cima dela.</p>
+        <h2>Dar colisão às plataformas — e torná-la one-way</h2>
+        <p>O nível já vem pronto em <code>mapa_1.tscn</code>. O foco não é construir do zero, e sim resolver a dúvida que ficou do Módulo 02: <strong>as plataformas flutuantes não tinham colisão</strong> (o player as atravessava e caía no abismo). Você vai <strong>desenhar</strong> a colisão delas no TileSet e, em seguida, torná-la <strong>one-way</strong> — a mecânica clássica de subir atravessando por baixo e pousar em cima.</p>
 
         <div class="callout info">
           <div class="callout-label">Projeto base deste módulo</div>
@@ -602,22 +608,29 @@
           <div class="step">
             <div class="step-num">3</div>
             <div class="step-body">
-              <strong>Abra o TileSet na plataforma</strong>
-              <p>Com o <code>tileset</code> selecionado, abra o painel <strong>TileSet</strong> (ao lado da aba TileMap). Selecione o tile usado nas <strong>plataformas flutuantes</strong> do mapa. Ele já tem um polígono de colisão na <code>Physics Layer</code> (foi assim que o chão ganhou colisão).</p>
+              <strong>Encontre o tile sem colisão</strong>
+              <p>Com o <code>tileset</code> selecionado, abra o painel <strong>TileSet</strong> (ao lado da aba TileMap) e selecione o tile usado nas <strong>plataformas flutuantes</strong>. Repare na <code>Physics Layer</code>: ele <strong>não tem</strong> polígono de colisão — é exatamente por isso que o player as atravessava no Módulo 02.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">4</div>
             <div class="step-body">
-              <strong>Ative o One Way nesse polígono</strong>
-              <p>Ainda no tile da plataforma, selecione o polígono de colisão. Nas propriedades dele, marque <strong>One Way</strong> (colisão de um lado só). Por padrão, o lado bloqueado é o de cima — o player pousa na superfície, mas não é barrado ao subir por baixo. O <code>One Way Margin</code> pode ficar no valor padrão.</p>
+              <strong>Desenhe a colisão</strong>
+              <p>Na seção de física desse tile, desenhe o polígono cobrindo o tile (clique nos cantos para formar o retângulo, como no chão). Se rodar agora com F5, a plataforma já bloqueia o player — mas dos <em>dois</em> lados, inclusive por baixo.</p>
             </div>
           </div>
           <div class="step">
             <div class="step-num">5</div>
             <div class="step-body">
+              <strong>Torne a colisão one-way</strong>
+              <p>Ainda no polígono que você desenhou, marque a propriedade <strong>One Way</strong> (colisão de um lado só). Por padrão o lado bloqueado é o de cima — o player pousa na superfície, mas não é barrado ao subir por baixo. O <code>One Way Margin</code> pode ficar no valor padrão.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
               <strong>Teste a plataforma atravessável</strong>
-              <p>Pressione F5. Posicione o player <em>embaixo</em> da plataforma e pule (Space): ele deve <strong>atravessar por baixo</strong> e <strong>pousar em cima</strong>. Ande sobre ela normalmente — a colisão segue valendo no topo. Compare com o chão sólido, que bloqueia dos dois lados.</p>
+              <p>Pressione F5. Posicione o player <em>embaixo</em> da plataforma e pule (Space): ele deve <strong>atravessar por baixo</strong> e <strong>pousar em cima</strong>. Ande sobre ela normalmente — a colisão vale só no topo. Compare com o chão sólido, que bloqueia dos dois lados.</p>
             </div>
           </div>
         </div>
