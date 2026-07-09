@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 06 — Experiência do jogador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F3EE;
+    --border: #E4E2D8;
+    --border-strong: #C8C5B8;
+    --text-primary: #1A1916;
+    --text-secondary: #5A5850;
+    --text-muted: #9A978E;
+    --accent: #2D5A27;
+    --accent-light: #EBF3E8;
+    --accent-mid: #4A8A42;
+    --amber: #8A5A00;
+    --amber-light: #FFF3D6;
+    --blue: #1A3F6B;
+    --blue-light: #E8F0FA;
+    --red: #7A2020;
+    --red-light: #FAEAEA;
+    --purple: #4A2878;
+    --purple-light: #F0EAFA;
+    --code-bg: #F0EFEA;
+    --code-border: #D8D6CE;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+  }
+
+  html { font-size: 16px; background: var(--bg); color: var(--text-primary); }
+  body { font-family: var(--font-body); font-weight: 400; line-height: 1.7; min-height: 100vh; }
+
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-logo .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo .title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sidebar-logo .tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0 1.5rem;
+    margin-bottom: 6px;
+  }
+  .sidebar-nav { list-style: none; margin-bottom: 1.5rem; }
+  .sidebar-nav li a {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 1.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-nav li a:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .sidebar-nav li.active a {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-nav li a .nav-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+  .sidebar-nav li.active a .nav-num { color: var(--accent-mid); }
+
+  /* Module accordion nav */
+  .module-list { list-style: none; }
+  .module-item { border-bottom: 1px solid var(--border); }
+  .module-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 1.5rem;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  a.module-item-header:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .module-item.current > .module-item-header {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .module-item.locked { opacity: 0.45; pointer-events: none; }
+  .module-item-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 22px;
+    flex-shrink: 0;
+  }
+  .module-item.current .module-item-num { color: var(--accent-mid); }
+  .module-item-title { flex: 1; }
+  .module-item-tag { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .module-lessons { padding: 4px 0 6px; }
+  .module-lessons li a { padding-left: 2.75rem; }
+
+  main { padding: 3rem 4rem; max-width: 840px; }
+
+  .lesson-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lesson-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .lesson-title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .lesson-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 580px;
+  }
+  .lesson-meta { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .meta-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .meta-pill svg { opacity: 0.5; }
+
+  .lesson-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .lesson-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: var(--font-body);
+  }
+  .lesson-tab:hover { color: var(--text-primary); }
+  .lesson-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .lesson-content { display: none; }
+  .lesson-content.active { display: block; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 2rem 0 0.75rem;
+    line-height: 1.3;
+  }
+  h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin: 1.5rem 0 0.5rem; letter-spacing: 0.01em; }
+  p { margin-bottom: 1rem; color: var(--text-secondary); font-size: 15px; }
+  p strong { color: var(--text-primary); font-weight: 500; }
+
+  .callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; border-left: 3px solid; font-size: 14px; }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+  .callout-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.info { background: var(--blue-light); border-color: var(--blue); }
+  .callout.info .callout-label { color: var(--blue); }
+  .callout.info p { color: #2A4F7A; }
+  .callout.tip { background: var(--accent-light); border-color: var(--accent); }
+  .callout.tip .callout-label { color: var(--accent); }
+  .callout.tip p { color: #2D5A27; }
+  .callout.warning { background: var(--amber-light); border-color: var(--amber); }
+  .callout.warning .callout-label { color: var(--amber); }
+  .callout.warning p { color: #6A4500; }
+  .callout.analogy { background: var(--purple-light); border-color: var(--purple); }
+  .callout.analogy .callout-label { color: var(--purple); }
+  .callout.analogy p { color: #3A1E60; }
+
+  .code-block { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; margin: 1.25rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--code-border); background: #E8E7E0; }
+  .code-filename { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .code-lang { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .code-block pre { padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+  .kw { color: #7A3080; font-weight: 500; }
+  .cm { color: #7A9A70; font-style: italic; }
+  .st { color: #A03030; }
+  .nm { color: #1A5A8A; }
+  .fn { color: #2A6A50; }
+  .at { color: #8A5A00; }
+  .tp { color: #4A2878; }
+
+  .diagram-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .diagram-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2; color: var(--text-secondary); white-space: pre; }
+  .tree .node-name { color: var(--text-primary); font-weight: 500; }
+  .tree .node-type { color: var(--accent-mid); font-size: 12px; }
+  .tree .node-script { color: #8A5A00; font-size: 12px; }
+
+  a.doc-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-mid);
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s, color 0.15s;
+  }
+  a.doc-link:hover { text-decoration-style: solid; text-decoration-color: var(--accent); color: var(--accent); }
+  a.doc-link::after { content: " ↗"; font-size: 0.65em; color: var(--accent-mid); vertical-align: super; line-height: 0; transition: color 0.15s; }
+  a.doc-link:hover::after { color: var(--accent); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+  .compare-card .cc-label { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .compare-card ul { list-style: none; }
+  .compare-card ul li { font-size: 13px; color: var(--text-secondary); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
+  .compare-card ul li:last-child { border-bottom: none; }
+  .compare-card ul li::before { content: "—"; color: var(--text-muted); flex-shrink: 0; }
+
+  .steps { margin: 1.5rem 0; }
+  .step { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body > strong { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .step-body p { font-size: 14px; margin-bottom: 0; }
+
+  .checklist { list-style: none; margin: 1rem 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "○"; color: var(--border-strong); flex-shrink: 0; margin-top: 1px; }
+
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 2rem 0 0; }
+  .summary-card h3 { margin-top: 0; margin-bottom: 1rem; font-size: 14px; }
+  .concepts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .concept-pill { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .concept-pill strong { display: block; font-size: 13px; color: var(--text-primary); font-weight: 500; margin-bottom: 2px; }
+
+  .milestone-banner { background: linear-gradient(135deg, var(--accent-light), #F0FAF0); border: 1px solid #C0DDB8; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 2rem 0; display: flex; align-items: flex-start; gap: 14px; }
+  .milestone-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .milestone-icon svg { color: white; }
+  .milestone-text strong { font-size: 14px; color: var(--accent); display: block; margin-bottom: 4px; }
+  .milestone-text p { font-size: 13px; color: #3A6A35; margin: 0; }
+
+  .lesson-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .nav-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: 13px; color: var(--text-secondary); font-family: var(--font-body); transition: all 0.15s; text-decoration: none; }
+  .nav-btn:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--surface-alt); }
+  .nav-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #245020; border-color: #245020; }
+  .nav-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+  .progress-bar { background: var(--border); height: 2px; border-radius: 2px; margin: 1rem 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+  .progress-label { font-size: 11px; color: var(--text-muted); padding: 0 1.5rem; margin-bottom: 1.5rem; }
+
+  code { font-family: var(--font-mono); font-size: 13px; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 6px; color: var(--text-primary); }
+
+  .challenge-header { display: flex; align-items: center; gap: 12px; padding: 1.25rem 1.5rem; background: var(--amber-light); border: 1px solid #E8C870; border-radius: 10px 10px 0 0; }
+  .challenge-icon { width: 36px; height: 36px; background: var(--amber); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .challenge-meta { flex: 1; }
+  .challenge-meta strong { font-size: 15px; font-weight: 500; color: #5A3800; display: block; }
+  .challenge-meta span { font-size: 12px; color: #8A6020; }
+  .difficulty-badge { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.05em; }
+  .diff-medium { background: #FFE8A0; color: #7A4A00; border: 1px solid #E8C870; }
+  .diff-hard { background: #FAEAEA; color: #7A2020; border: 1px solid #E8B0B0; }
+  .challenge-body { border: 1px solid #E8C870; border-top: none; border-radius: 0 0 10px 10px; padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
+  .objective-list { list-style: none; margin: 1rem 0; }
+  .objective-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-secondary); padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .objective-list li:last-child { border-bottom: none; }
+  .obj-num { width: 22px; height: 22px; border-radius: 50%; background: var(--amber-light); color: var(--amber); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .hint-accordion { border: 1px solid var(--border); border-radius: 8px; margin-top: 1.5rem; overflow: hidden; }
+  .hint-toggle { width: 100%; text-align: left; padding: 12px 16px; background: var(--surface-alt); border: none; cursor: pointer; font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .hint-toggle:hover { background: var(--border); color: var(--text-primary); }
+  .hint-toggle svg { flex-shrink: 0; transition: transform 0.2s; }
+  .hint-toggle.open svg { transform: rotate(180deg); }
+  .hint-body { display: none; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .hint-body.open { display: block; }
+  .hint-body p { font-size: 13px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .hint-body p:last-child { margin-bottom: 0; }
+
+  /* Flow / state diagram */
+  .loop-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .loop-step:last-child { border-bottom: none; }
+  .loop-arrow { color: var(--accent-mid); font-weight: 500; flex-shrink: 0; width: 20px; margin-top: 1px; }
+  .loop-label { font-family: var(--font-mono); color: var(--text-primary); font-weight: 500; min-width: 160px; }
+  .loop-desc { color: var(--text-secondary); }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    main { padding: 2rem 1.5rem; }
+    .compare-grid, .concepts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-logo">
+      <a href="../index.html" style="text-decoration: none; color: inherit;">
+        <div class="eyebrow">Tutorial Godot 4</div>
+        <div class="title">C# · Plataforma 2D</div>
+      </a>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 33%"></div></div>
+    <div class="progress-label" id="progress-label">Módulo 06 · Aula 1 de 3</div>
+
+    <div class="sidebar-section-label">Módulos</div>
+    <ul class="module-list">
+
+      <li class="module-item">
+        <a href="modulo-01.html" class="module-item-header">
+          <span class="module-item-num">01</span>
+          <span class="module-item-title">Como a engine pensa</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-02.html" class="module-item-header">
+          <span class="module-item-num">02</span>
+          <span class="module-item-title">Personagem jogável</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-03.html" class="module-item-header">
+          <span class="module-item-num">03</span>
+          <span class="module-item-title">Mundo e câmera</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-04.html" class="module-item-header">
+          <span class="module-item-num">04</span>
+          <span class="module-item-title">Inimigos e coletáveis</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item">
+        <a href="modulo-05.html" class="module-item-header">
+          <span class="module-item-num">05</span>
+          <span class="module-item-title">HUD, game loop e exportação</span>
+          <span class="module-item-tag">→</span>
+        </a>
+      </li>
+
+      <li class="module-item current">
+        <div class="module-item-header">
+          <span class="module-item-num">06</span>
+          <span class="module-item-title">Experiência do jogador</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <ul class="sidebar-nav module-lessons">
+          <li class="active" id="nav-1" onclick="goLesson(1)">
+            <a href="#"><span class="nav-num">6.1</span>Menu principal e pause</a>
+          </li>
+          <li id="nav-2" onclick="goLesson(2)">
+            <a href="#"><span class="nav-num">6.2</span>Opções e save/load</a>
+          </li>
+          <li id="nav-3" onclick="goLesson(3)">
+            <a href="#"><span class="nav-num">6.3</span>Transições e remapeamento</a>
+          </li>
+        </ul>
+      </li>
+
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main>
+
+    <!-- ======================== AULA 6.1 ======================== -->
+    <div class="lesson-content active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 06 · Aula 6.1</div>
+        <h1 class="lesson-title">Menu principal e pause</h1>
+        <p class="lesson-subtitle">Dar ao jogo uma porta de entrada e um botão de respiro: a tela que abre antes do nível e o menu que congela a ação sem sair dela.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            C# + UI
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-1')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-1')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-1')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-1')">Resumo</button>
+      </div>
+
+      <div id="conteudo-1">
+        <h2>O jogo não começa no nível</h2>
+        <p>Até o Módulo 05 o jogo abria direto no <code>mapa_1</code>. Mas todo jogo de verdade tem uma <strong>porta de entrada</strong>: uma tela de título onde o jogador escolhe começar, ver opções ou sair. Essa tela é só mais uma <strong>cena</strong> — feita de nodes <code>Control</code>, como o HUD do Módulo 05 — e o jogo passa a abrir por ela.</p>
+        <p>Definir qual cena abre é uma configuração: <em>Project Settings → Application → Run → Main Scene</em>. Trocar o <code>mapa_1</code> pela <code>MainMenu</code> ali já muda a porta de entrada do jogo.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Fluxo de telas do jogo</div>
+          <div class="loop-step">
+            <div class="loop-arrow">▶</div>
+            <div class="loop-label">MainMenu</div>
+            <div class="loop-desc">Abre primeiro. Botões Jogar / Opções / Sair.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">↓</div>
+            <div class="loop-label">mapa_1 (jogo)</div>
+            <div class="loop-desc">"Jogar" troca para a cena do nível com <code>ChangeSceneToFile</code>.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">⏸</div>
+            <div class="loop-label">PauseMenu</div>
+            <div class="loop-desc">Sobre o jogo, sem trocar de cena — congela e mostra Continuar / Sair.</div>
+          </div>
+        </div>
+
+        <h2>O menu principal</h2>
+        <p>A <code>MainMenu</code> é um <code>Control</code> com botões. Cada <code>Button</code> tem o signal <a href="https://docs.godotengine.org/en/stable/classes/class_basebutton.html#class-basebutton-signal-pressed" target="_blank" rel="noopener" class="doc-link"><code>pressed</code></a>, que você conecta a um método — exatamente como fez com o botão de "Tentar de novo" no Módulo 05.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">MainMenu.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">MainMenu</span> : <span class="tp">Control</span>
+{
+    <span class="cm">// Conectado ao "pressed" do botão Jogar</span>
+    <span class="kw">private void</span> <span class="fn">OnPlayPressed</span>()
+    {
+        <span class="fn">GetTree</span>().<span class="fn">ChangeSceneToFile</span>(<span class="st">"res://Scenes/World/mapa_1.tscn"</span>);
+    }
+
+    <span class="cm">// Conectado ao "pressed" do botão Sair</span>
+    <span class="kw">private void</span> <span class="fn">OnQuitPressed</span>()
+    {
+        <span class="fn">GetTree</span>().<span class="fn">Quit</span>(); <span class="cm">// fecha o jogo</span>
+    }
+}</pre>
+        </div>
+
+        <h2>Pause: congelar sem sair da cena</h2>
+        <p>O pause é diferente de trocar de cena: você quer <strong>parar o jogo no lugar</strong> e mostrar um menu por cima, mantendo o nível intacto atrás. O Godot congela toda a árvore com uma única propriedade: <a href="https://docs.godotengine.org/en/stable/classes/class_scenetree.html#class-scenetree-property-paused" target="_blank" rel="noopener" class="doc-link"><code>GetTree().Paused</code></a>.</p>
+
+        <div class="callout warning">
+          <div class="callout-label">O paradoxo do menu congelado</div>
+          <p>Se <code>Paused = true</code> congela <em>tudo</em>, como o próprio menu de pause continua respondendo aos cliques? A resposta é o <a href="https://docs.godotengine.org/en/stable/classes/class_node.html#class-node-property-process-mode" target="_blank" rel="noopener" class="doc-link"><code>Process Mode</code></a> do node. Ajuste o <code>PauseMenu</code> para <code>Process Mode = Always</code> no Inspector — assim ele ignora o congelamento e segue processando input, enquanto o jogo (em <code>Inherit</code>) para.</p>
+        </div>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Process Mode e o pause</div>
+          <div class="loop-step">
+            <div class="loop-label"><code>Inherit</code> (padrão)</div>
+            <div class="loop-desc">Player, inimigos, mundo — congelam quando <code>Paused = true</code>.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-label"><code>Always</code></div>
+            <div class="loop-desc">O <code>PauseMenu</code> — continua vivo durante o pause para receber os cliques.</div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">PauseMenu.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">PauseMenu</span> : <span class="tp">CanvasLayer</span>
+{
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>() => Visible = <span class="kw">false</span>;
+
+    <span class="kw">public override void</span> <span class="fn">_UnhandledInput</span>(<span class="tp">InputEvent</span> @event)
+    {
+        <span class="kw">if</span> (@event.<span class="fn">IsActionPressed</span>(<span class="st">"pause"</span>)) <span class="fn">Toggle</span>();
+    }
+
+    <span class="kw">private void</span> <span class="fn">Toggle</span>()
+    {
+        <span class="kw">bool</span> paused = !<span class="fn">GetTree</span>().Paused;
+        <span class="fn">GetTree</span>().Paused = paused; <span class="cm">// congela / descongela o jogo</span>
+        Visible = paused;              <span class="cm">// mostra / esconde o menu</span>
+    }
+
+    <span class="cm">// Botão Continuar</span>
+    <span class="kw">private void</span> <span class="fn">OnResumePressed</span>() => <span class="fn">Toggle</span>();
+
+    <span class="cm">// Botão Sair para o menu</span>
+    <span class="kw">private void</span> <span class="fn">OnQuitToMenuPressed</span>()
+    {
+        <span class="fn">GetTree</span>().Paused = <span class="kw">false</span>; <span class="cm">// SEMPRE despause antes de trocar de cena</span>
+        <span class="fn">GetTree</span>().<span class="fn">ChangeSceneToFile</span>(<span class="st">"res://Scenes/UI/MainMenu.tscn"</span>);
+    }
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Despause antes de sair</div>
+          <p>Se você trocar de cena com o jogo ainda pausado, a próxima cena nasce congelada — o clássico "abri o jogo e nada se move". Sempre zere <code>Paused</code> antes de um <code>ChangeSceneToFile</code>.</p>
+        </div>
+      </div>
+
+      <div id="pratica-1" style="display:none">
+        <h2>Criar o menu e o pause</h2>
+        <p>Vamos dar ao jogo uma tela de título e um menu de pause funcional.</p>
+
+        <div class="callout info">
+          <div class="callout-label">Projeto base deste módulo</div>
+          <p>Continue do projeto do Módulo 05 (com HUD, <code>GameManager</code> e game over). A arte de título está em <code>res://Assets/environment/</code> (o <code>title-screen</code> do Sunny Land).</p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Crie a ação de pause</strong>
+              <p>Em <strong>Project Settings → Input Map</strong>, crie a ação <code>pause</code> e associe a tecla <code>Esc</code> (e, se quiser, o botão Start do gamepad).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Monte a MainMenu</strong>
+              <p>Nova cena com <code>Control</code> como raiz (<code>MainMenu</code>). Adicione um título e três <code>Button</code>: Jogar, Opções, Sair. Use um <code>VBoxContainer</code> para empilhá-los. Salve em <code>res://Scenes/UI/MainMenu.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Ligue os botões e defina a Main Scene</strong>
+              <p>Anexe <code>MainMenu.cs</code>, conecte os <code>pressed</code> de Jogar e Sair. Em <strong>Project Settings → Application → Run → Main Scene</strong>, aponte para <code>MainMenu.tscn</code>. (O botão Opções fica para a Aula 6.2.)</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Monte o PauseMenu</strong>
+              <p>Nova cena com <code>CanvasLayer</code> como raiz (<code>PauseMenu</code>), com um painel e dois <code>Button</code>: Continuar e Sair para o menu. No Inspector da raiz, defina <strong>Process Mode = Always</strong>. Salve em <code>res://Scenes/UI/PauseMenu.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Instancie o pause no nível</strong>
+              <p>No <code>mapa_1.tscn</code>, instancie <code>PauseMenu.tscn</code>. Anexe <code>PauseMenu.cs</code>, conecte os botões e confirme que ele inicia invisível.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Teste o fluxo completo</strong>
+              <p>Rode. O jogo deve abrir na <code>MainMenu</code>; "Jogar" leva ao nível; <code>Esc</code> congela e mostra o pause; "Continuar" volta ao jogo; "Sair para o menu" retorna à tela de título — sem ficar congelado.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">O menu de pause também congelou?</div>
+          <p>Se o pause aparecer mas os botões não responderem, quase sempre o <strong>Process Mode</strong> do <code>PauseMenu</code> ficou em <code>Inherit</code>. Mude para <code>Always</code> na raiz da cena do menu.</p>
+        </div>
+      </div>
+
+      <div id="desafio-1" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Botão "Continuar" que aparece condicionalmente</strong>
+            <span>Aula 6.1 · Estado e UI</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>No menu principal, o botão "Continuar" (retomar um jogo salvo) só faz sentido se existir um save. Faça-o aparecer condicionalmente — deixando o gancho pronto para o save/load da Aula 6.2.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione um botão "Continuar" na <code>MainMenu</code>, acima de "Jogar"</li>
+            <li><div class="obj-num">2</div>No <code>_Ready</code>, verifique se existe um arquivo de save (por ora, <code>FileAccess.FileExists("user://savegame.cfg")</code>)</li>
+            <li><div class="obj-num">3</div>Defina <code>Visible</code> do botão conforme o resultado — sem save, ele nem aparece</li>
+            <li><div class="obj-num">4</div>Ligue "Continuar" para carregar o nível (por enquanto, o mesmo <code>ChangeSceneToFile</code> do Jogar)</li>
+            <li><div class="obj-num">5</div>Teste criando um arquivo vazio em <code>user://</code> e confirme que o botão aparece só quando ele existe</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>A pasta <code>user://</code> é o diretório de dados do jogo (você vai conhecê-la a fundo na 6.2). <code>FileAccess.FileExists("user://savegame.cfg")</code> devolve <code>true</code>/<code>false</code> sem abrir o arquivo.</p>
+              <p>Esconder um botão é só <code>botao.Visible = false</code>. Como está num <code>VBoxContainer</code>, os outros sobem para ocupar o espaço automaticamente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-1" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Main Scene</strong>a porta de entrada</div>
+            <div class="concept-pill"><strong>MainMenu</strong>tela de título</div>
+            <div class="concept-pill"><strong>Paused</strong>congela a árvore</div>
+            <div class="concept-pill"><strong>Process Mode</strong>Always vs Inherit</div>
+            <div class="concept-pill"><strong>PauseMenu</strong>overlay sobre o jogo</div>
+            <div class="concept-pill"><strong>Quit()</strong>fechar o jogo</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Como se define qual cena abre quando o jogo roda?</li>
+          <li>Por que o pause usa <code>Paused</code> em vez de trocar de cena?</li>
+          <li>Por que o <code>PauseMenu</code> precisa de <code>Process Mode = Always</code>?</li>
+          <li>O que acontece se você trocar de cena sem zerar <code>Paused</code>?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <a href="modulo-05.html" class="nav-btn">← Módulo 05</a>
+        <button class="nav-btn" onclick="goLesson(2)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 6.2 ======================== -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 06 · Aula 6.2</div>
+        <h1 class="lesson-title">Opções e save/load</h1>
+        <p class="lesson-subtitle">Deixar o jogador ajustar o jogo e guardar o que importa entre sessões — configurações e progresso que sobrevivem a fechar o programa.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~35 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            C# + persistência
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-2')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-2')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-2')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-2')">Resumo</button>
+      </div>
+
+      <div id="conteudo-2">
+        <h2>Onde os dados sobrevivem: user://</h2>
+        <p>Quando o jogo fecha, tudo na memória some. Para guardar volume, tela cheia ou o recorde, você precisa <strong>escrever em disco</strong>. Mas onde? Não em <code>res://</code> — essa pasta é <em>só leitura</em> no jogo exportado (vira o <code>.pck</code>). O lugar certo é <a href="https://docs.godotengine.org/en/stable/tutorials/io/data_paths.html" target="_blank" rel="noopener" class="doc-link"><code>user://</code></a>: uma pasta de dados por-usuário que o Godot mapeia para cada sistema (<code>AppData</code> no Windows, <code>~/.local/share</code> no Linux, etc.).</p>
+
+        <div class="callout analogy">
+          <div class="callout-label">res:// é o livro; user:// é o caderno</div>
+          <p>O <code>res://</code> é o conteúdo impresso do jogo — você lê, mas não rabisca. O <code>user://</code> é o seu caderno pessoal ao lado: é onde o jogo anota o que <em>você</em> mudou. Cada jogador tem o seu.</p>
+        </div>
+
+        <h2>ConfigFile: um formato simples de chave-valor</h2>
+        <p>Você poderia inventar um formato de texto, mas o Godot já traz o <a href="https://docs.godotengine.org/en/stable/classes/class_configfile.html" target="_blank" rel="noopener" class="doc-link"><code>ConfigFile</code></a>: um arquivo estilo <code>.ini</code> organizado em <strong>seções</strong> e <strong>chaves</strong>. Perfeito para configurações e saves pequenos, sem depender de JSON à mão.</p>
+
+        <div class="callout info">
+          <div class="callout-label">Separe settings de savegame</div>
+          <p>Configurações (volume, tela) e progresso (recorde, fase) são coisas diferentes, com ciclos de vida diferentes. Use <strong>dois arquivos</strong>: <code>user://settings.cfg</code> e <code>user://savegame.cfg</code>. Apagar o save não deve zerar o volume.</p>
+        </div>
+
+        <h2>Aplicar configurações de verdade</h2>
+        <p>Salvar um número não muda nada sozinho — você precisa <strong>aplicar</strong> o valor ao sistema certo. Volume vai para o <a href="https://docs.godotengine.org/en/stable/classes/class_audioserver.html" target="_blank" rel="noopener" class="doc-link"><code>AudioServer</code></a>; tela cheia vai para o <a href="https://docs.godotengine.org/en/stable/classes/class_displayserver.html" target="_blank" rel="noopener" class="doc-link"><code>DisplayServer</code></a>.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Options.cs — aplicar e salvar</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">Options</span> : <span class="tp">Control</span>
+{
+    <span class="kw">private const string</span> Path = <span class="st">"user://settings.cfg"</span>;
+
+    <span class="cm">// Signal "value_changed" do HSlider de volume (0..1)</span>
+    <span class="kw">private void</span> <span class="fn">OnMasterVolumeChanged</span>(<span class="kw">double</span> value)
+    {
+        <span class="kw">int</span> bus = <span class="tp">AudioServer</span>.<span class="fn">GetBusIndex</span>(<span class="st">"Master"</span>);
+        <span class="tp">AudioServer</span>.<span class="fn">SetBusVolumeDb</span>(bus, <span class="tp">Mathf</span>.<span class="fn">LinearToDb</span>((<span class="kw">float</span>)value));
+        <span class="fn">Save</span>();
+    }
+
+    <span class="cm">// Signal "toggled" do CheckButton de tela cheia</span>
+    <span class="kw">private void</span> <span class="fn">OnFullscreenToggled</span>(<span class="kw">bool</span> on)
+    {
+        <span class="tp">DisplayServer</span>.<span class="fn">WindowSetMode</span>(on
+            ? <span class="tp">DisplayServer</span>.<span class="tp">WindowMode</span>.Fullscreen
+            : <span class="tp">DisplayServer</span>.<span class="tp">WindowMode</span>.Windowed);
+        <span class="fn">Save</span>();
+    }
+
+    <span class="kw">private void</span> <span class="fn">Save</span>()
+    {
+        <span class="kw">var</span> cfg = <span class="kw">new</span> <span class="tp">ConfigFile</span>();
+        <span class="kw">int</span> bus = <span class="tp">AudioServer</span>.<span class="fn">GetBusIndex</span>(<span class="st">"Master"</span>);
+        cfg.<span class="fn">SetValue</span>(<span class="st">"audio"</span>, <span class="st">"master_db"</span>, <span class="tp">AudioServer</span>.<span class="fn">GetBusVolumeDb</span>(bus));
+        cfg.<span class="fn">SetValue</span>(<span class="st">"video"</span>, <span class="st">"fullscreen"</span>,
+            <span class="tp">DisplayServer</span>.<span class="fn">WindowGetMode</span>() == <span class="tp">DisplayServer</span>.<span class="tp">WindowMode</span>.Fullscreen);
+        cfg.<span class="fn">Save</span>(Path);
+    }
+}</pre>
+        </div>
+
+        <h2>Carregar no boot: um autoload de Settings</h2>
+        <p>As configurações precisam ser aplicadas <strong>assim que o jogo abre</strong>, antes de qualquer tela. O lugar natural é um autoload (como o <code>GameManager</code> do Módulo 05) que, no <code>_Ready</code>, lê o arquivo e aplica os valores.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">Settings.cs — autoload, carrega no início</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">public override void</span> <span class="fn">_Ready</span>()
+{
+    <span class="kw">var</span> cfg = <span class="kw">new</span> <span class="tp">ConfigFile</span>();
+    <span class="kw">if</span> (cfg.<span class="fn">Load</span>(<span class="st">"user://settings.cfg"</span>) != <span class="tp">Error</span>.Ok)
+        <span class="kw">return</span>; <span class="cm">// primeira vez: sem arquivo, usa os padrões</span>
+
+    <span class="kw">int</span> bus = <span class="tp">AudioServer</span>.<span class="fn">GetBusIndex</span>(<span class="st">"Master"</span>);
+    <span class="tp">AudioServer</span>.<span class="fn">SetBusVolumeDb</span>(bus, (<span class="kw">float</span>)cfg.<span class="fn">GetValue</span>(<span class="st">"audio"</span>, <span class="st">"master_db"</span>, <span class="nm">0f</span>));
+
+    <span class="kw">bool</span> fs = (<span class="kw">bool</span>)cfg.<span class="fn">GetValue</span>(<span class="st">"video"</span>, <span class="st">"fullscreen"</span>, <span class="kw">false</span>);
+    <span class="tp">DisplayServer</span>.<span class="fn">WindowSetMode</span>(fs
+        ? <span class="tp">DisplayServer</span>.<span class="tp">WindowMode</span>.Fullscreen
+        : <span class="tp">DisplayServer</span>.<span class="tp">WindowMode</span>.Windowed);
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Save do jogo é o mesmo padrão</div>
+          <p>Guardar o recorde é o mesmo <code>ConfigFile</code>, em <code>user://savegame.cfg</code>: no <code>GameManager</code>, ao bater um recorde, faça <code>cfg.SetValue("progress", "high_score", HighScore)</code> e <code>cfg.Save(...)</code>. Carregue no <code>_Ready</code> do <code>GameManager</code> para o HUD já mostrar o melhor placar.</p>
+        </div>
+      </div>
+
+      <div id="pratica-2" style="display:none">
+        <h2>Menu de opções com persistência</h2>
+        <p>Vamos construir a tela de Opções (volume + tela cheia), salvar em <code>user://</code> e aplicar tudo no boot.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Monte a cena de Opções</strong>
+              <p>Nova cena <code>Control</code> (<code>Options</code>) com um <code>HSlider</code> de volume, um <code>CheckButton</code> de tela cheia e um botão Voltar. Salve em <code>res://Scenes/UI/Options.tscn</code> e ligue o botão Opções do menu principal a ela.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Aplique volume e tela cheia</strong>
+              <p>Anexe <code>Options.cs</code>. Conecte o <code>value_changed</code> do slider a <code>OnMasterVolumeChanged</code> e o <code>toggled</code> do checkbutton a <code>OnFullscreenToggled</code> (código da aba Conteúdo).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Salve em user://</strong>
+              <p>Confirme que cada mudança chama <code>Save()</code> e grava em <code>user://settings.cfg</code>. Para inspecionar o arquivo, use <strong>Editor → Open User Data Folder</strong>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Crie o autoload Settings</strong>
+              <p>Crie <code>Settings.cs</code> (carrega e aplica no <code>_Ready</code>) e registre em <strong>Project Settings → Autoload</strong>. Ele deve rodar antes de qualquer tela.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Salve o recorde</strong>
+              <p>No <code>GameManager</code>, ao fim de uma partida, se <code>Score</code> superar o recorde, grave em <code>user://savegame.cfg</code>. Carregue no <code>_Ready</code> para o HUD exibir o melhor placar.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Teste a persistência</strong>
+              <p>Ajuste o volume, ligue tela cheia, <strong>feche</strong> o jogo e abra de novo: as configurações devem voltar aplicadas. Bata um recorde, feche e reabra: o recorde continua lá.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Ponto de verificação</div>
+          <p>Persistência funciona quando: (1) mudar o volume/tela grava em <code>settings.cfg</code>, (2) reabrir o jogo aplica os valores salvos, (3) o recorde sobrevive em <code>savegame.cfg</code> separado das configurações.</p>
+        </div>
+      </div>
+
+      <div id="desafio-2" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Sliders separados de Música e SFX</strong>
+            <span>Aula 6.2 · Audio buses</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Um único volume mestre é grosseiro — jogadores querem baixar a música e manter os efeitos. Crie <strong>buses de áudio</strong> separados e um slider para cada.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>No painel <strong>Audio</strong> (parte de baixo do editor), crie os buses <code>Music</code> e <code>SFX</code>, ambos roteados para <code>Master</code></li>
+            <li><div class="obj-num">2</div>Configure a música para tocar no bus <code>Music</code> e os efeitos no <code>SFX</code> (propriedade <code>Bus</code> do <code>AudioStreamPlayer</code>)</li>
+            <li><div class="obj-num">3</div>Adicione dois sliders nas Opções e aplique cada um ao bus correspondente com <code>SetBusVolumeDb</code></li>
+            <li><div class="obj-num">4</div>Salve e carregue os três volumes (Master, Music, SFX) no <code>settings.cfg</code></li>
+            <li><div class="obj-num">5</div>Teste: baixar só a música deve deixar os efeitos intactos</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p>Cada bus tem um índice (<code>AudioServer.GetBusIndex("Music")</code>). O código do volume mestre serve igual para qualquer bus — só muda o nome.</p>
+              <p>Sliders trabalham em escala linear (0..1), mas o áudio é em decibéis. Sempre converta com <code>Mathf.LinearToDb</code> ao aplicar e <code>Mathf.DbToLinear</code> ao carregar de volta para o slider.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-2" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>user://</strong>dados por jogador</div>
+            <div class="concept-pill"><strong>ConfigFile</strong>seções e chaves</div>
+            <div class="concept-pill"><strong>AudioServer</strong>volume por bus</div>
+            <div class="concept-pill"><strong>DisplayServer</strong>modo de janela</div>
+            <div class="concept-pill"><strong>Autoload Settings</strong>aplica no boot</div>
+            <div class="concept-pill"><strong>LinearToDb</strong>slider → áudio</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que salvar em <code>user://</code> e não em <code>res://</code>?</li>
+          <li>Por que separar <code>settings.cfg</code> de <code>savegame.cfg</code>?</li>
+          <li>Por que salvar um valor não basta — o que mais é preciso?</li>
+          <li>Por que o volume passa por <code>Mathf.LinearToDb</code>?</li>
+        </ul>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(1)">← Aula anterior</button>
+        <button class="nav-btn" onclick="goLesson(3)">Próxima aula →</button>
+      </div>
+    </div>
+
+    <!-- ======================== AULA 6.3 ======================== -->
+    <div class="lesson-content" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Módulo 06 · Aula 6.3</div>
+        <h1 class="lesson-title">Transições e remapeamento</h1>
+        <p class="lesson-subtitle">Dois toques de polimento: um fade suave entre telas e a possibilidade de o jogador reconfigurar os controles do próprio jeito.</p>
+        <div class="lesson-meta">
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ~30 minutos
+          </span>
+          <span class="meta-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            C# + polimento
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-tabs">
+        <button class="lesson-tab active" onclick="switchTab(this, 'conteudo-3')">Conteúdo</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'pratica-3')">Prática guiada</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'desafio-3')">Desafio</button>
+        <button class="lesson-tab" onclick="switchTab(this, 'resumo-3')">Resumo</button>
+      </div>
+
+      <div id="conteudo-3">
+        <h2>Por que o corte seco incomoda</h2>
+        <p>No Módulo 05 as trocas de cena eram <em>instantâneas</em>: num frame você está no jogo, no outro no game over. Funciona, mas é abrupto. Um <strong>fade</strong> — escurecer, trocar, clarear — dá respiro e esconde o pequeno engasgo de carregar a cena. É barato e eleva muito a percepção de acabamento.</p>
+
+        <h2>Um overlay de transição que sobrevive à troca</h2>
+        <p>O truque: a troca de cena destrói a cena atual, então o fade não pode viver nela. Ele mora num <strong>autoload</strong> com um <code>CanvasLayer</code> e um <code>ColorRect</code> preto por cima de tudo. Como autoload, ele persiste entre cenas e pode escurecer <em>antes</em> de trocar e clarear <em>depois</em>.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-title">Anatomia da transição</div>
+          <div class="loop-step">
+            <div class="loop-arrow">1</div>
+            <div class="loop-label">Fade to black</div>
+            <div class="loop-desc">Anima o alpha do <code>ColorRect</code> de 0 → 1 com um <code>Tween</code>.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">2</div>
+            <div class="loop-label">ChangeSceneToFile</div>
+            <div class="loop-desc">Com a tela preta, a troca acontece escondida.</div>
+          </div>
+          <div class="loop-step">
+            <div class="loop-arrow">3</div>
+            <div class="loop-label">Fade from black</div>
+            <div class="loop-desc">Anima o alpha de 1 → 0, revelando a nova cena.</div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">SceneTransition.cs — autoload</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+<span class="kw">using</span> System.Threading.Tasks;
+
+<span class="kw">public partial class</span> <span class="tp">SceneTransition</span> : <span class="tp">CanvasLayer</span>
+{
+    <span class="kw">private</span> <span class="tp">ColorRect</span> _fade;
+
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>()
+    {
+        _fade = <span class="fn">GetNode</span>&lt;<span class="tp">ColorRect</span>&gt;(<span class="st">"Fade"</span>);
+        _fade.Modulate = <span class="kw">new</span> <span class="tp">Color</span>(<span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">1</span>, <span class="nm">0</span>); <span class="cm">// começa transparente</span>
+    }
+
+    <span class="kw">public async void</span> <span class="fn">ChangeScene</span>(<span class="kw">string</span> path)
+    {
+        <span class="kw">await</span> <span class="fn">FadeTo</span>(<span class="nm">1f</span>);                 <span class="cm">// escurece</span>
+        <span class="fn">GetTree</span>().<span class="fn">ChangeSceneToFile</span>(path);  <span class="cm">// troca escondido</span>
+        <span class="kw">await</span> <span class="fn">FadeTo</span>(<span class="nm">0f</span>);                 <span class="cm">// clareia</span>
+    }
+
+    <span class="kw">private async</span> <span class="tp">Task</span> <span class="fn">FadeTo</span>(<span class="kw">float</span> alpha)
+    {
+        <span class="tp">Tween</span> tween = <span class="fn">CreateTween</span>();
+        tween.<span class="fn">TweenProperty</span>(_fade, <span class="st">"modulate:a"</span>, alpha, <span class="nm">0.3f</span>);
+        <span class="kw">await</span> <span class="fn">ToSignal</span>(tween, <span class="tp">Tween</span>.<span class="tp">SignalName</span>.Finished);
+    }
+}</pre>
+        </div>
+
+        <p>Com isso, trocar de cena vira <code>SceneTransition.Instance.ChangeScene("res://...")</code> em vez do <code>GetTree().ChangeSceneToFile</code> direto — e todo o jogo ganha fade de graça.</p>
+
+        <div class="callout warning">
+          <div class="callout-label">O overlay precisa bloquear... ou não</div>
+          <p>Ponha o <code>ColorRect</code> cobrindo a tela inteira e, para ele não roubar cliques enquanto está transparente, defina o <code>Mouse → Filter</code> como <code>Ignore</code>. Garanta também que o <code>CanvasLayer</code> da transição tenha um <code>Layer</code> alto, para ficar acima do HUD.</p>
+        </div>
+
+        <h2>Remapeamento: os controles são do jogador</h2>
+        <p>No Módulo 02 você definiu ações no InputMap (<code>move_left</code>, <code>jump</code>…). Aquilo era fixo no editor. Agora vamos deixar o <strong>jogador</strong> reconfigurar em tempo de execução — a mesma <a href="https://docs.godotengine.org/en/stable/classes/class_inputmap.html" target="_blank" rel="noopener" class="doc-link"><code>InputMap</code></a>, mas alterada por código.</p>
+
+        <p>A ideia: um botão "espera" a próxima tecla, captura o <code>InputEventKey</code>, apaga os eventos antigos da ação e adiciona o novo.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-filename">RemapButton.cs</span>
+            <span class="code-lang">C#</span>
+          </div>
+          <pre><span class="kw">using</span> Godot;
+
+<span class="kw">public partial class</span> <span class="tp">RemapButton</span> : <span class="tp">Button</span>
+{
+    [<span class="at">Export</span>] <span class="kw">public string</span> Action = <span class="st">"jump"</span>;
+    <span class="kw">private bool</span> _waiting;
+
+    <span class="kw">public override void</span> <span class="fn">_Ready</span>() => <span class="fn">UpdateLabel</span>();
+
+    <span class="cm">// Signal "pressed" do próprio botão</span>
+    <span class="kw">private void</span> <span class="fn">OnPressed</span>()
+    {
+        _waiting = <span class="kw">true</span>;
+        Text = <span class="st">"Pressione uma tecla..."</span>;
+    }
+
+    <span class="kw">public override void</span> <span class="fn">_Input</span>(<span class="tp">InputEvent</span> @event)
+    {
+        <span class="kw">if</span> (!_waiting || @event <span class="kw">is not</span> <span class="tp">InputEventKey</span> { Pressed: <span class="kw">true</span> } key)
+            <span class="kw">return</span>;
+
+        <span class="tp">InputMap</span>.<span class="fn">ActionEraseEvents</span>(Action);   <span class="cm">// remove o mapeamento antigo</span>
+        <span class="tp">InputMap</span>.<span class="fn">ActionAddEvent</span>(Action, key);  <span class="cm">// grava a tecla nova</span>
+        _waiting = <span class="kw">false</span>;
+        <span class="fn">UpdateLabel</span>();
+        <span class="fn">GetViewport</span>().<span class="fn">SetInputAsHandled</span>();     <span class="cm">// não deixa a tecla "vazar" pro jogo</span>
+    }
+
+    <span class="kw">private void</span> <span class="fn">UpdateLabel</span>()
+    {
+        <span class="kw">var</span> events = <span class="tp">InputMap</span>.<span class="fn">ActionGetEvents</span>(Action);
+        Text = events.Count &gt; <span class="nm">0</span> ? events[<span class="nm">0</span>].<span class="fn">AsText</span>() : <span class="st">"—"</span>;
+    }
+}</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Persistir o remapeamento</div>
+          <p>Mudanças no <code>InputMap</code> valem só para a sessão. Para sobreviverem, salve os eventos de cada ação no <code>settings.cfg</code> (Aula 6.2) e reaplique no boot — o mesmo padrão do volume e da tela cheia.</p>
+        </div>
+      </div>
+
+      <div id="pratica-3" style="display:none">
+        <h2>Fade entre cenas e tela de controles</h2>
+        <p>Vamos dar fade a todas as trocas de cena e criar uma tela onde o jogador remapeia uma ação.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Monte o autoload de transição</strong>
+              <p>Nova cena com <code>CanvasLayer</code> (<code>SceneTransition</code>) contendo um <code>ColorRect</code> preto chamado <code>Fade</code>, cobrindo a tela (anchors <em>Full Rect</em>), com <code>Mouse → Filter = Ignore</code>. Anexe <code>SceneTransition.cs</code> e registre em <strong>Autoload</strong>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Troque as chamadas de cena</strong>
+              <p>Onde havia <code>GetTree().ChangeSceneToFile(...)</code> (menu, game over, pause), passe a chamar <code>SceneTransition.Instance.ChangeScene(...)</code>. Rode e sinta o fade em cada transição.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Crie a tela de Controles</strong>
+              <p>Nova cena <code>Control</code> (<code>Controls</code>) com um <code>RemapButton</code> por ação (ex.: Pular, Esquerda, Direita). Ligue-a a partir das Opções. Salve em <code>res://Scenes/UI/Controls.tscn</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Configure cada botão</strong>
+              <p>Em cada <code>RemapButton</code>, defina a propriedade <code>Action</code> no Inspector (<code>jump</code>, <code>move_left</code>…) e conecte o <code>pressed</code> ao <code>OnPressed</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Teste o remapeamento</strong>
+              <p>Rode, abra Controles, clique num botão, pressione uma tecla nova e volte ao jogo: a ação deve responder à tecla remapeada.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Persista (opcional agora)</strong>
+              <p>Salve os eventos remapeados no <code>settings.cfg</code> e reaplique no autoload <code>Settings</code>, para o mapeamento sobreviver ao fechar o jogo.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Ponto de verificação</div>
+          <p>Polimento pronto quando: (1) toda troca de cena tem fade, (2) o overlay não rouba cliques quando invisível, (3) remapear uma ação muda de fato o controle no jogo.</p>
+        </div>
+      </div>
+
+      <div id="desafio-3" style="display:none">
+        <div class="challenge-header">
+          <div class="challenge-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="challenge-meta">
+            <strong>Botão "Restaurar padrões"</strong>
+            <span>Aula 6.3 · InputMap</span>
+          </div>
+          <span class="difficulty-badge diff-medium">Médio</span>
+        </div>
+        <div class="challenge-body">
+          <p>Quem remapeia às vezes se enrola — todo menu de controles precisa de um "voltar ao original". Adicione um botão que restaura o mapeamento padrão do projeto.</p>
+          <ul class="objective-list">
+            <li><div class="obj-num">1</div>Adicione um botão "Restaurar padrões" na tela de Controles</li>
+            <li><div class="obj-num">2</div>Ao clicar, recarregue o mapeamento original com <code>InputMap.LoadFromProjectSettings()</code></li>
+            <li><div class="obj-num">3</div>Atualize o texto de todos os <code>RemapButton</code> para refletir as teclas restauradas</li>
+            <li><div class="obj-num">4</div>Apague (ou sobrescreva) o mapeamento salvo no <code>settings.cfg</code></li>
+            <li><div class="obj-num">5</div>Teste: remapeie, restaure, e confirme que as teclas voltaram ao original — inclusive após reabrir o jogo</li>
+          </ul>
+          <div class="hint-accordion">
+            <button class="hint-toggle" onclick="toggleHint(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Ver dica
+            </button>
+            <div class="hint-body">
+              <p><code>InputMap.LoadFromProjectSettings()</code> descarta as alterações de runtime e recarrega exatamente o que está no <em>Project Settings → Input Map</em> — o "reset" pronto de fábrica.</p>
+              <p>Depois de restaurar, chame o <code>UpdateLabel()</code> de cada botão (ou emita um signal que todos escutem) para os textos não ficarem mostrando a tecla antiga.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumo-3" style="display:none">
+        <h2>O que você aprendeu</h2>
+        <div class="summary-card">
+          <h3>Conceitos desta aula</h3>
+          <div class="concepts-grid">
+            <div class="concept-pill"><strong>Transição</strong>fade entre cenas</div>
+            <div class="concept-pill"><strong>Autoload + Tween</strong>overlay persistente</div>
+            <div class="concept-pill"><strong>Mouse Filter</strong>não roubar cliques</div>
+            <div class="concept-pill"><strong>InputMap runtime</strong>remapear em jogo</div>
+            <div class="concept-pill"><strong>ActionAddEvent</strong>gravar tecla nova</div>
+            <div class="concept-pill"><strong>SetInputAsHandled</strong>consumir a tecla</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Perguntas de verificação</h3>
+        <ul class="checklist">
+          <li>Por que a transição precisa viver num autoload, e não na cena?</li>
+          <li>Como o fade "esconde" a troca de cena?</li>
+          <li>Como remapear uma ação em tempo de execução?</li>
+          <li>Por que chamar <code>SetInputAsHandled()</code> ao capturar a tecla?</li>
+        </ul>
+
+        <div class="milestone-banner" style="margin-top: 2rem;">
+          <div class="milestone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="milestone-text">
+            <strong>Módulo 06 completo — o jogo virou produto!</strong>
+            <p>Agora seu jogo abre num menu, pode ser pausado, configurado e salvo, com transições suaves e controles reconfiguráveis. Saiu de "mecânicas rodando" para uma experiência que alguém pode instalar, ajustar e jogar do começo ao fim.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn" onclick="goLesson(2)">← Aula anterior</button>
+        <a href="../index.html" class="nav-btn primary">Voltar ao início →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  let currentLesson = 1;
+
+  function goLesson(n) {
+    document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('lesson-' + n).classList.add('active');
+    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
+    document.getElementById('nav-' + n).classList.add('active');
+    currentLesson = n;
+    document.getElementById('progress-fill').style.width = (n / 3 * 100) + '%';
+    document.getElementById('progress-label').textContent = 'Módulo 06 · Aula ' + n + ' de 3';
+    window.scrollTo(0, 0);
+
+    const tabs = document.querySelectorAll('#lesson-' + n + ' .lesson-tab');
+    if (tabs.length) {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[0].classList.add('active');
+      const firstId = tabs[0].getAttribute('onclick').match(/'([^']+)'/)[1];
+      document.querySelectorAll('#lesson-' + n + ' [id^="conteudo-"], #lesson-' + n + ' [id^="pratica-"], #lesson-' + n + ' [id^="desafio-"], #lesson-' + n + ' [id^="resumo-"]').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById(firstId).style.display = 'block';
+    }
+  }
+
+  function switchTab(btn, targetId) {
+    const lesson = btn.closest('.lesson-content');
+    lesson.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const lessonNum = lesson.id.split('-')[1];
+    ['conteudo', 'pratica', 'desafio', 'resumo'].forEach(prefix => {
+      const el = document.getElementById(prefix + '-' + lessonNum);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById(targetId).style.display = 'block';
+  }
+
+  function toggleHint(btn) {
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
